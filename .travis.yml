@@ -1,6 +1,7 @@
 language: clojure
 lein: lein2
-script: "cd Jest;lein2 midje"
+before_script: "cd Jest"
+script: "lein2 midje"
 jdk:
   - openjdk7
 branches:
