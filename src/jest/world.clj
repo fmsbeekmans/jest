@@ -1,9 +1,9 @@
 (ns jest.world)
 
 (defrecord Cell [x y paths])
-
+(defrecord Path [type direction inout resources])
 (defn- path-type [type]
-  `(do (defrecord ~type ~'[in out])
+  `(do (defrecord ~type ~'[direction inout resource])
        (derive ~type ::path)))
   
 
@@ -69,8 +69,12 @@
   (update-in c [:paths]
              (fn [paths]
                (apply merge
-                      (assoc paths in [:in type])
-                      (map #(assoc paths % [:out type])
+                      (assoc paths in (map->Path {:type type
+                                                  :direction in
+                                                  :inout :in}))
+                      (map #(assoc paths % (map->Path {:type type
+                                                       :direction %
+                                                       :inout :out}))
                            outs)))))
 
 ;(defn remove-path
@@ -79,17 +83,17 @@
 (defn in-paths
   "Returns all incoming paths for the given cell"
   [c]
-  (for [[dir [inout type]] (:paths c)
+  (for [[dir {:keys [inout type]}] (:paths c)
         :when (= :in inout)]
     [dir type]))
        
-
 (defn out-paths
-  "Returns all incoming paths for the given cell"
+  "Returns all outgoing paths for the given cell"
   [c]
-  (for [[dir [inout type]] (:paths c)
+  (for [[dir {:keys [inout type]}] (:paths c)
         :when (= :out inout)]
     [dir type]))
+       
 
 (defn complete-paths
   "Returns all in-out path pairs of this cell in the format [type [in out]]"
@@ -98,4 +102,3 @@
         [outdir outtype] (out-paths c)
         :when (= intype outtype)]
     [intype [indir outdir]]))
-        
