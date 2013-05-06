@@ -2,17 +2,6 @@
 
 (defrecord Cell [x y paths])
 (defrecord Path [type direction inout resources])
-(defn- path-type [type]
-  `(do (defrecord ~type ~'[direction inout resource])
-       (derive ~type ::path)))
-  
-
-(defmacro def-path-types [& types]
-  `(do ~@(map path-type types)))
-
-(def-path-types Road Rails Canal)
-
-(defrecord Path [type in out])
 
 (def ^:dynamic world
   "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."
@@ -54,18 +43,20 @@
                         (coords ~'c)
                         ~[dx dy])))))
 
-(defmacro def-directions [& dirs]
-  `(do ~@(map direction-m dirs)
-       (def dirfn ~(reduce conj {}
-                           (map (fn [[dir _ _]]
-                                  [(keyword dir) dir])
-                                dirs)))))
+(def directions
+  {:north [0 -1]
+   :south [0 1]
+   :west [-1 0]
+   :east [1 0]})
 
-(def-directions
-  [north 0 -1]
-  [south 0 1]
-  [west -1 0]
-  [east 1 0])
+(defn direction
+  "returns cell in the given direction"
+  [c dir]
+  (if (derefable? c)
+    (direction @c dir)
+    (@world (map +
+                 (coords c)
+                 (dir directions)))))
 
 (letfn [(some-paths [c inout]
   (for [[dir path] (:paths c)
@@ -113,20 +104,20 @@
 
 (defn build-path
   "builds a path from refcell c to the given direction"
-  [c direction type]
-  {:pre [((dirfn direction) c)]}
+  [c dir type]
+  {:pre [(direction c dir)]}
   (dosync
-   (alter c add-path direction type :out)
-   (alter ((dirfn direction) c) add-path (opposite-dirs direction) type :in)))
+   (alter c add-path dir type :out)
+   (alter (direction c dir) add-path (opposite-dirs dir) type :in)))
 
 
 (defn unbuild-path
   "builds a path from refcell c to the given direction"
-  [c direction]
-  {:pre [((dirfn direction) c)]}
+  [c dir]
+  {:pre [(direction c dir)]}
   (dosync
-   (alter c remove-path direction)
-   (alter ((dirfn direction) c) remove-path (opposite-dirs direction))))
+   (alter c remove-path dir)
+   (alter (direction c dir) remove-path (opposite-dirs dir))))
 
 
 (defn moo [x]
