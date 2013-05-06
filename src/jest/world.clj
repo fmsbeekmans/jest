@@ -26,7 +26,7 @@
                 y (range sy)]
             [[x y] (ref (map->Cell {:x x
                                     :y y
-                                    :roads {}
+                                    :paths {}
                                     :background :none}))])))
 
 (defn cell
@@ -114,6 +114,7 @@
 (defn build-path
   "builds a path from refcell c to the given direction"
   [c direction type]
+  {:pre [((dirfn direction) c)]}
   (dosync
    (alter c add-path direction type :out)
    (alter ((dirfn direction) c) add-path (opposite-dirs direction) type :in)))
@@ -122,6 +123,7 @@
 (defn unbuild-path
   "builds a path from refcell c to the given direction"
   [c direction]
+  {:pre [((dirfn direction) c)]}
   (dosync
    (alter c remove-path direction)
    (alter ((dirfn direction) c) remove-path (opposite-dirs direction))))
