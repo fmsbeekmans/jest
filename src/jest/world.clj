@@ -118,9 +118,3 @@
   (dosync
    (alter c remove-path dir)
    (alter (direction c dir) remove-path (opposite-dirs dir))))
-
-
-(defn moo [x]
-  {:pre [(>= x 0)]
-   :post [(>= % 0)]}
-  (dec x))
