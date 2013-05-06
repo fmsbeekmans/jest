@@ -80,25 +80,24 @@
 ;(defn remove-path
 ;  "removes the given path from the cell"
 
-(defn in-paths
-  "Returns all incoming paths for the given cell"
-  [c]
-  (for [[dir {:keys [inout type]}] (:paths c)
-        :when (= :in inout)]
-    [dir type]))
+(letfn [(some-paths [c inout]
+  (for [[dir path] (:paths c)
+        :when (= inout (:inout path))]
+    path))]
+  (defn in-paths
+    "Returns all incoming paths for the given cell"
+    [c]
+    (some-paths c :in))
        
-(defn out-paths
-  "Returns all outgoing paths for the given cell"
-  [c]
-  (for [[dir {:keys [inout type]}] (:paths c)
-        :when (= :out inout)]
-    [dir type]))
+  (defn out-paths
+    "Returns all outgoing paths for the given cell"
+    [c]
+    (some-paths c :out)))
        
-
 (defn complete-paths
   "Returns all in-out path pairs of this cell in the format [type [in out]]"
   [c]
-  (for [[indir intype] (in-paths c)
-        [outdir outtype] (out-paths c)
+  (for [{indir :direction intype :type} (in-paths c)
+        {outdir :direction outtype :type} (out-paths c)
         :when (= intype outtype)]
     [intype [indir outdir]]))
