@@ -55,7 +55,11 @@
                         ~[dx dy])))))
 
 (defmacro def-directions [& dirs]
-  `(do ~@(map direction-m dirs)))
+  `(do ~@(map direction-m dirs)
+       (def dirfn ~(reduce conj {}
+                           (map (fn [[dir _ _]]
+                                  [(keyword dir) dir])
+                                dirs)))))
 
 (def-directions
   [north 0 -1]
@@ -63,41 +67,67 @@
   [west -1 0]
   [east 1 0])
 
-(defn add-path
-  "adds the given path to the cell"
-  [c type in outs]
-  (update-in c [:paths]
-             (fn [paths]
-               (apply merge
-                      (assoc paths in (map->Path {:type type
-                                                  :direction in
-                                                  :inout :in}))
-                      (map #(assoc paths % (map->Path {:type type
-                                                       :direction %
-                                                       :inout :out}))
-                           outs)))))
-
-;(defn remove-path
-;  "removes the given path from the cell"
-
 (letfn [(some-paths [c inout]
   (for [[dir path] (:paths c)
         :when (= inout (:inout path))]
     path))]
-  (defn in-paths
+  (defn- in-paths
     "Returns all incoming paths for the given cell"
     [c]
     (some-paths c :in))
        
-  (defn out-paths
+  (defn- out-paths
     "Returns all outgoing paths for the given cell"
     [c]
     (some-paths c :out)))
        
-(defn complete-paths
-  "Returns all in-out path pairs of this cell in the format [type [in out]]"
+(defn- complete-paths
+  "Returns all in-out path pairs of this cell"
   [c]
-  (for [{indir :direction intype :type} (in-paths c)
-        {outdir :direction outtype :type} (out-paths c)
-        :when (= intype outtype)]
-    [intype [indir outdir]]))
+  (for [in (in-paths c)
+        out (out-paths c)
+        :when (= (:type in) (:type out))]
+    [in out]))
+
+(defn- add-path
+  "adds the given path to the cell"
+  [c direction type inout]
+  {:pre [(not (get-in c [:paths direction]))]}
+  (assoc-in c [:paths direction]
+            (map->Path {:type type
+                        :direction direction
+                        :inout inout})))
+
+(defn- remove-path
+  "removes the path from the cell for the given direction"
+  [c direction]
+  {:pre [(get-in c [:paths direction])]}
+  (update-in c [:paths]
+             #(dissoc % direction)))
+
+(def opposite-dirs
+  {:north :south,
+   :south :north,
+   :west :east,
+   :east :west})
+
+(defn build-path
+  "builds a path from refcell c to the given direction"
+  [c direction type]
+  (dosync
+   (alter c add-path direction type :out)
+   (alter ((dirfn direction) c) add-path (opposite-dirs direction) type :in)))
+
+
+(defn unbuild-path
+  "builds a path from refcell c to the given direction"
+  [c direction]
+  (dosync
+   (alter c remove-path direction)
+   (alter ((dirfn direction) c) remove-path (opposite-dirs direction))))
+
+
+(defn moo [x]
+  {:pre [(>= x 0)]
+   :post [(>= % 0)]}
+  (dec x))
