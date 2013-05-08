@@ -1,6 +1,6 @@
 (ns jest.world)
 
-(defrecord Cell [x y paths background type])
+(defrecord Cell [coord paths background type])
 (defrecord Path [type direction inout resources])
 
 (defonce
@@ -14,8 +14,7 @@
   (reduce conj {}
           (for [x (range sx)
                 y (range sy)]
-            [[x y] (ref (map->Cell {:x x
-                                    :y y
+            [[x y] (ref (map->Cell {:coord [x y]
                                     :paths {}
                                     :type :normal
                                     :background :none}))])))
@@ -25,15 +24,20 @@
   [x y]
   (@world [x y]))
 
-(defn coords
-  "Returns the coordinates of the given cell"
-  [c]
-  [(:x c) (:y c)])
-
 (defn derefable?
   "Returns true if the argument can be dereferenced, false otherwise."
   [x]
   (instance? clojure.lang.IDeref x))
+
+(defn maybe-deref [x]
+  (if (derefable? x)
+    (deref x)
+    x))
+
+(defn coords
+  "Returns the coordinates of the given cell/ref"
+  [c]
+  (:coord (maybe-deref c)))
 
 (def directions
   {:north [0 -1]
@@ -44,11 +48,9 @@
 (defn direction
   "returns cell in the given direction"
   [c dir]
-  (if (derefable? c)
-    (direction @c dir)
-    (@world (map +
-                 (coords c)
-                 (dir directions)))))
+  (@world (map +
+               (coords (maybe-deref c))
+               (dir directions))))
 
 (letfn [(some-paths [c inout]
   (for [[dir path] (:paths c)
@@ -129,8 +131,8 @@
 (defn- all-cells-type
   "returns all cells in the currently bound world grid with the given building type"
   [type]
-  (filter (fn [[_ cell]]
-            (= (:type @cell) type)) @world))
+  (map first (filter (fn [[_ cell]]
+                       (= (:type @cell) type)) @world)))
 
 (defmacro defbuilding [name]
   (let [add (symbol (str "add-" name))
@@ -150,10 +152,10 @@
          
          (defn- ~pred
            ~(format "returns whether or not this cell/refcell is of type %s" name)
-           [~'c]
-           (if (derefable? ~'c)
-             (~pred @~'c)
-             (= (:type ~'c) ~(keyword name))))
+           ([~'c]
+              (= (:type (maybe-deref ~'c)) ~(keyword name)))
+           ([~'x ~'y]
+              (~pred (cell ~'x ~'y))))
          
          (defn- ~all
            ~(format "returns all cells with building type %s" name)
@@ -162,13 +164,17 @@
          
          (defn ~build
            ~(format "builds a %s to the given cell ref" name)
-           [~'c]
-           (dosync (alter ~'c ~add)))
+           ([~'c]
+              (dosync (alter ~'c ~add)))
+           ([~'x ~'y]
+              (dosync (alter (cell ~'x ~'y) ~add))))
          
          (defn ~unbuild
            ~(format "unbuilds a %s from the given cell ref" name)
-           [~'c]
-           (dosync (alter ~'c ~remove))))))
+           ([~'c]
+              (dosync (alter ~'c ~remove)))
+           ([~'x ~'y]
+              (~unbuild (cell ~'x ~'y)))))))
 
 (defmacro buildings [& names]
   `(do ~@(map #(list 'defbuilding %) names)))
