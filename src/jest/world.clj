@@ -1,10 +1,11 @@
 (ns jest.world)
 
-(defrecord Cell [x y paths])
+(defrecord Cell [x y paths background type])
 (defrecord Path [type direction inout resources])
 
-(def ^:dynamic world
-  "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."
+(defonce
+  #^{:dynamic true
+     :doc "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."} world
   (atom {}))
 
 (defn world-grid
@@ -16,6 +17,7 @@
             [[x y] (ref (map->Cell {:x x
                                     :y y
                                     :paths {}
+                                    :type :normal
                                     :background :none}))])))
 
 (defn cell
@@ -108,3 +110,76 @@
   (dosync
    (alter c remove-path dir)
    (alter (direction c dir) remove-path (opposite-dirs dir))))
+
+(defn- add-building
+  "adds a building to the given cell"
+  [c type]
+  {:pre [(= (:type c) :normal)]}
+  (assoc c :type type))
+
+(defn- remove-building
+  "removes a building from the given cell"
+  ([c]
+     {:pre [(not= (:type c) :normal)]}
+     (assoc c :type :normal))
+  ([c type]
+     {:pre [(= (:type c) type)]}
+     (remove-building c)))
+
+(defn- all-cells-type
+  "returns all cells in the currently bound world grid with the given building type"
+  [type]
+  (filter (fn [[_ cell]]
+            (= (:type @cell) type)) @world))
+
+(defmacro defbuilding [name]
+  (let [add (symbol (str "add-" name))
+        remove (symbol (str "remove-" name))
+        build (symbol (str "build-" name))
+        unbuild (symbol (str "unbuild-" name))
+        pred (symbol (str name "?"))
+        all (symbol (str "all-" name "s"))]
+    `(do (defn- ~add
+           ~(format "adds a %s to the given cell" name)
+           [~'c]
+           (add-building ~'c ~(keyword name)))
+         (defn- ~remove
+           ~(format "removes a %s from the given cell" name)
+           [~'c]
+           (remove-building ~'c ~(keyword name)))
+         
+         (defn- ~pred
+           ~(format "returns whether or not this cell/refcell is of type %s" name)
+           [~'c]
+           (if (derefable? ~'c)
+             (~pred @~'c)
+             (= (:type ~'c) ~(keyword name))))
+         
+         (defn- ~all
+           ~(format "returns all cells with building type %s" name)
+           []
+           (all-cells-type ~(keyword name)))
+         
+         (defn ~build
+           ~(format "builds a %s to the given cell ref" name)
+           [~'c]
+           (dosync (alter ~'c ~add)))
+         
+         (defn ~unbuild
+           ~(format "unbuilds a %s from the given cell ref" name)
+           [~'c]
+           (dosync (alter ~'c ~remove))))))
+
+(defmacro buildings [& names]
+  `(do ~@(map #(list 'defbuilding %) names)))
+
+(buildings spawn
+           supply
+           depot
+           mixer)
+
+(defn set-background
+  "sets the background on refcell c to the given background."
+  [c background]
+  (dosync
+   (alter c assoc :background background)))
