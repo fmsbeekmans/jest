@@ -33,16 +33,6 @@
   [x]
   (instance? clojure.lang.IDeref x))
 
-(defn- direction-m [[dir dx dy]]
-  `(defn ~dir
-     ~(format "Returns the cell in direction %s from the given cell" dir)
-     ~'[c]
-     (if (derefable? ~'c)
-       (recur (deref ~'c))
-       (apply cell (map +
-                        (coords ~'c)
-                        ~[dx dy])))))
-
 (def directions
   {:north [0 -1]
    :south [0 1]
