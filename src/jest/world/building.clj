@@ -3,6 +3,11 @@
   (:use jest.util
         jest.world.cell))
 
+(defn all-cells-type
+  "returns all cells in the currently bound world grid with the given building type"
+  [type]
+  (all-cells #(= (:type %1) type)))
+
 (defn- add-building
   "adds a building to the given cell"
   [c type]
@@ -35,9 +40,9 @@
            (remove-building ~'c ~(keyword name)))
          
          (defn- ~pred
-           ~(format "returns whether or not this cell/refcell is of type %s" name)
+           ~(format "returns whether or not this cell is of type %s" name)
            ([~'c]
-              (= (:type (maybe-deref ~'c)) ~(keyword name)))
+              (= (:type ~'c) ~(keyword name)))
            ([~'x ~'y]
               (~pred (cell ~'x ~'y))))
          
@@ -47,16 +52,16 @@
            (all-cells-type ~(keyword name)))
          
          (defn ~build
-           ~(format "builds a %s to the given cell ref" name)
+           ~(format "builds a %s to the given cell" name)
            ([~'c]
-              (dosync (alter ~'c ~add)))
+              (dosync (alter-cell ~'c ~add)))
            ([~'x ~'y]
-              (dosync (alter (cell ~'x ~'y) ~add))))
+              (~build (cell ~'x ~'y))))
          
          (defn ~unbuild
-           ~(format "unbuilds a %s from the given cell ref" name)
+           ~(format "unbuilds a %s from the given cell" name)
            ([~'c]
-              (dosync (alter ~'c ~remove)))
+              (dosync (alter-cell ~'c ~remove)))
            ([~'x ~'y]
               (~unbuild (cell ~'x ~'y)))))))
 

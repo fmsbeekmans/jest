@@ -54,8 +54,8 @@
   [c dir type]
   {:pre [(direction c dir)]}
   (dosync
-   (alter c add-path dir type :out)
-   (alter (direction c dir) add-path (opposite-dirs dir) type :in)))
+   (alter-cell c add-path dir type :out)
+   (alter-cell (direction c dir) add-path (opposite-dirs dir) type :in)))
 
 
 (defn unbuild-path
@@ -63,7 +63,7 @@
   [c dir]
   {:pre [(direction c dir)]}
   (dosync
-   (alter c remove-path dir)
-   (alter (direction c dir) remove-path (opposite-dirs dir))))
+   (alter-cell c remove-path dir)
+   (alter-cell (direction c dir) remove-path (opposite-dirs dir))))
 
 

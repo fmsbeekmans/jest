@@ -27,7 +27,7 @@
 (defn cell
   "Returns the cell on the given coordinates"
   ([x y]
-     (@world [x y]))
+     @(@world [x y]))
   ([[x y]]
      (cell x y)))
 
@@ -50,18 +50,21 @@
              (dir directions))))
 
 (defn all-cells
-  "returns a list of all cell refs"
-  []
-  @world)
+  "returns a list of all cells, optionally filtered by a predicate"
+  ([]
+     (map (comp deref second) @world))
+  ([pred]
+     (filter pred (all-cells))))
 
-(defn all-cells-type
-  "returns all cells in the currently bound world grid with the given building type"
-  [type]
-  (map first (filter (fn [[_ cell]]
-                       (= (:type @cell) type)) (all-cells))))
+(defn alter-cell
+  "Alters a cell. This must be called within a transaction."
+  ([c f & args]
+     (apply alter (@world (coords c)) f args)))
+     
 
 (defn set-background
-  "sets the background on refcell c to the given background."
+  "sets the background on cell c to the given background."
   [c background]
   (dosync
-   (alter c assoc :background background)))
+   (alter-cell c assoc :background background)))
+   
