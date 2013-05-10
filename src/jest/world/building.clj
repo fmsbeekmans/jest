@@ -24,7 +24,7 @@
         build (symbol (str "build-" name))
         unbuild (symbol (str "unbuild-" name))
         pred (symbol (str name "?"))
-        all (symbol (str "all-" name "s"))]
+        all (symbol (str "all-" (plural (str name))))]
     `(do (defn- ~add
            ~(format "adds a %s to the given cell" name)
            [~'c]
