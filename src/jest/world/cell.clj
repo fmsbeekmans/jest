@@ -63,7 +63,7 @@
      
 
 (defn set-background
-  "sets the background on cell c to the given background."
+  "Alters world state by setting the background on cell c to the given background."
   [c background]
   (dosync
    (alter-cell c assoc :background background)))

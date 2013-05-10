@@ -50,7 +50,7 @@
    :east :west})
 
 (defn build-path
-  "builds a path from refcell c to the given direction"
+  "Alters world state by building a path from cell c to the given direction"
   [c dir type]
   {:pre [(direction c dir)]}
   (dosync
@@ -59,7 +59,7 @@
 
 
 (defn unbuild-path
-  "builds a path from refcell c to the given direction"
+  "Alters world state by building a path from cell c to the given direction"
   [c dir]
   {:pre [(direction c dir)]}
   (dosync

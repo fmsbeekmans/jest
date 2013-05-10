@@ -52,14 +52,14 @@
            (all-cells-type ~(keyword name)))
          
          (defn ~build
-           ~(format "builds a %s to the given cell" name)
+           ~(format "Alters world state by building a %s to the given cell" name)
            ([~'c]
               (dosync (alter-cell ~'c ~add)))
            ([~'x ~'y]
               (~build (cell ~'x ~'y))))
          
          (defn ~unbuild
-           ~(format "unbuilds a %s from the given cell" name)
+           ~(format "Alters world state by unbuilding a %s from the given cell" name)
            ([~'c]
               (dosync (alter-cell ~'c ~remove)))
            ([~'x ~'y]
