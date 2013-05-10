@@ -1,4 +1,5 @@
 (ns jest.world.path
+  "Functions for adding, removing and searching for roads, rails and canals."
   (:use jest.util
         jest.world.cell))
 

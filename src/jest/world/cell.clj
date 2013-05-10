@@ -1,10 +1,12 @@
 (ns jest.world.cell
+  "Functions for managing the world grid."
   (:use jest.util))
 
 (defrecord Cell [coord paths background type])
 
 (defonce
   #^{:dynamic true
+     :private true
      :doc "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."} world
   (atom {}))
 

@@ -1,4 +1,5 @@
 (ns jest.world.building
+  "Functions for adding, removing and searching for buildings."
   (:use jest.util
         jest.world.cell))
 

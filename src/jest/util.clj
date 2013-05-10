@@ -1,4 +1,5 @@
-(ns jest.util)
+(ns jest.util
+  "Miscellaneous utility functions.")
 
 (defn derefable?
   "Returns true if the argument can be dereferenced, false otherwise."
