@@ -21,7 +21,9 @@
                                     :type :normal
                                     :background :none}))])))
 
-(defn initialize-world [sx sy]
+(defn initialize-world
+  "Initializes the world grid with the specified dimensions."
+  [sx sy]
   (reset! world (world-grid sx sy)))
 
 (defn cell
