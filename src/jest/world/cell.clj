@@ -2,7 +2,7 @@
   "Functions for managing the world grid."
   (:use jest.util))
 
-(defrecord Cell [coord paths background type])
+(defrecord Cell [coord paths background type resource])
 
 (defonce
   #^{:dynamic true
