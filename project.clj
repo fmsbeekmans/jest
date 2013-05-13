@@ -7,7 +7,4 @@
                  [YAJTL/YAJTL "0.0.1"]]
   :repositories {"pievolution" "http://pievolution.org/maven-repo/"}
   :profiles {:dev {:plugins [[lein-midje "3.0.0"]]
-                   :dependencies [[midje "1.5.1"]]
-                   }
-             }
-  )
+                   :dependencies [[midje "1.5.1"]]}})
