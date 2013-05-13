@@ -48,7 +48,7 @@
   "returns cell in the given direction"
   [c dir]
   (cell (map +
-             (coords (maybe-deref c))
+             (coords c)
              (dir directions))))
 
 (defn all-cells
