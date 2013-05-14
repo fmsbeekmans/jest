@@ -28,10 +28,8 @@
 
 (defn cell
   "Returns the cell on the given coordinates"
-  ([x y]
-     @(@world [x y]))
-  ([[x y]]
-     (cell x y)))
+  [[x y]]
+  @(@world [x y]))
 
 (defn coords
   "Returns the coordinates of the given cell/ref"
@@ -47,9 +45,10 @@
 (defn direction
   "returns cell in the given direction"
   [c dir]
-  (cell (map +
-             (coords c)
-             (dir directions))))
+  (cell (vec
+         (map +
+              (coords c)
+              (dir directions)))))
 
 (defn all-cells
   "returns a list of all cells, optionally filtered by a predicate"
@@ -62,11 +61,9 @@
   "Alters a cell. This must be called within a transaction."
   ([c f & args]
      (apply alter (@world (coords c)) f args)))
-     
 
 (defn set-background
   "Alters world state by setting the background on cell c to the given background."
   [c background]
   (dosync
    (alter-cell c assoc :background background)))
-   
