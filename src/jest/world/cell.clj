@@ -7,7 +7,8 @@
 (defonce
   #^{:dynamic true
      :private true
-     :doc "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."} world
+     :doc "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."}
+  world
   (atom {}))
 
 (defn- world-grid
