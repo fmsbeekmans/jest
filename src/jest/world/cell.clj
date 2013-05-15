@@ -2,7 +2,7 @@
   "Functions for managing the world grid."
   (:use jest.util))
 
-(defrecord Cell [coord paths background type resource])
+(defrecord Cell [coord paths routes background type resource])
 
 (defonce
   #^{:dynamic true
@@ -19,6 +19,7 @@
                 y (range sy)]
             [[x y] (ref (map->Cell {:coord [x y]
                                     :paths {}
+                                    :routes {}
                                     :type :normal
                                     :background :none}))])))
 
