@@ -6,19 +6,19 @@
 (defrecord Path [type direction inout resources])
 
 (letfn [(some-paths [c inout]
-  (for [[dir path] (:paths c)
-        :when (= inout (:inout path))]
-    path))]
+          (for [[dir path] (:paths c)
+                :when (= inout (:inout path))]
+            path))]
   (defn- in-paths
     "Returns all incoming paths for the given cell"
     [c]
     (some-paths c :in))
-       
+
   (defn- out-paths
     "Returns all outgoing paths for the given cell"
     [c]
     (some-paths c :out)))
-       
+
 (defn- complete-paths
   "Returns all in-out path pairs of this cell"
   [c]
@@ -65,5 +65,3 @@
   (dosync
    (alter-cell c remove-path dir)
    (alter-cell (direction c dir) remove-path (opposite-dirs dir))))
-
-

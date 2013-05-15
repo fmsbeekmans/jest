@@ -30,7 +30,7 @@
      {:pre [(= (:type c) type)]}
      (remove-building c)))
 
-(defmacro- defbuilding 
+(defmacro- defbuilding
   "Creates helper functions for building construction.
 'type' is the name of the building type (as a symbol).
 'resource?' specifies whether or not this building type is associated with a
@@ -44,7 +44,7 @@ particular resource."
         pred (symbol (str type "?"))
         all (symbol (str "all-" (plural (str type))))
         optional-resource-argument (if resource? '(resource) '())
-        optional-documentation-addition (if resource? 
+        optional-documentation-addition (if resource?
                                           (format " 'resource' specifies what resource is associated with this %s."
                                                   type)
                                           "")]
@@ -53,7 +53,7 @@ particular resource."
          ~(format "adds a %s to the given cell.%s" type optional-documentation-addition)
          [~'c ~@optional-resource-argument]
          (add-building ~'c ~(keyword type) ~@optional-resource-argument))
-       
+
        (defn ~build
          ~(format "Alters world state by building a %s to the given cell.\n%s" type optional-documentation-addition)
          ([~'c ~@optional-resource-argument]
@@ -61,12 +61,12 @@ particular resource."
          ([~'x ~'y ~@optional-resource-argument]
             (~build (cell ~'x ~'y) ~@optional-resource-argument)))
 
-       
+
        (defn- ~remove
          ~(format "removes a %s from the given cell." type)
          [~'c]
          (remove-building ~'c ~(keyword type)))
-       
+
        (defn ~unbuild
          ~(format "Alters world state by unbuilding a %s from the given cell." type)
          ([~'c]
@@ -80,7 +80,7 @@ particular resource."
             (= (:type ~'c) ~(keyword type)))
          ([~'x ~'y]
             (~pred (cell ~'x ~'y))))
-       
+
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
@@ -90,4 +90,3 @@ particular resource."
 (defbuilding supply true)
 (defbuilding depot true)
 (defbuilding mixer false)
-
