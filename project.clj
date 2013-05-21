@@ -11,5 +11,3 @@
                    :dependencies [[midje "1.5.1"]]}}
   :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/world-state"
           :src-linenum-anchor-prefix "L"})
-             
-
