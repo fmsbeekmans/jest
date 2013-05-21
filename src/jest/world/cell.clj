@@ -8,7 +8,7 @@
   #^{:dynamic true
      :private true
      :doc "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."}
-  world
+  *world*
   (atom {}))
 
 (defn- world-grid
@@ -25,12 +25,12 @@
 (defn initialize-world
   "Initializes the world grid with the specified dimensions."
   [sx sy]
-  (reset! world (world-grid sx sy)))
+  (reset! *world* (world-grid sx sy)))
 
 (defn cell
   "Returns the cell on the given coordinates"
   [[x y]]
-  @(@world [x y]))
+  @(@*world* [x y]))
 
 (defn coords
   "Returns the coordinates of the given cell/ref"
@@ -54,14 +54,14 @@
 (defn all-cells
   "returns a list of all cells, optionally filtered by a predicate"
   ([]
-     (map (comp deref second) @world))
+     (map (comp deref second) @*world*))
   ([pred]
      (filter pred (all-cells))))
 
 (defn alter-cell
   "Alters a cell. This must be called within a transaction."
   ([c f & args]
-     (apply alter (@world (coords c)) f args)))
+     (apply alter (@*world* (coords c)) f args)))
 
 (defn set-background
   "Alters world state by setting the background on cell c to the given background."
