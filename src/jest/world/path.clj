@@ -3,7 +3,16 @@
   (:use jest.util
         jest.world.cell))
 
-(defrecord Path [type direction inout resources])
+; Temporary convention:
+; Routes are preferred paths for the specified colors, but can actually
+; be used for the transportation of any resource. In other words, every path
+; has an implied :any color.
+
+(defrecord Path [type direction inout resources routes])
+
+;; TODO
+; Implementation of the following functions doesn't always take into
+; account the possibility of different Path types
 
 (letfn [(some-paths [c inout]
           (for [[dir path] (:paths c)
@@ -27,14 +36,17 @@
         :when (= (:type in) (:type out))]
     [in out]))
 
+(defn- update-path
+  [c path]
+  (assoc-in c [:paths (path :direction)] path))
+
 (defn- add-path
-  "adds the given path to the cell"
+  "Adds the given path to the cell"
   [c direction type inout]
   {:pre [(not (get-in c [:paths direction]))]}
-  (assoc-in c [:paths direction]
-            (map->Path {:type type
-                        :direction direction
-                        :inout inout})))
+  (update-path c (map->Path {:type type
+                          :direction direction
+                          :inout inout})))
 
 (defn- remove-path
   "removes the path from the cell for the given direction"
@@ -42,6 +54,8 @@
   {:pre [(get-in c [:paths direction])]}
   (update-in c [:paths]
              #(dissoc % direction)))
+
+
 
 (def opposite-dirs
   {:north :south,
@@ -56,7 +70,6 @@
   (dosync
    (alter-cell c add-path dir type :out)
    (alter-cell (direction c dir) add-path (opposite-dirs dir) type :in)))
-
 
 (defn unbuild-path
   "Alters world state by building a path from cell c to the given direction"
