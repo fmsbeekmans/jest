@@ -38,7 +38,7 @@
 
 (defn- update-path
   [c path]
-  (assoc-in c [:paths (path :direction)] path))
+  (assoc-in c [:paths (:direction path)] path))
 
 (defn- add-path
   "Adds the given path to the cell"
