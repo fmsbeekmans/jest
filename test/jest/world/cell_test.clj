@@ -1,19 +1,12 @@
 (ns jest.world.cell-test
-  (:use midje.sweet)
+  (:use midje.sweet
+        jest.testutils)
   (:require [jest.world.cell :as cell]))
 
 (fact "The world is initialized to the right size."
       (cell/with-temp-world
         (cell/initialize-world 10 10)
         (cell/world-size) => [10 10]))
-
-(defmacro for-cells
-  "test macro, give sx and sy and it will do something for each cell."
-  [[cell x y] [sx sy] & body]
-  `(doall (for [~x (range ~sx)
-                ~y (range ~sy)]
-            (let [~cell (cell/cell [~x ~y])]
-              ~@body))))
 
 (cell/with-initialized-temp-world [10 10]
   (fact "Each cell in the world grid exists."
