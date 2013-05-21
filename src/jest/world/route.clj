@@ -8,14 +8,17 @@
   "Adds a route for resources of the specified color to an
   existing path"
   [path color]
+  {:pre [path
+         color
+         (not (contains? (:routes path) color))]}
   (assoc path :routes
-         (set (conj (path :routes) color))))
+         (set (conj (:routes path) color))))
 
 (defn- remove-route
   "Removes any existing routes for the specified color from an
   existing path"
   [path color]
-  {:pre [(contains? color (path :routes))]}
+  {:pre [(contains? color (:routes path))]}
   (update-in path [:routes]
              #(disj % color)))
 
