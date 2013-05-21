@@ -1,8 +1,10 @@
-(ns jest.color
+(ns jest.world.color
   "Resource colors and some helper functions.")
 
 ;; This is not supposed to be in the public API
-(def color-set
+(def
+  #^{:private true}
+  color-set
   #{:red
     :green
     :blue
