@@ -27,10 +27,45 @@
   [sx sy]
   (reset! *world* (world-grid sx sy)))
 
+(defn world-width
+  "Returns the width of the world."
+  []
+  (inc
+   (apply max (map first (keys @*world*)))))
+
+(defn world-height
+  "Returns the height of the world."
+  []
+  (inc
+   (apply max (map second (keys @*world*)))))
+
+(defn world-size
+  "Returns the size of the world as [sx sy]"
+  []
+  [(world-width) (world-height)])
+
+(defmacro with-temp-world
+  "For testing purposes, rebind the world state to an empty map."
+  [& body]
+  `(binding [*world* (atom {})]
+     ~@body))
+
+(defmacro with-initialized-temp-world
+  "For testing purposes, rebind the world state to an initialized map."
+  [[sx sy] & body]
+  `(binding [*world* (atom {})]
+     (initialize-world ~sx ~sy)
+     ~@body))
+
+(defn- cell-ref
+  "Returns the cell ref for the given coordinate"
+  [[x y]]
+  (@*world* [x y]))
+
 (defn cell
   "Returns the cell on the given coordinates"
   [[x y]]
-  @(@*world* [x y]))
+  @(cell-ref [x y]))
 
 (defn coords
   "Returns the coordinates of the given cell/ref"
@@ -43,13 +78,18 @@
    :west [-1 0]
    :east [1 0]})
 
+(defn- calculate-coord [cell dir]
+  (vec (map + (coords cell) (dir directions))))
+
 (defn direction
   "returns cell in the given direction"
   [c dir]
-  (cell (vec
-         (map +
-              (coords c)
-              (dir directions)))))
+  (cell (calculate-coord c dir)))
+
+(defn direction-exists?
+  "returns whether the cell is connected in the given direction"
+  [c dir]
+  (boolean (cell-ref (calculate-coord c dir))))
 
 (defn all-cells
   "returns a list of all cells, optionally filtered by a predicate"
