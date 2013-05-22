@@ -37,3 +37,26 @@
             (path/build-path (cell [2 3]) :east :road)
             (path/out-path? (path/path (cell [2 3]) :east)) => TRUTHY
             (path/in-path? (path/path (cell [3 3]) :west)) => TRUTHY)
+
+(world-fact [10 10]
+            "An incoming path combined with an outgoing path of the same type is a complete path."
+            (count (path/complete-paths (cell [3 2]))) => 0
+            (path/build-path (cell [2 2]) :east :road)
+            (count (path/complete-paths (cell [3 2]))) => 0
+            (path/build-path (cell [3 2]) :east :road)
+            (count (path/complete-paths (cell [3 2]))) => 1)
+
+(world-fact [10 10]
+            "An incoming path combined with an outgoing path of another type is not a complete path."
+            (path/build-path (cell [2 2]) :east :road)
+            (path/build-path (cell [3 2]) :east :rails)
+            (count (path/complete-paths (cell [3 2]))) => 0)
+
+(world-fact [10 10]
+            "An incoming path combined with multiple outgoing patsh of the same type are multiple complete paths."
+            (path/build-path (cell [2 2]) :east :road)
+            (path/build-path (cell [3 2]) :east :road)
+            (path/build-path (cell [3 2]) :north :road)
+            (count (path/complete-paths (cell [3 2]))) => 2
+            (path/build-path (cell [3 2]) :south :road)
+            (count (path/complete-paths (cell [3 2]))) => 3)
