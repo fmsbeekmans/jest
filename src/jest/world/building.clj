@@ -12,7 +12,7 @@
 (defn- add-building
   "adds a building to the given cell"
   ([c type color]
-     {:pre [(= (:type c) :normal)]}
+     {:pre [(= (:type c) :none)]}
      (assoc c
        :type type
        :resource color))
@@ -22,9 +22,9 @@
 (defn- remove-building
   "removes a building from the given cell"
   ([c]
-     {:pre [(not= (:type c) :normal)]}
+     {:pre [(not= (:type c) :none)]}
      (-> c
-         (assoc :type :normal)
+         (assoc :type :none)
          (dissoc :resource)))
   ([c type]
      {:pre [(= (:type c) type)]}
@@ -90,3 +90,8 @@ particular resource."
 (defbuilding supply true)
 (defbuilding depot true)
 (defbuilding mixer false)
+
+(defn building-type
+  "Returns the building type for the given cell."
+  [c]
+  (:type c))
