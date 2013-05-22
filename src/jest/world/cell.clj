@@ -19,7 +19,7 @@
                 y (range sy)]
             [[x y] (ref (map->Cell {:coord [x y]
                                     :paths {}
-                                    :type :normal
+                                    :type :none
                                     :background :none}))])))
 
 (defn initialize-world
