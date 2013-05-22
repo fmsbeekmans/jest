@@ -97,3 +97,7 @@ particular resource."
   (when-not (= :none (:type c))
     (:type c)))
 
+(defn resource-type
+  "Returns the type of resource handled on this cell."
+  [c]
+  (:resource c))
