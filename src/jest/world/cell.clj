@@ -20,7 +20,8 @@
             [[x y] (ref (map->Cell {:coord [x y]
                                     :paths {}
                                     :type :none
-                                    :background :none}))])))
+                                    :background :none
+                                    :resource :none}))])))
 
 (defn initialize-world
   "Initializes the world grid with the specified dimensions."
