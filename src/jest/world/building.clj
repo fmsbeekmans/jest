@@ -94,4 +94,6 @@ particular resource."
 (defn building-type
   "Returns the building type for the given cell."
   [c]
-  (:type c))
+  (when-not (= :none (:type c))
+    (:type c)))
+
