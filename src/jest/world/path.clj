@@ -36,6 +36,11 @@
         :when (= (:type in) (:type out))]
     [in out]))
 
+(defn path
+  "Returns the path in the given direction, or nil if there is none."
+  [c direction]
+  (get-in c [:paths direction]))
+
 (defn- update-path
   [c path]
   (assoc-in c [:paths (:direction path)] path))
