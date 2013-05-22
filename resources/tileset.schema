@@ -1,0 +1,37 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Tileset",
+    "description": "A tileset for the Brick tiling engine",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "The name of the tileset",
+            "type": "string"
+        },
+        "image": {
+            "description": "The path of the image of the tileset",
+            "type": "string"
+        },
+        "imagewidth": {
+            "description": "width of the image",
+            "type": "int"
+        },
+        "imageheight": {
+            "description": "height of the image",
+            "type": "int"
+        },
+        "tileheight": {
+            "description": "height of each tile",
+            "type": "int"
+        },
+        "tilewidth": {
+            "description": "width of each tile",
+            "type": "int"
+        },
+        "properties": {
+            "description": "The dictionary mapping between tile indexes and named tiles",
+            "type": "object"
+        }
+    },
+    "required": ["id"]
+}
