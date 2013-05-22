@@ -41,6 +41,16 @@
   [c direction]
   (get-in c [:paths direction]))
 
+(defn in-path?
+  "Returns whether or not the given path is an in-path."
+  [path]
+  (= :in (:inout path)))
+
+(defn out-path?
+  "Returns whether or not the given path is an out-path."
+  [path]
+  (= :out (:inout path)))
+
 (defn- update-path
   [c path]
   (assoc-in c [:paths (:direction path)] path))
