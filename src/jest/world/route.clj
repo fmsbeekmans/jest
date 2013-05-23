@@ -33,8 +33,8 @@
   (dosync
    (alter-cell c #(add-route % color) (get-in c [:paths dir]))))
 
-(defn remove-route
-  "removes a colored route from an existing path in cell c"
+(defn unbuild-route
+  "unbuilds a colored route from an existing path in cell c"
   [c dir color]
   (dosync
    (alter-cell c #(remove-route % color) (get-in c [:paths dir]))))
