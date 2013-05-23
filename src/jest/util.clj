@@ -20,3 +20,13 @@
   (if (= \y (last word))
     (format "%sies" (subs word 0 (dec (count word))))
     (format "%ss" word)))
+
+(defn ncomp
+  "Returns a function which is a composition of n f functions."
+  [f n]
+  (loop [result f
+         n (dec n)]
+    (if (= n 0)
+      result
+      (recur (comp result f)
+             (dec n)))))
