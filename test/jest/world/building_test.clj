@@ -13,7 +13,8 @@
 (world-fact [10 10]
             "Spawns can be built"
             (building/build-spawn (cell [3 3]) :truck)
-            (building/building-type (cell [3 3])) => :spawn)
+            (building/building-type (cell [3 3])) => :spawn
+            (building/vehicle-type (cell [3 3])) => :truck)
 
 (world-fact [10 10]
             "Supplies can be built"
