@@ -12,7 +12,7 @@
   
 (world-fact [10 10]
             "Spawns can be built"
-            (building/build-spawn (cell [3 3]))
+            (building/build-spawn (cell [3 3]) :truck)
             (building/building-type (cell [3 3])) => :spawn)
 
 (world-fact [10 10]
@@ -34,7 +34,7 @@
 
 (world-fact [10 10]
             "Spawns can be destroyed"
-            (building/build-spawn (cell [3 3]))
+            (building/build-spawn (cell [3 3]) :truck)
             (building/unbuild-spawn (cell [3 3]))
             (building/building-type (cell [3 3])) => nil)
 
@@ -62,7 +62,7 @@
         mixers (set [[3 2] [5 4] [7 6]])
         depots (set [[4 2] [6 4] [8 6]])]
   (doseq [c (map cell spawns)]
-    (building/build-spawn c))
+    (building/build-spawn c :truck))
   (doseq [c (map cell supplies)]
     (building/build-supply c :red))
   (doseq [c (map cell mixers)]

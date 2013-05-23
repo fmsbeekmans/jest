@@ -11,13 +11,11 @@
 
 (defn- add-building
   "adds a building to the given cell"
-  ([c type color]
-     {:pre [(= (:type c) :none)]}
-     (assoc c
-       :type type
-       :resource color))
-  ([c type]
-     (add-building c type :none)))
+  [c type & other-fields]
+  {:pre [(= (:type c) :none)]}
+  (apply assoc c
+         :type type
+         other-fields))
 
 (defn- remove-building
   "removes a building from the given cell"
@@ -31,35 +29,28 @@
      (remove-building c)))
 
 (defmacro- defbuilding
-  "Creates helper functions for building construction.
-'type' is the name of the building type (as a symbol).
-'resource?' specifies whether or not this building type is associated with a
-particular resource."
-  [type resource?]
-  {:private true}
+  "creates building helper functions"
+  [type & fields]
   (let [add (symbol (str "add-" type))
         remove (symbol (str "remove-" type))
         build (symbol (str "build-" type))
         unbuild (symbol (str "unbuild-" type))
         pred (symbol (str type "?"))
         all (symbol (str "all-" (plural (str type))))
-        optional-resource-argument (if resource? '(resource) '())
-        optional-documentation-addition (if resource?
-                                          (format " 'resource' specifies what resource is associated with this %s."
-                                                  type)
-                                          "")]
+        field-syms (map (comp symbol name) fields)
+        field-args (interleave fields field-syms)]
     `(do
        (defn- ~add
-         ~(format "adds a %s to the given cell.%s" type optional-documentation-addition)
-         [~'c ~@optional-resource-argument]
-         (add-building ~'c ~(keyword type) ~@optional-resource-argument))
+         ~(format "adds a %s to the given cell." type)
+         [~'c ~@field-syms]
+         (add-building ~'c ~(keyword type) ~@field-args))
 
        (defn ~build
-         ~(format "Alters world state by building a %s to the given cell.\n%s" type optional-documentation-addition)
-         ([~'c ~@optional-resource-argument]
-            (dosync (alter-cell ~'c ~add ~@optional-resource-argument)))
-         ([~'x ~'y ~@optional-resource-argument]
-            (~build (cell ~'x ~'y) ~@optional-resource-argument)))
+         ~(format "Alters world state by building a %s to the given cell.\n" type)
+         ([~'c ~@field-syms]
+            (dosync (alter-cell ~'c ~add ~@field-syms)))
+         ([~'x ~'y ~@field-syms]
+            (~build (cell ~'x ~'y) ~@field-syms)))
 
 
        (defn- ~remove
@@ -84,12 +75,14 @@ particular resource."
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
-         (all-cells-type ~(keyword type))))))
+         (all-cells-type ~(keyword type)))))) 
 
-(defbuilding spawn false)
-(defbuilding supply true)
-(defbuilding depot true)
-(defbuilding mixer false)
+(defbuilding spawn :vehicle)
+(defbuilding supply :resource)
+(defbuilding depot :resource)
+(defbuilding mixer)
+
+
 
 (defn building-type
   "Returns the building type for the given cell."
