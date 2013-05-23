@@ -22,11 +22,6 @@
   (update-in path [:routes]
              #(disj % color)))
 
-(defn preferred-path
-  "Returns the preferred outgoing path for the specified cell, type and color"
-  [c type color]
-  )
-
 (defn build-route
   "Adds a colored route to an existing path in cell c"
   [c dir color]
