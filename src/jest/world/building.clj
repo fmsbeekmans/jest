@@ -57,7 +57,7 @@
        (defn- ~add
          ~(format "adds a %s to the given cell." type)
          [~'c ~@field-syms]
-         {:pre  [(not (building-type ~'c))]
+         {:pre  [(unbuilt? ~'c)]
           :post [(~pred ~'%)]}
          (add-building ~'c ~(keyword type) ~@field-args))
 
@@ -73,7 +73,7 @@
          ~(format "removes a %s from the given cell." type)
          [~'c]
          {:pre  [(~pred ~'c)]
-          :post [(not (building-type ~'%))]}
+          :post [(unbuilt? ~'%)]}
          (remove-building ~'c ~@fields))
 
        (defn ~unbuild
