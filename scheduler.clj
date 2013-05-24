@@ -101,8 +101,15 @@
     (reregister-all)
     resume-time))
 
-(defn delay [dt]
-  (+ @game-time dt))
+(defn delay
+  ([dt]
+     (+ @game-time dt))
+  ([dt time-unit]
+     (delay (* dt
+               (case time-unit
+                 :minutes 60000
+                 :seconds 1000
+                 :milliseconds 1)))))
 
 (defn schedule [task time]
   {:pre [@timer-data]}
