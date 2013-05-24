@@ -47,7 +47,7 @@
         field-syms (map (comp symbol name) fields)
         field-args (interleave fields field-syms)]
     `(do
-       (defn- ~pred
+       (defn ~pred
          ~(format "returns whether or not this cell is of type %s." type)
          ([~'c]
             (= (building-type ~'c) ~(keyword type)))
