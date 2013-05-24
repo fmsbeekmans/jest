@@ -1,18 +1,20 @@
 (ns jest.testutils
-  (:use [jest.world.cell :only [cell]]
+  (:use [jest.world.cell :only [cell with-initialized-temp-world]]
         [jest.world.path :only [build-path complete-paths]]
-        [jest.world.building :only [build-spawn]]))
+        [jest.world.building :only [build-spawn]]
+        midje.sweet))
+         
 
 (defmacro for-cells
   "test macro, give sx and sy and it will do something for each cell."
   [[cell x y] [sx sy] & body]
   `(doall (for [~x (range ~sx)
                 ~y (range ~sy)]
-            (let [~cell (cell/cell [~x ~y])]
+            (let [~cell (cell [~x ~y])]
               ~@body))))
 
 (defmacro world-fact [[sx sy] fact-text & body]
-  `(cell/with-initialized-temp-world [~sx ~sy]
+  `(with-initialized-temp-world [~sx ~sy]
      (fact ~fact-text ~@body)))
 
 (defn build-spawn-circle []
