@@ -34,9 +34,11 @@
                    [on-failure report-json]))))))
 
 (defn boolean-validator
-  "Wraps a json-validator so it can be used as a simple valid? function"
+  "Wraps a json-validator so it can be used as a simple valid? function.
+  Validated json-data is return as is, invalidated json-data gives a nil return
+  value."
   [validator-f]
   (fn [json-data]
     ((validator-f json-data
-                   (fn [_] true)
-                   (fn [_] false)))))
+                  identity
+                  (fn [_] nil)))))
