@@ -1,4 +1,4 @@
-(ns scheduler
+(ns jest.scheduler
   (:import java.util.Date
            [java.util.concurrent Executors TimeUnit]))
 
