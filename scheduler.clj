@@ -22,18 +22,23 @@
 (defn- calculate-delay [game-time]
   (- (calculate-real-time game-time) (time-millis)))
 
-(def game-time
+(def ^{:doc "A derefable variable specifying the current game time, in milliseconds. Only valid after the scheduler has started."}
+  game-time
   (reify clojure.lang.IDeref
     (deref [_] (calculate-game-time))))
 
-(defn start []
+(defn start
+  "Starts the scheduler. After calling start, game-time will become valid and schedule may be called."
+  []
   {:pre [(not @timer-data)
          (not @thread-pool)]}
   (reset! timer-data [(time-millis) nil])
   (reset! thread-pool (Executors/newScheduledThreadPool 10))
   nil)
 
-(defn stop []
+(defn stop
+  "Stops the scheduler. After calling stop, game-time will become invalid and schedule may not be called anymore."
+  []
   {:pre [@timer-data
          @thread-pool]}
   (reset! timer-data nil)
@@ -42,7 +47,9 @@
   (reset! tasks nil)
   nil)
 
-(defn paused? []
+(defn paused?
+  "Returns true if the scheduler has been paused, false otherwise."
+  []
   {:pre [@timer-data]}
   (boolean (second @timer-data)))
 
@@ -83,7 +90,9 @@
          (collect-task-map (fn [time [task _]]
                              [task (register-with-scheduler task time)]))))
   
-(defn pause []
+(defn pause
+  "Pauses the scheduler. The game-time clock will freeze, and none of the scheduled tasks will run until the scheduler is resumed again."
+  []
   {:pre [@timer-data
          (not (second @timer-data))]}
   (swap! timer-data (fn [[time paused]]
@@ -91,7 +100,9 @@
   (unregister-all)
   @game-time)
 
-(defn resume []
+(defn resume
+  "Resumes the scheduler. The game-time clock starts running again, and the scheduled tasks will run at their scheduled game times."
+  []
   {:pre [@timer-data
          (second @timer-data)]}
   (let [resume-time @game-time]
@@ -102,6 +113,7 @@
     resume-time))
 
 (defn delay
+  "Calculates a future game time dt time-units in the future. By default, time-units is :milliseconds. Other allowed values are :seconds and :minutes."
   ([dt]
      (+ @game-time dt))
   ([dt time-unit]
@@ -111,7 +123,9 @@
                  :seconds 1000
                  :milliseconds 1)))))
 
-(defn schedule [task time]
+(defn schedule
+  "Schedules the given task at the specified game time. This may only be called if the scheduler has started."
+  [task time]
   {:pre [@timer-data]}
   (swap! tasks
          update-in [time] conj [task
