@@ -32,3 +32,11 @@
                  (if (success?)
                    [on-success json-data]
                    [on-failure report-json]))))))
+
+(defn boolean-validator
+  "Wraps a json-validator so it can be used as a simple valid? function"
+  [validator-f]
+  (fn [json-data]
+    ((validator-f json-data
+                   (fn [_] true)
+                   (fn [_] false)))))
