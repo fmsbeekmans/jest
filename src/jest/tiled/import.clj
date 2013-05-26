@@ -65,17 +65,20 @@
 ; Which one of these functions is more idiomatic
 ; (or more efficient)
 (defn- offset-image-vec
+  "Creates a map from (index + offset) to value"
   [image-vec offset]
   (zipmap (map (util/ncomp inc offset) (range))
           image-vec))
 
 (defn- offset-image-vec*
+  "Creates a map from (index + offset) to value"
   [image-vec offset]
   (let [offset-f (util/ncomp inc offset)]
     (into {}
           (map-indexed (fn [i v] [(offset-f i) v]) image-vec))))
 
 (defn- offset-properties-map
+  "Creates a map from (key + offset) to value"
   [properties-map offset]
   (let [offset-f (util/ncomp inc offset)
         keyword->int #(Integer/valueOf (name %1))]
@@ -84,6 +87,8 @@
             (map keyword (vals properties-map)))))
 
 (defn- parse-tilesets
+  "Parses the the tilesets entry in a valid level, returning index->image and
+   index->keyword dictionaries"
   [tilesets]
   (loop [sets tilesets
          offset 0
