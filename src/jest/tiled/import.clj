@@ -3,6 +3,7 @@
   (:require [clojure.data.json :as json]
             [jest.world.cell :as cell]
             [jest.world :as world]
+            [jest.util :as util]
             [jest.util.json-validation :as json-val]
             [clojure.core.incubator :refer [-?>]]))
 
@@ -43,6 +44,62 @@
   "Wrapper for the used tileset that facilitates on-the-fly changes"
   (atom []))
 
+;;; ToDo
+; The tileset map should be loaded from the json files, with an offset being
+; managed by the loader function. If the first tileset has 4 tiles, the indices
+; in the second tileset image-array should be 4 higher than indicated in the
+; json meta-data.
+
+; After this, a merged map has to be returned and a function should be returned
+; which accepts an array of data and returns a TiledLayer for use in the brick
+; engine
+
+(defn- two-step-map
+  [m1 m2]
+  (into {}
+        (for [ [k v] m1
+               :when (contains? m2 v)]
+          [k (m2 v)])))
+
+;;; ToDo
+; Which one of these functions is more idiomatic
+; (or more efficient)
+(defn- offset-image-vec
+  [image-vec offset]
+  (zipmap (map (util/ncomp inc offset) (range))
+          image-vec))
+
+(defn- offset-image-vec*
+  [image-vec offset]
+  (let [offset-f (util/ncomp inc offset)]
+    (into {}
+          (map-indexed (fn [i v] [(offset-f i) v]) image-vec))))
+
+(defn- offset-properties-map
+  [properties-map offset]
+  (let [offset-f (util/ncomp inc offset)
+        keyword->int #(Integer/valueOf (name %1))]
+    (zipmap (map (comp offset-f keyword->int)
+                 (keys properties-map))
+            (map keyword (vals properties-map)))))
+
+(defn- parse-tilesets
+  [tilesets]
+  (loop [sets tilesets
+         offset 0
+         images {}
+         props {}]
+    (if (seq sets)
+      (let [current-tileset (first sets)
+            image-path (:image current-tileset)
+            image-vec [] ;; TODO replace [] with a call to load-images
+            prop (:properties current-tileset)]
+        (recur (rest sets)
+               (+ offset (count images))
+               (into images (offset-image-vec image-vec offset))
+               (into props (offset-properties-map prop offset))))
+      [images props])))
+
 (defn- initialize-world
   "Initializes a world according with the correct width and height"
   [tiled-world]
@@ -52,10 +109,9 @@
 
 (defn- extract-tileset-info
   "Returns required information from the tiled-map for creating Brick tilesets"
-  [tiled-world]
-  (let [tileset (first (:tilesets tiled-world))]
-    {:name (:name tileset)
-     :image (:image tileset)
-     :tileheight (:tileheight tileset)
-     :tilewidth (:tilewidth tileset)
-     :dict (:properties tileset)}))
+  [tileset]
+  {:name (:name tileset)
+   :image (:image tileset)
+   :tileheight (:tileheight tileset)
+   :tilewidth (:tilewidth tileset)
+   :dict (:properties tileset)})
