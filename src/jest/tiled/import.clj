@@ -5,12 +5,39 @@
             [jest.world :as world]
             [jest.util :as util]
             [jest.util.json-validation :as json-val]
-            [clojure.core.incubator :refer [-?>]]))
+            [clojure.core.incubator :refer [-?>]]
+            [brick.image :as image]))
 
-;; Concept
+;; Utility functions
+
+; ToDo
+; Which one of these functions is more idiomatic
+; (or more efficient)
+(defn- offset-vec
+  "Creates a map from (index + offset) to value"
+  [v offset]
+  (zipmap (map (util/ncomp inc offset) (range)) v))
+
+(defn- offset-vec*
+  "Creates a map from (index + offset) to value"
+  [v offset]
+  (let [offset-f (util/ncomp inc offset)]
+    (into {}
+          (map-indexed (fn [idx itm] [(offset-f idx) itm]) v))))
+
+(defn- offset-map
+  "Creates a map from (key + offset) to value. Key should be
+  representable as an int"
+  [m offset]
+  (let [offset-f (util/ncomp inc offset)
+        keyword->int #(Integer/valueOf (name %1))]
+    (zipmap (map (comp offset-f keyword->int)
+                 (keys m))
+            (map keyword (vals m)))))
+
+;; Json utility functions
 ; A JSON description of the tiled-map is converted to a clojure map,
 ; with keywords for keys.
-
 (defn- read-json
   [json-path]
   (json/read-str (slurp json-path)
@@ -40,6 +67,8 @@
   (defn- valid-level? [json-schema]
     (wrapper json-schema)))
 
+;;
+
 (def tileset
   "Wrapper for the used tileset that facilitates on-the-fly changes"
   (atom []))
@@ -61,48 +90,26 @@
                :when (contains? m2 v)]
           [k (m2 v)])))
 
-;;; ToDo
-; Which one of these functions is more idiomatic
-; (or more efficient)
-(defn- offset-image-vec
-  "Creates a map from (index + offset) to value"
-  [image-vec offset]
-  (zipmap (map (util/ncomp inc offset) (range))
-          image-vec))
-
-(defn- offset-image-vec*
-  "Creates a map from (index + offset) to value"
-  [image-vec offset]
-  (let [offset-f (util/ncomp inc offset)]
-    (into {}
-          (map-indexed (fn [i v] [(offset-f i) v]) image-vec))))
-
-(defn- offset-properties-map
-  "Creates a map from (key + offset) to value"
-  [properties-map offset]
-  (let [offset-f (util/ncomp inc offset)
-        keyword->int #(Integer/valueOf (name %1))]
-    (zipmap (map (comp offset-f keyword->int)
-                 (keys properties-map))
-            (map keyword (vals properties-map)))))
-
 (defn- parse-tilesets
   "Parses the the tilesets entry in a valid level, returning index->image and
    index->keyword dictionaries"
   [tilesets]
-  (loop [sets tilesets
+  (loop [tilesets tilesets
          offset 0
          images {}
          props {}]
-    (if (seq sets)
-      (let [current-tileset (first sets)
-            image-path (:image current-tileset)
-            image-vec [] ;; TODO replace [] with a call to load-images
-            prop (:properties current-tileset)]
-        (recur (rest sets)
+    (if (seq tilesets)
+      (let [current-tileset (first tilesets)
+            prop (:properties current-tileset)
+            image-path (clojure.java.io/resource (:image current-tileset))
+            image-vec (image/load-images
+                       (image/path->PImage image-path)
+                       [(:tilewidth current-tileset)
+                        (:tileheight current-tileset)])]
+        (recur (rest tilesets)
                (+ offset (count images))
-               (into images (offset-image-vec image-vec offset))
-               (into props (offset-properties-map prop offset))))
+               (into images (offset-vec image-vec offset))
+               (into props (offset-map prop offset))))
       [images props])))
 
 (defn- initialize-world
