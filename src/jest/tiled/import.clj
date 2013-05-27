@@ -4,91 +4,8 @@
             [jest.world.cell :as cell]
             [jest.world :as world]
             [jest.util :as util]
-            [jest.util.json-validation :as json-val]
-            [clojure.core.incubator :refer [-?>]]
+            [jest.tiled.validation :as validation]
             [brick.image :as image]))
-
-;; Utility functions
-
-; ToDo
-; Which one of these functions is more idiomatic
-; (or more efficient)
-(defn- offset-vec
-  "Creates a map from (index + offset) to value"
-  [v offset]
-  (zipmap (map (util/ncomp inc offset) (range)) v))
-
-(defn- offset-vec*
-  "Creates a map from (index + offset) to value"
-  [v offset]
-  (let [offset-f (util/ncomp inc offset)]
-    (into {}
-          (map-indexed (fn [idx itm] [(offset-f idx) itm]) v))))
-
-(defn- offset-map
-  "Creates a map from (key + offset) to value. Key should be
-  representable as an int"
-  [m offset]
-  (let [offset-f (util/ncomp inc offset)
-        keyword->int #(Integer/valueOf (name %1))]
-    (zipmap (map (comp offset-f keyword->int)
-                 (keys m))
-            (map keyword (vals m)))))
-
-;; Json utility functions
-; A JSON description of the tiled-map is converted to a clojure map,
-; with keywords for keys.
-(defn- read-json
-  [json-path]
-  (json/read-str (slurp json-path)
-                 :key-fn keyword))
-
-(def meta-schema-url (clojure.java.io/resource "meta.schema"))
-(def level-schema-url (clojure.java.io/resource "level.schema"))
-
-(let [schema-validator
-         (-?> meta-schema-url
-              read-json
-              json-val/validator
-              json-val/boolean-validator)
-      wrapper (or schema-validator
-                  (fn [_] nil))]
-  (defn- valid-schema? [json-schema]
-    (wrapper json-schema)))
-
-(let [level-validator
-         (-?> level-schema-url
-              read-json
-              valid-schema?
-              json-val/validator
-              json-val/boolean-validator)
-      wrapper (or level-validator
-                  (fn [_] nil))]
-  (defn- valid-level? [json-schema]
-    (wrapper json-schema)))
-
-;;
-
-(def tileset
-  "Wrapper for the used tileset that facilitates on-the-fly changes"
-  (atom []))
-
-;;; ToDo
-; The tileset map should be loaded from the json files, with an offset being
-; managed by the loader function. If the first tileset has 4 tiles, the indices
-; in the second tileset image-array should be 4 higher than indicated in the
-; json meta-data.
-
-; After this, a merged map has to be returned and a function should be returned
-; which accepts an array of data and returns a TiledLayer for use in the brick
-; engine
-
-(defn- two-step-map
-  [m1 m2]
-  (into {}
-        (for [ [k v] m1
-               :when (contains? m2 v)]
-          [k (m2 v)])))
 
 (defn- parse-tilesets
   "Parses the the tilesets entry in a valid level, returning index->image and
@@ -108,8 +25,8 @@
                         (:tileheight current-tileset)])]
         (recur (rest tilesets)
                (+ offset (count images))
-               (into images (offset-vec image-vec offset))
-               (into props (offset-map prop offset))))
+               (into images (util/offset-vec image-vec offset))
+               (into props (util/offset-map prop offset))))
       [images props])))
 
 (defn- initialize-world
