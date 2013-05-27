@@ -31,7 +31,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"..\/Downloads\/ground.png",
+         "image":"32x32.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
