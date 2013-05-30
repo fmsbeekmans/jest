@@ -10,6 +10,9 @@
 
 (defrecord Path [type coords direction inout resources routes])
 
+(defn path-type [path]
+  (:type path))
+
 ;; TODO
 ; Implementation of the following functions doesn't always take into
 ; account the possibility of different Path types
