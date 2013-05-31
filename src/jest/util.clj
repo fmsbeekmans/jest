@@ -17,8 +17,12 @@
 (defn plural
   "Returns a best guess of the plural of the given word"
   [word]
-  (if (= \y (last word))
+  (cond
+   (= \y (last word))
     (format "%sies" (subs word 0 (dec (count word))))
+   (= \s (last word))
+    word
+   :else
     (format "%ss" word)))
 
 (defn ncomp

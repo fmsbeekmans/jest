@@ -36,8 +36,27 @@
         :when (= (:type in) (:type out))]
     [in out]))
 
-(defn paths [c]
-  (sequence (vals (:paths c))))
+(defn paths
+  ([c]
+     (sequence (vals (:paths c))))
+  ([c type]
+     (filter #(= type (:type %)) (paths c))))
+
+(defmacro defpath
+  "defines a path type."
+  [path-type vehicle-type]
+  (let [pred (symbol (format "%s?" (name path-type)))
+        getall (symbol (plural (name path-type)))]
+    `(do (defn ~pred
+           [~'path]
+           (= ~path-type (:type ~'path)))
+         (defn ~getall
+           [~'cell]
+           (paths ~'cell ~path-type)))))
+
+(defpath :road :truck)
+(defpath :rails :train)
+(defpath :canal :boat)
 
 (defn path
   "Returns the path in the given direction, or nil if there is none."
