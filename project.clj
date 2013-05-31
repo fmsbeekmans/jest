@@ -11,7 +11,8 @@
   :profiles {:dev {:plugins [[lein-midje "3.0.0"]
                              [codox "0.6.4"]
                              [lein-cloverage "1.0.2"]]
-                   :dependencies [[midje "1.5.1"]]}}
+                   :dependencies [[midje "1.5.1"]]
+                   :source-paths ["dev/"]}}
   :resource-paths ["resources/"]
   :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/world-state"
           :src-linenum-anchor-prefix "L"})
