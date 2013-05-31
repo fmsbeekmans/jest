@@ -30,8 +30,7 @@
   (image/path->PImage (clojure.java.io/resource "grass.png")))
 
 (defn cell-canal [c]
-  (if (seq (filter (fn [[_ v]]
-                (= :canal (:type v))) (:paths c)))
+  (if (seq (path/canals c))
     (drawable/->Image (image/path->PImage (clojure.java.io/resource "canal.png")))
     (drawable/->Nothing)))
 
