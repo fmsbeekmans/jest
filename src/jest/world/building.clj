@@ -4,68 +4,77 @@
         jest.util
         jest.world.cell))
 
+(defn building-type
+  "Returns the building type for the given cell."
+  [c]
+  (:building-type c))
+
+(defn unbuilt?
+  "Returns true if nothing is built on this cell, false otherwise."
+  [c]
+  (not (building-type c)))
+
 (defn all-cells-type
   "returns all cells in the currently bound world grid with the given building type"
   [type]
-  (all-cells #(= (:type %1) type)))
+  (all-cells #(= (building-type %1) type)))
 
 (defn- add-building
   "adds a building to the given cell"
-  ([c type color]
-     {:pre [(= (:type c) :normal)]}
-     (assoc c
-       :type type
-       :resource color))
-  ([c type]
-     (add-building c type :none)))
+  [c type & other-fields]
+  {:pre [(not (building-type c))]}
+  (apply assoc c
+         :building-type type
+         other-fields))
 
 (defn- remove-building
   "removes a building from the given cell"
-  ([c]
-     {:pre [(not= (:type c) :normal)]}
-     (-> c
-         (assoc :type :normal)
-         (dissoc :resource)))
-  ([c type]
-     {:pre [(= (:type c) type)]}
-     (remove-building c)))
+  ([c & extra-fields]
+     {:pre [(building-type c)]}
+     (apply assoc c
+            :building-type nil
+            (interleave extra-fields (repeat (count extra-fields) nil)))))
 
 (defmacro- defbuilding
-  "Creates helper functions for building construction.
-'type' is the name of the building type (as a symbol).
-'resource?' specifies whether or not this building type is associated with a
-particular resource."
-  [type resource?]
-  {:private true}
+  "creates building helper functions"
+  [type & fields]
   (let [add (symbol (str "add-" type))
         remove (symbol (str "remove-" type))
         build (symbol (str "build-" type))
         unbuild (symbol (str "unbuild-" type))
         pred (symbol (str type "?"))
         all (symbol (str "all-" (plural (str type))))
-        optional-resource-argument (if resource? '(resource) '())
-        optional-documentation-addition (if resource?
-                                          (format " 'resource' specifies what resource is associated with this %s."
-                                                  type)
-                                          "")]
+        field-syms (map (comp symbol name) fields)
+        field-args (interleave fields field-syms)]
     `(do
+       (defn- ~pred
+         ~(format "returns whether or not this cell is of type %s." type)
+         ([~'c]
+            (= (building-type ~'c) ~(keyword type)))
+         ([~'x ~'y]
+            (~pred (cell ~'x ~'y))))
+
        (defn- ~add
-         ~(format "adds a %s to the given cell.%s" type optional-documentation-addition)
-         [~'c ~@optional-resource-argument]
-         (add-building ~'c ~(keyword type) ~@optional-resource-argument))
+         ~(format "adds a %s to the given cell." type)
+         [~'c ~@field-syms]
+         {:pre  [(unbuilt? ~'c)]
+          :post [(~pred ~'%)]}
+         (add-building ~'c ~(keyword type) ~@field-args))
 
        (defn ~build
-         ~(format "Alters world state by building a %s to the given cell.\n%s" type optional-documentation-addition)
-         ([~'c ~@optional-resource-argument]
-            (dosync (alter-cell ~'c ~add ~@optional-resource-argument)))
-         ([~'x ~'y ~@optional-resource-argument]
-            (~build (cell ~'x ~'y) ~@optional-resource-argument)))
+         ~(format "Alters world state by building a %s to the given cell.\n" type)
+         ([~'c ~@field-syms]
+            (dosync (alter-cell ~'c ~add ~@field-syms)))
+         ([~'x ~'y ~@field-syms]
+            (~build (cell ~'x ~'y) ~@field-syms)))
 
 
        (defn- ~remove
          ~(format "removes a %s from the given cell." type)
          [~'c]
-         (remove-building ~'c ~(keyword type)))
+         {:pre  [(~pred ~'c)]
+          :post [(unbuilt? ~'%)]}
+         (remove-building ~'c ~@fields))
 
        (defn ~unbuild
          ~(format "Alters world state by unbuilding a %s from the given cell." type)
@@ -74,19 +83,26 @@ particular resource."
          ([~'x ~'y]
             (~unbuild (cell ~'x ~'y))))
 
-       (defn- ~pred
-         ~(format "returns whether or not this cell is of type %s." type)
-         ([~'c]
-            (= (:type ~'c) ~(keyword type)))
-         ([~'x ~'y]
-            (~pred (cell ~'x ~'y))))
-
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
-         (all-cells-type ~(keyword type))))))
+         (all-cells-type ~(keyword type)))))) 
 
-(defbuilding spawn false)
-(defbuilding supply true)
-(defbuilding depot true)
-(defbuilding mixer false)
+(defbuilding spawn :vehicle-type)
+(defbuilding supply :resource-type)
+(defbuilding depot :resource-type)
+(defbuilding mixer)
+
+(defn resource-type
+  "Returns the type of resource handled on this supply or depot."
+  [c]
+  {:pre [(or (supply? c)
+             (depot? c))]}
+  (:resource-type c))
+
+(defn vehicle-type
+  "Returns the vehicle type spawned at this spawn."
+  [c]
+  {:pre [(spawn? c)]}
+  (:vehicle-type c))
+

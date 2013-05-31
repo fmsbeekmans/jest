@@ -22,19 +22,14 @@
   (update-in path [:routes]
              #(disj % color)))
 
-(defn preferred-path
-  "Returns the preferred outgoing path for the specified cell, type and color"
-  [c type color]
-  )
-
 (defn build-route
   "Adds a colored route to an existing path in cell c"
   [c dir color]
   (dosync
    (alter-cell c #(add-route % color) (get-in c [:paths dir]))))
 
-(defn remove-route
-  "removes a colored route from an existing path in cell c"
+(defn unbuild-route
+  "unbuilds a colored route from an existing path in cell c"
   [c dir color]
   (dosync
    (alter-cell c #(remove-route % color) (get-in c [:paths dir]))))

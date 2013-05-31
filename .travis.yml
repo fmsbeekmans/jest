@@ -9,5 +9,4 @@ branches:
     - master
 notifications:
   email:
-    - bep-jest@googlegroups.com
     - wordempire@gmail.com

@@ -18,23 +18,38 @@
           (for [[dir path] (:paths c)
                 :when (= inout (:inout path))]
             path))]
-  (defn- in-paths
+  (defn in-paths
     "Returns all incoming paths for the given cell"
     [c]
     (some-paths c :in))
 
-  (defn- out-paths
+  (defn out-paths
     "Returns all outgoing paths for the given cell"
     [c]
     (some-paths c :out)))
 
-(defn- complete-paths
+(defn complete-paths
   "Returns all in-out path pairs of this cell"
   [c]
   (for [in (in-paths c)
         out (out-paths c)
         :when (= (:type in) (:type out))]
     [in out]))
+
+(defn path
+  "Returns the path in the given direction, or nil if there is none."
+  [c direction]
+  (get-in c [:paths direction]))
+
+(defn in-path?
+  "Returns whether or not the given path is an in-path."
+  [path]
+  (= :in (:inout path)))
+
+(defn out-path?
+  "Returns whether or not the given path is an out-path."
+  [path]
+  (= :out (:inout path)))
 
 (defn- update-path
   [c path]
