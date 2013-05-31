@@ -47,7 +47,7 @@
         field-syms (map (comp symbol name) fields)
         field-args (interleave fields field-syms)]
     `(do
-       (defn- ~pred
+       (defn ~pred
          ~(format "returns whether or not this cell is of type %s." type)
          ([~'c]
             (= (building-type ~'c) ~(keyword type)))
@@ -63,11 +63,8 @@
 
        (defn ~build
          ~(format "Alters world state by building a %s to the given cell.\n" type)
-         ([~'c ~@field-syms]
-            (dosync (alter-cell ~'c ~add ~@field-syms)))
-         ([~'x ~'y ~@field-syms]
-            (~build (cell ~'x ~'y) ~@field-syms)))
-
+         [~'c ~@field-syms]
+         (dosync (alter-cell ~'c ~add ~@field-syms)))
 
        (defn- ~remove
          ~(format "removes a %s from the given cell." type)
@@ -78,10 +75,8 @@
 
        (defn ~unbuild
          ~(format "Alters world state by unbuilding a %s from the given cell." type)
-         ([~'c]
-            (dosync (alter-cell ~'c ~remove)))
-         ([~'x ~'y]
-            (~unbuild (cell ~'x ~'y))))
+         [~'c]
+         (dosync (alter-cell ~'c ~remove)))
 
        (defn ~all
          ~(format "returns all cells with building type %s." type)
