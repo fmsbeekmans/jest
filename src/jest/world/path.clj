@@ -36,6 +36,9 @@
         :when (= (:type in) (:type out))]
     [in out]))
 
+(defn paths [c]
+  (sequence (vals (:paths c))))
+
 (defn path
   "Returns the path in the given direction, or nil if there is none."
   [c direction]
