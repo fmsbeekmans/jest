@@ -20,13 +20,13 @@
 
 (defn build-spawn-circle []
   {:post [(seq (complete-paths (cell [5 5])))]}
-  (build-spawn (cell [5 5]) :fireball)
-  (build-path (cell [5 5]) :east :pipe)
-  (build-path (cell [6 5]) :south :pipe)
-  (build-path (cell [6 6]) :west :pipe)
-  (build-path (cell [5 6]) :west :pipe)
-  (build-path (cell [4 6]) :north :pipe)
-  (build-path (cell [4 5]) :east :pipe))
+  (build-spawn (cell [5 5]) :truck)
+  (build-path (cell [5 5]) :east :road)
+  (build-path (cell [6 5]) :south :road)
+  (build-path (cell [6 6]) :west :road)
+  (build-path (cell [5 6]) :west :road)
+  (build-path (cell [4 6]) :north :road)
+  (build-path (cell [4 5]) :east :road))
 
 (defn mock-schedule
   "mock version for schedule. Ignores the schedule time and runs the function right away. Useful in tests."
