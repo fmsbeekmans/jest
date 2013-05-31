@@ -1,4 +1,6 @@
 (ns jest.monocle
+  (:require [jest.world.path :as path])
+  (:require [jest.world.cell :as cell])
   (:require [brick.image :as image])
   (:require [brick.drawable :as drawable]))
 
@@ -6,6 +8,15 @@
 (defn tile-lookup [k]
   {:bg ()}
   )
+
+
+(defn layer-from-world-state
+  "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
+  [cell-draw-fn]
+  {:post [(every? drawable/drawable? (vals (:grid %)))]}
+  (drawable/->Grid (cell/world-width) (cell/world-height)
+                   (into {} (for [c (cell/all-cells)]
+                              [(cell/coords c) (cell-draw-fn c)]))))
 
 (comment
   {:coord [0 0],
