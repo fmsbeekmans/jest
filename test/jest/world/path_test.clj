@@ -60,3 +60,25 @@
             (count (path/complete-paths (cell [3 2]))) => 2
             (path/build-path (cell [3 2]) :south :road)
             (count (path/complete-paths (cell [3 2]))) => 3)
+
+(world-fact [10 10]
+            "paths returns all defined paths for a cell"
+            (empty? (path/paths (cell [2 2]))) => TRUTHY
+            (path/build-path (cell [2 2]) :east :road)
+            (path/paths (cell [2 2])) => (contains (path/path (cell [2 2]) :east)
+                                                   :in-any-order)
+            (path/build-path (cell [2 2]) :west :rails)
+            (path/paths (cell [2 2])) => (contains (path/path (cell [2 2]) :east)
+                                                   (path/path (cell [2 2]) :west)
+                                                   :in-any-order)
+            (path/build-path (cell [2 2]) :north :canal)
+            (path/paths (cell [2 2])) => (contains (path/path (cell [2 2]) :east)
+                                                   (path/path (cell [2 2]) :west)
+                                                   (path/path (cell [2 2]) :north)
+                                                   :in-any-order)
+            (path/build-path (cell [2 2]) :south :road)
+            (path/paths (cell [2 2])) => (contains (path/path (cell [2 2]) :east)
+                                                   (path/path (cell [2 2]) :west)
+                                                   (path/path (cell [2 2]) :north)
+                                                   (path/path (cell [2 2]) :south)
+                                                   :in-any-order))
