@@ -1,5 +1,5 @@
 (ns jest.vehicle
-  (:use [jest.world.cell :only [cell alter-cell coords]]
+  (:use [jest.world.cell :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
         [jest.world.path :only [in-paths out-paths from to path-type vehicle->path]]
         [jest.scheduler :only [game-time schedule]]))
@@ -67,3 +67,6 @@
     (schedule-move vehicle)
     vehicle))))
 
+
+(defn all-vehicles []
+  (remove nil? (flatten (map vehicles (all-cells)))))
