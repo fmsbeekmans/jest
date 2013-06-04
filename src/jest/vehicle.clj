@@ -15,33 +15,23 @@
 "Returns the cell this vehicle is on"
 [v]
 (cell (:coords v)))
-(declare schedule-move)
 
-(defn spawn
-"Spawns a vehicle on the given cell."
-([c]
- {:pre [(spawn? c)]}
- (dosync
-  (let [vehicle (spawn c (->Vehicle (vehicle-type c)
-                                    (coords c)
-                                    @game-time
-                                    nil))]
-    (schedule-move vehicle)
-    vehicle)))
-([c v]
- (dosync
-  (alter-cell c
+(defn- load-vehicle [c v]
+  "Loads a vehicle on the given cell"
+  (let [v (assoc v :coords (coords c))]
+    (alter-cell c
               update-in [:vehicles] conj v)
-  v)))
+    v))
 
 
-(defn despawn
-"Despawns the given vehicle"
-[v]
-{:pre [(some (partial = v) (vehicles (vehicle-cell v)))]}
-(dosync
-(alter-cell (vehicle-cell v)
-           update-in [:vehicles] (partial remove (partial = v)))))
+(defn- unload-vehicle
+  "Unloads the given vehicle"
+  [v]
+  {:pre [(some (partial = v) (vehicles (vehicle-cell v)))]}
+  (dosync
+   (alter-cell (vehicle-cell v)
+               update-in [:vehicles] (partial remove (partial = v))))
+  (assoc v :coords nil))
 
 (defn preferred-path
   "select the preferred path for this vehicle"
@@ -54,9 +44,9 @@
   {:pre [(= (vehicle-cell v)
             (from path))]}
   (dosync
-   (despawn v)
+   (unload-vehicle v)
    (when-not (spawn? (to path))
-     (spawn (to path) (assoc v :coords (coords (to path)))))))
+     (load-vehicle (to path) v))))
 
 (defn schedule-move [v]
   (schedule (fn []
@@ -64,9 +54,16 @@
                (if-let [v (move-vehicle v (preferred-path v))]
                  (schedule-move v))))
             (jest.scheduler/delay 10 :seconds)))
-  ; snelheid
-  ; naar
-  ; naar = spawn? => despawn
-  ; schedule!
-  ; schedule schedule-move!)
+
+(defn spawn
+"Spawns a vehicle on the given cell."
+([c]
+ {:pre [(spawn? c)]}
+ (dosync
+  (let [vehicle (load-vehicle c (->Vehicle (vehicle-type c)
+                                           (coords c)
+                                           @game-time
+                                           nil))]
+    (schedule-move vehicle)
+    vehicle))))
 
