@@ -56,16 +56,16 @@
             (jest.scheduler/delay 10 :seconds)))
 
 (defn spawn
-"Spawns a vehicle on the given cell."
-([c]
- {:pre [(spawn? c)]}
- (dosync
-  (let [vehicle (load-vehicle c (->Vehicle (vehicle-type c)
-                                           (coords c)
-                                           @game-time
-                                           nil))]
-    (schedule-move vehicle)
-    vehicle))))
+  "Spawns a vehicle on the given cell."
+  [c]
+  {:pre [(spawn? c)]}
+  (dosync
+   (let [vehicle (load-vehicle c (->Vehicle (vehicle-type c)
+                                            (coords c)
+                                            @game-time
+                                            nil))]
+     (schedule-move vehicle)
+     vehicle)))
 
 
 (defn all-vehicles []
