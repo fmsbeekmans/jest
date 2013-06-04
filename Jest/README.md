@@ -1,4 +1,0 @@
-Jest
-====
-
-Multi touch game
