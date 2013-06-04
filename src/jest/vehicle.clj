@@ -53,7 +53,6 @@
   [v path]
   {:pre [(= (vehicle-cell v)
             (from path))]}
-  (println "move")
   (dosync
    (despawn v)
    (when-not (spawn? (to path))
