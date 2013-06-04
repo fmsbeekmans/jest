@@ -42,6 +42,9 @@
   ([c type]
      (filter #(= type (:type %)) (paths c))))
 
+(def path->vehicle {})
+(def vehicle->path {})
+
 (defmacro defpath
   "defines a path type."
   [path-type vehicle-type]
@@ -52,7 +55,10 @@
            (= ~path-type (:type ~'path)))
          (defn ~getall
            [~'cell]
-           (paths ~'cell ~path-type)))))
+           (paths ~'cell ~path-type))
+
+         (alter-var-root #'path->vehicle assoc ~path-type ~vehicle-type)
+         (alter-var-root #'vehicle->path assoc ~vehicle-type ~path-type))))
 
 (defpath :road :truck)
 (defpath :rails :train)
