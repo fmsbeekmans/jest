@@ -1,7 +1,7 @@
 (ns jest.vehicle
   (:use [jest.world.cell :only [cell alter-cell coords]]
         [jest.world.building :only [vehicle-type spawn?]]
-        [jest.world.path :only [in-paths out-paths from to path-type]]
+        [jest.world.path :only [in-paths out-paths from to path-type vehicle->path]]
         [jest.scheduler :only [game-time schedule]]))
 
 (defrecord Vehicle [type coords entry-time cargo])
@@ -43,29 +43,11 @@
 (alter-cell (vehicle-cell v)
            update-in [:vehicles] (partial remove (partial = v)))))
 
-(defonce vehicle->path {})
-
-(defn defvehicle
-  "Defines a new vehicle type. requires two keywords. the first is the kind of vehicle being defined, the second is the kind of road it moves over."
-  [vehicle-type road-type]
-  (alter-var-root #'vehicle->path
-                  assoc vehicle-type road-type)
-  vehicle-type)
-
-(defvehicle :truck :road)
-(defvehicle :train :rails)
-(defvehicle :boat :canal)
-
-(defn vehicle-path
-"Returns the kind of path this vehicle moves on"
-[vehicle]
-(vehicle->path (:type vehicle)))
-
 (defn preferred-path
   "select the preferred path for this vehicle"
   [v]
   (let [paths (out-paths (vehicle-cell v))]
-    (rand-nth (filter #(= (path-type %) (vehicle-path v)) paths))))
+    (rand-nth (filter #(= (path-type %) (vehicle->path (:type v))) paths))))
 
 (defn- move-vehicle
   [v path]
