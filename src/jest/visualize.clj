@@ -1,4 +1,4 @@
-(ns jest.monocle
+(ns jest.visualize
   (:require [jest.world.path :as path])
   (:require [jest.world.cell :as cell])
   (:require [brick.image :as image])
