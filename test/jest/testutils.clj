@@ -28,17 +28,32 @@
   (build-path (cell [4 6]) :north :road)
   (build-path (cell [4 5]) :east :road))
 
-(defn mock-schedule
+(def ^:private mock-game-time)
+(def ^:private mock-tasks)
+
+(defn ^:private mock-calculate-game-time
+  "mock version of calculate-game-time. Always returns the current mock time, which can be forwarded using tick."
+  []
+  @mock-game-time)
+
+(defn ^:private mock-schedule
   "mock version for schedule. Ignores the schedule time and runs the function right away. Useful in tests."
   [task time]
-  (task))
+  (if (<= time @scheduler/game-time)
+    (task)
+    (swap! mock-tasks update-in [time] conj task)))
 
-(defn mock-calculate-game-time
-  "mock version of calculate-game-time. Always returns 0."
-  []
-  0)
+(defn tick
+  "forwards the scheduler n milliseconds, running all scheduled tasks in order. By default n is 1"
+  ([] (mock-scheduler-tick 1))
+  ([n] (dotimes [i n]
+         (swap! mock-game-time inc)
+         (doseq [task (@mock-tasks @scheduler/game-time)]
+           (task)))))
 
 (defmacro with-mock-scheduler [& body]
-  `(with-redefs [scheduler/schedule mock-schedule
+  `(with-redefs [mock-game-time (atom 0)
+                 mock-tasks (atom {})
+                 scheduler/schedule mock-schedule
                  scheduler/calculate-game-time mock-calculate-game-time]
      ~@body))
