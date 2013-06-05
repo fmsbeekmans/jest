@@ -81,7 +81,7 @@
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
-         (all-cells-type ~(keyword type)))))) 
+         (all-cells-type ~(keyword type))))))
 
 (defbuilding spawn :vehicle-type)
 (defbuilding supply :resource-type)
@@ -100,4 +100,3 @@
   [c]
   {:pre [(spawn? c)]}
   (:vehicle-type c))
-
