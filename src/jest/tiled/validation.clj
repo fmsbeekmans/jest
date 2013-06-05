@@ -9,7 +9,7 @@
 ; A JSON description of the tiled-map is converted to a clojure map,
 ; with keywords for keys.
 
-(defn- read-json
+(defn read-json
   [json-path]
   (json/read-str (slurp json-path)
                  :key-fn keyword))
