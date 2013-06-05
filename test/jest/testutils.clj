@@ -45,7 +45,7 @@
 
 (defn tick
   "forwards the scheduler n milliseconds, running all scheduled tasks in order. By default n is 1"
-  ([] (mock-scheduler-tick 1))
+  ([] (tick 1))
   ([n] (dotimes [i n]
          (swap! mock-game-time inc)
          (doseq [task (@mock-tasks @scheduler/game-time)]
