@@ -27,7 +27,7 @@
 (defn ncomp
   "Returns a function which is a composition of n f functions."
   [f n]
-  (apply comp (repeat f n)))
+  (apply comp (repeat n f)))
 
 (defn offset-vec
   "Creates a map from (index + offset) to value"
