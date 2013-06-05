@@ -1,7 +1,7 @@
 (ns jest.vehicle
   (:use [jest.world.cell :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
-        [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration]]
+        [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path]]
         [jest.scheduler :only [game-time schedule offset]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
@@ -26,7 +26,6 @@
      (first (remove nil? (map #(vehicle % id)
                               (all-cells)))))
   ([c id]
-     (contains-vehicle? c (:id id))
      (first (filter #(= id (:id %))
                     (:vehicles c)))))
 
@@ -44,7 +43,7 @@
   {:pre [(some (partial = v) (vehicles (vehicle-cell v)))]}
   (dosync
    (alter-cell (vehicle-cell v)
-               update-in [:vehicles] (partial remove (partial = v))))
+               update-in [:vehicles] #(disj % v)))
   (assoc v :coords nil))
 
 (defn preferred-path
@@ -60,13 +59,19 @@
     :exit-direction (:direction (preferred-path v))))
 
 (defn- move-vehicle
-  [v path]
-  {:pre [(= (vehicle-cell v)
-            (from path))]}
-  (dosync
-   (unload-vehicle v)
-   (when-not (spawn? (to path))
-     (load-vehicle (to path) v))))
+  [id direction]
+  {:pre [(let [v (vehicle id)
+               path (path (vehicle-cell v) direction)]
+           (and (= (:inout path) :out)
+                (= (path-type path)
+                   (vehicle->path (:type (vehicle id))))))]}
+  (let [v (vehicle id)
+        path (path (vehicle-cell v)
+                   direction)]
+    (dosync
+     (unload-vehicle v)
+     (when-not (spawn? (to path))
+       (load-vehicle (to path) v)))))
 
 (defn vehicle-state-change [c v state]
   (let [nv (assoc v :state state)]
@@ -81,12 +86,12 @@
                                  state))
             time))
 
-(defn- schedule-move [v]
+(defn- schedule-move [id]
   (schedule (fn []
               (dosync
-               (if-let [v (move-vehicle v (preferred-path v))]
-                 (schedule-move v))))
-            (jest.scheduler/offset 10 :seconds)))
+               (if  (move-vehicle id (:exit-direction (vehicle id)))
+                 (schedule-move id))))
+            (:exit-time (vehicle id))))
 
 (defn spawn
   "Spawns a vehicle on the given cell."
@@ -100,7 +105,7 @@
                                                 :entry-time @game-time
                                                 :state :spawning})))]
      (schedule-state-change vehicle :moving (offset 5))
-     (schedule-move vehicle)
+     (schedule-move (:id vehicle))
      vehicle)))
 
 
