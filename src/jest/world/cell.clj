@@ -2,7 +2,7 @@
   "Functions for managing the world grid."
   (:use jest.util))
 
-(defrecord Cell [coord paths background building-type vehicle-type resource-type])
+(defrecord Cell [coord paths background building-type vehicle-type resource-type vehicles])
 
 (defonce
   #^{:dynamic true
@@ -19,7 +19,8 @@
                 y (range sy)]
             [[x y] (ref (map->Cell {:coord [x y]
                                     :paths {}
-                                    :background :none}))])))
+                                    :background :none
+                                    :vehicles #{}}))])))
 
 (defn initialize-world
   "Initializes the world grid with the specified dimensions."
