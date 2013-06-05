@@ -13,7 +13,6 @@
     (deref x)
     x))
 
-
 (defn plural
   "Returns a best guess of the plural of the given word"
   [word]
@@ -28,9 +27,4 @@
 (defn ncomp
   "Returns a function which is a composition of n f functions."
   [f n]
-  (loop [result f
-         n (dec n)]
-    (if (= n 0)
-      result
-      (recur (comp result f)
-             (dec n)))))
+  (apply comp (repeat f n)))
