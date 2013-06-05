@@ -18,6 +18,25 @@
                    (into {} (for [c (cell/all-cells)]
                               [(cell/coords c) (cell-draw-fn c)]))))
 
+(defn vehicle->location-fn
+  #^{:doc (str "Return a location-fn of a vehicle.\n"
+               "The location-fn is a 1-arity fn where it's input is the progres, "
+               "0" is the start of the animation and 1 the end.)}
+  [v]
+  (let [start [1 1]
+        end [1 -1]
+        mid 0 0
+        speed])
+  (fn [p]
+    (let [sub-p (* 2 p)]
+      (cond
+       (< p 0.5);tussen start en mid
+       
+       (> p 0.5);tussen mid en end
+
+       (= p 0.5); precies mid.
+       ))))
+
 (comment
   {:coord [0 0],
    :paths {},
