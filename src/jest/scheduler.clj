@@ -10,7 +10,8 @@
 (defn- time-millis []
   (.getTime (Date.)))
 
-(defn- calculate-game-time []
+(defn calculate-game-time []
+  "Calculates the current game time"
   {:pre [@timer-data]}
   (let [[start-time paused] @timer-data]
     (or paused

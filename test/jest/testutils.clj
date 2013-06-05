@@ -49,7 +49,8 @@
   ([n] (dotimes [i n]
          (swap! mock-game-time inc)
          (doseq [task (@mock-tasks @scheduler/game-time)]
-           (task)))))
+           (task)))
+     @scheduler/game-time))
 
 (defmacro with-mock-scheduler [& body]
   `(with-redefs [mock-game-time (atom 0)
@@ -57,3 +58,22 @@
                  scheduler/schedule mock-schedule
                  scheduler/calculate-game-time mock-calculate-game-time]
      ~@body))
+
+(def tmp-schedule)
+(def tmp-calculate-game-time)
+
+(defn idfn [x] (fn [& _] x))
+
+(defn swap-scheduler []
+  (if (= scheduler/schedule mock-schedule)
+    (do (alter-var-root #'scheduler/schedule (idfn tmp-schedule))
+        (alter-var-root #'scheduler/calculate-game-time (idfn tmp-calculate-game-time))
+        (alter-var-root #'mock-game-time (idfn nil))
+        (alter-var-root #'mock-tasks (idfn nil)))
+
+    (do (alter-var-root #'tmp-schedule (idfn scheduler/schedule))
+        (alter-var-root #'tmp-calculate-game-time (idfn scheduler/calculate-game-time))
+        (alter-var-root #'mock-game-time (idfn (atom 0)))
+        (alter-var-root #'mock-tasks (idfn (atom {})))
+        (alter-var-root #'scheduler/schedule (idfn mock-schedule))
+        (alter-var-root #'scheduler/calculate-game-time (idfn mock-calculate-game-time)))))
