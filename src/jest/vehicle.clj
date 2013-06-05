@@ -53,7 +53,7 @@
               (dosync
                (if-let [v (move-vehicle v (preferred-path v))]
                  (schedule-move v))))
-            (jest.scheduler/delay 10 :seconds)))
+            (jest.scheduler/offset 10 :seconds)))
 
 (defn spawn
   "Spawns a vehicle on the given cell."

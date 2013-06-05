@@ -117,16 +117,16 @@
      (reregister-all)
      resume-time)))
 
-(defn delay
+(defn offset
   "Calculates a future game time dt time-units in the future. By default, time-units is :milliseconds. Other allowed values are :seconds and :minutes."
   ([dt]
      (+ @game-time dt))
   ([dt time-unit]
-     (delay (* dt
-               (case time-unit
-                 :minutes 60000
-                 :seconds 1000
-                 :milliseconds 1)))))
+     (offset (* dt
+                (case time-unit
+                  :minutes 60000
+                  :seconds 1000
+                  :milliseconds 1)))))
 
 ;; An agent is used here because anything sent to an agent from within a
 ;; transaction will only run if the transaction succeeds, and will only run once
