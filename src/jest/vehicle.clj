@@ -4,7 +4,7 @@
         [jest.world.path :only [in-paths out-paths from to path-type vehicle->path]]
         [jest.scheduler :only [game-time schedule]]))
 
-(defrecord Vehicle [type coords entry-time cargo])
+(defrecord Vehicle [type coords entry-time entry-path exit-time exit-path cargo state])
 
 (defn vehicles
 "Returns the vehicles on the given cell."
@@ -60,10 +60,10 @@
   [c]
   {:pre [(spawn? c)]}
   (dosync
-   (let [vehicle (load-vehicle c (->Vehicle (vehicle-type c)
-                                            (coords c)
-                                            @game-time
-                                            nil))]
+   (let [vehicle (load-vehicle c (map->Vehicle
+                                  {:type (vehicle-type c)
+                                   :coords (coords c)
+                                   :entry-time @game-time}))]
      (schedule-move vehicle)
      vehicle)))
 
