@@ -18,6 +18,19 @@
                    (into {} (for [c (cell/all-cells)]
                               [(cell/coords c) (cell-draw-fn c)]))))
 
+(defn line
+  #^{:doc (str "Returns a 1-arity function that calculates "
+               "an n-dimentional point at pro")}
+  [from to]
+  (fn [progress]
+    (let [togo (- 1 progress)]
+      (vec (map (fn [from-c to-c]
+                  (+
+                   (* progress to-c)
+                   (* togo from-c)))
+                from
+                to)))))
+
 (defn vehicle->location-fn
   #^{:doc (str "Return a location-fn of a vehicle.\n"
                "The location-fn is a 1-arity fn where it's input is the progres, "
