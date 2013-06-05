@@ -1,4 +1,4 @@
-(ns jest.monocle-test
+(ns jest.visualize-test
   (:require [jest.monocle :as monocle]
             [brick.drawable :as drawable]
             [jest.world.building :as building])
