@@ -1,7 +1,7 @@
 (ns jest.vehicle
   (:use [jest.world.cell :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
-        [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path]]
+        [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path opposite-dirs]]
         [jest.scheduler :only [game-time schedule offset]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
@@ -29,9 +29,9 @@
      (first (filter #(= id (:id %))
                     (:vehicles c)))))
 
-(defn update-vehicle [id f]
+(defn update-vehicle [id f & args]
   (let [v (vehicle id)
-        nv (f v)]
+        nv (apply f v args)]
     (alter-cell (vehicle-cell v)
                 update-in [:vehicles] #(conj (disj % v)
                                              nv))))
@@ -43,14 +43,13 @@
                 update-in [:vehicles] conj v)
     v))
 
-
 (defn- unload-vehicle
   "Unloads the given vehicle"
   [v]
   {:pre [(some (partial = v) (vehicles (vehicle-cell v)))]}
   (dosync
    (alter-cell (vehicle-cell v)
-               update-in [:vehicles] #(disj % v)))
+               update-in [:vehicles] disj v))
   (assoc v :coords nil))
 
 (defn preferred-path
@@ -65,6 +64,11 @@
                   (path->duration (vehicle->path (:type v))))
     :exit-direction (:direction (preferred-path v))))
 
+(defn- vehicle-enter [v]
+  (assoc (select-exit v)
+    :entry-time (:exit-time v)
+    :entry-direction (opposite-dirs (:exit-direction v))))
+
 (defn- move-vehicle
   [id direction]
   {:pre [(let [v (vehicle id)
@@ -77,37 +81,41 @@
                    direction)]
     (dosync
      (unload-vehicle v)
-     (when-not (spawn? (to path))
-       (load-vehicle (to path) v)))))
+     (load-vehicle (to path) v)
+     (update-vehicle id vehicle-enter))))
 
 (defn vehicle-state-change [id state]
-  (update-vehicle id #(assoc % :state state)))
+  (update-vehicle id assoc :state state))
 
 (defn- schedule-state-change [id state time]
   (schedule #(dosync (vehicle-state-change id state))
             time))
 
 (defn- schedule-move [id]
+  (println @game-time "schedule move.")
   (schedule (fn []
+              (println "move."
+                       (:exit-direction (vehicle id))
+;                       (jest.world.cell/direction (cell (:coord (vehicle id))) (:exit-direction (vehicle id)))
+                       )
               (dosync
-               (if  (move-vehicle id (:exit-direction (vehicle id)))
-                 (schedule-move id))))
-            (:exit-time (vehicle id))))
+               (move-vehicle id (:exit-direction (vehicle id)))
+               (schedule-move id)))
+            (+ 10 @game-time)))
 
 (defn spawn
   "Spawns a vehicle on the given cell."
   [c]
   {:pre [(spawn? c)]}
-  (dosync
-   (let [vehicle (load-vehicle c (select-exit (map->Vehicle
-                                               {:id (next-idc)
-                                                :type (vehicle-type c)
-                                                :coords (coords c)
-                                                :entry-time @game-time
-                                                :state :spawning})))]
-     (schedule-state-change vehicle :moving (offset 5))
-     (schedule-move (:id vehicle))
-     vehicle)))
+  (let [vehicle (dosync (load-vehicle c (select-exit (map->Vehicle
+                                                      {:id (next-idc)
+                                                       :type (vehicle-type c)
+                                                       :coords (coords c)
+                                                       :entry-time @game-time
+                                                       :state :spawning}))))]
+    (schedule-state-change (:id vehicle) :moving (offset 5))
+    (schedule-move (:id vehicle))
+    vehicle))
 
 
 (defn all-vehicles []
