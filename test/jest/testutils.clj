@@ -16,7 +16,8 @@
 
 (defmacro world-fact [[sx sy] fact-text & body]
   `(with-initialized-temp-world [~sx ~sy]
-     (fact ~fact-text ~@body)))
+     (with-mock-scheduler
+       (fact ~fact-text ~@body))))
 
 (defn build-spawn-circle []
   {:post [(seq (complete-paths (cell [5 5])))]}
@@ -28,20 +29,22 @@
   (build-path (cell [4 6]) :north :road)
   (build-path (cell [4 5]) :east :road))
 
-(def ^:private mock-game-time)
-(def ^:private mock-tasks)
+(def mock-game-time)
+(def mock-tasks)
 
-(defn ^:private mock-calculate-game-time
+(defn mock-calculate-game-time
   "mock version of calculate-game-time. Always returns the current mock time, which can be forwarded using tick."
   []
   @mock-game-time)
 
-(defn ^:private mock-schedule
+(defn mock-schedule
   "mock version for schedule. Ignores the schedule time and runs the function right away. Useful in tests."
   [task time]
-  (if (<= time @scheduler/game-time)
-    (task)
-    (swap! mock-tasks update-in [time] conj task)))
+  (let [mockagent (agent nil)]
+    (send mockagent (fn [_]
+                      (if (<= time @scheduler/game-time)
+                        (task)
+                        (swap! mock-tasks update-in [time] conj task))))))
 
 (defn tick
   "forwards the scheduler n milliseconds, running all scheduled tasks in order. By default n is 1"
