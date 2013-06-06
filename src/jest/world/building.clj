@@ -19,7 +19,7 @@
   [type]
   (all-cells #(= (building-type %1) type)))
 
-(defn- add-building
+(defn add-building
   "adds a building to the given cell"
   [c type & other-fields]
   {:pre [(not (building-type c))]}
