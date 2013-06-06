@@ -30,7 +30,6 @@
 
 (spawn-fact
  "After spawning and half the path duration has passed, a vehicle is in state :moving"
- (println "start of test.")
  (v/spawn (c/cell [5 5]))
  (tick 4) ;time is 4
  (:state (first (:vehicles (c/cell [5 5])))) => :spawning
@@ -39,26 +38,20 @@
 
 (spawn-fact
  "After spawning and the whole path duration has passed, a vehicle has moved in its preferred direction. It then keeps moving."
- (println "before moves.")
-
  (let [v  (v/spawn (c/cell [5 5]))
        id (:id v)
        exit-direction (:exit-direction v)]
-   (println jest.testutils/mock-tasks)
-
    (tick 9) ;time is 9, just before move
    (:coords (v/vehicle id)) => [5 5]
    (tick 1) ;time is 10, move should have happened
    (:coords (v/vehicle id)) => [6 5]
    (:vehicles (c/cell [5 5])) => empty?
    (:vehicles (c/cell [6 5])) => (just [(v/vehicle id)])
-   (println jest.testutils/mock-tasks)
    (tick 10)
    (:coords (v/vehicle id)) => [6 6]))
 
 (spawn-fact
  "A vehicle that enters a spawn point starts despawning."
- (println "___---__--____-")
  (let [id (:id (v/spawn (c/cell [5 5])))]
    (tick 59) ;vehicle should now be west of spawn, after having moved 5 cells
    (:coords (v/vehicle id)) => [4 5]

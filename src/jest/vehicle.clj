@@ -92,12 +92,7 @@
             time))
 
 (defn- schedule-move [id]
-  (println @game-time "schedule move.")
   (schedule (fn []
-              (println "move."
-                       (:exit-direction (vehicle id))
-;                       (jest.world.cell/direction (cell (:coord (vehicle id))) (:exit-direction (vehicle id)))
-                       )
               (dosync
                (move-vehicle id (:exit-direction (vehicle id)))
                (schedule-move id)))
