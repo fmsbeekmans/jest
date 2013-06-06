@@ -55,4 +55,9 @@
  (let [id (:id (v/spawn (c/cell [5 5])))]
    (tick 59) ;vehicle should now be west of spawn, after having moved 5 cells
    (:coords (v/vehicle id)) => [4 5]
+   (tick 1) ;vehicle is on spawn, should start despawning
+   (:coords (v/vehicle id)) => [5 5]
+   (:state (v/vehicle id)) => :despawning
+   (tick 5) ;vehicle should be gone now
+   (v/vehicle id) => nil
    ))

@@ -6,6 +6,9 @@
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
 
+(defn vehicle->duration [v]
+  (path->duration (vehicle->path (:type v))))
+  
 (defn vehicles
 "Returns the vehicles on the given cell."
 [c]
@@ -29,13 +32,20 @@
      (first (filter #(= id (:id %))
                     (:vehicles c)))))
 
-(defn update-vehicle [id f & args]
+(defn vehicle-state-change [id state]
+  (update-vehicle id assoc :state state))
+
+(defn- schedule-state-change [id state time]
+  (schedule #(dosync (vehicle-state-change id state))
+            time))
+
+(defn update-vehicle
+  [id f & args]
   (let [v (vehicle id)
         nv (apply f v args)]
     (alter-cell (vehicle-cell v)
                 update-in [:vehicles] #(conj (disj % v)
                                              nv))))
-
 (defn- load-vehicle [c v]
   "Loads a vehicle on the given cell"
   (let [v (assoc v :coords (coords c))]
@@ -69,6 +79,17 @@
     :entry-time (:exit-time v)
     :entry-direction (opposite-dirs (:exit-direction v))))
 
+(defn start-despawning [id]
+  {:pre [(spawn? (vehicle-cell (vehicle id)))]}
+  (vehicle-state-change id :despawning)
+  (update-vehicle id
+                  assoc
+                  :exit-time nil
+                  :exit-direction nil)
+  (schedule #(unload-vehicle (vehicle id))
+            (offset (/ (vehicle->duration (vehicle id))
+                       2))))
+
 (defn- move-vehicle
   [id direction]
   {:pre [(let [v (vehicle id)
@@ -82,21 +103,16 @@
     (dosync
      (unload-vehicle v)
      (load-vehicle (to path) v)
-     (update-vehicle id vehicle-enter))))
-
-(defn vehicle-state-change [id state]
-  (update-vehicle id assoc :state state))
-
-(defn- schedule-state-change [id state time]
-  (schedule #(dosync (vehicle-state-change id state))
-            time))
+     (update-vehicle id vehicle-enter)
+     (if (spawn? (vehicle-cell (vehicle id)))
+       (start-despawning id)))))
 
 (defn- schedule-move [id]
   (schedule (fn []
               (dosync
                (move-vehicle id (:exit-direction (vehicle id)))
                (schedule-move id)))
-            (+ 10 @game-time)))
+            (offset (vehicle->duration (vehicle id)))))
 
 (defn spawn
   "Spawns a vehicle on the given cell."
@@ -108,7 +124,8 @@
                                                        :coords (coords c)
                                                        :entry-time @game-time
                                                        :state :spawning}))))]
-    (schedule-state-change (:id vehicle) :moving (offset 5))
+    (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
+                                                    2))
     (schedule-move (:id vehicle))
     vehicle))
 
