@@ -10,36 +10,30 @@
 
 ;; V0.1; Only support for roads, no
 
-(defn- lookup-table
-  [m]
-  (fn [k]
-    (or (get m k) :none)))
-
 (defn- workable-world
   []
   (for [x (range (cell/world-width))
         y (range (cell/world-height))]
     (cell/cell [x y])))
 
-(defn- parse-background [cells data]
-  (map cell/set-background cells data))
+(defn- place-building [c d]
+  (let [parts (clojure.string/split (name d) #"-")
+        type (first parts)
+        r (map keyword (rest parts))]
+    (apply (partial ( building/get-build-function (keyword type)) c) r)))
 
-(defn- building-helper [k]
-  (let [parts (clojure.string/split (name k) #"-")
-        builder (ns-resolve *ns* (symbol (str "building/build-" (first parts))))
-        resource-type (keyword (second parts))]
-    #(builder %1 resource-type)))
+(defn- parse [f cells lookup-fn layer]
+  (map f cells (map lookup-fn (:data layer))))
 
-(defn- parse-buildings [cells data]
-  (let [build-selector (memoize building-helper)
-        create-buildings
-        (fn [c d]
-          (let [b (build-selector d)]
-            (b c)))]
-    (map create-buildings cells data)))
+(defmulti parse-layer
+  (fn [layer _ _]
+    (:name layer)))
 
-(defn layer-type [n l]
-  (= n (keyword (:name l))))
+(defmethod parse-layer :background [layer lookup cells]
+  (parse cell/set-background cells lookup layer))
+
+(defmethod parse-layer :buildings [layer lookup cells]
+  (parse place-building cells lookup layer))
 
 (defn layer-selector [_ layer _]
   (println layer)
@@ -77,16 +71,11 @@
 ;; what should we be able to put in a world state?
 (defn parse-world [json-data]
   (let [tilesets (parse-tilesets (:tilesets json-data))
-        lookup (lookup-table (second tilesets))
+        lookup (second tilesets)
         lookup-layer #(map lookup (:data %))
         layers (:layers json-data)]
     (initialize-world json-data)
     ;(configure renderer)
     (let [cells (workable-world)]
-      (if-let [background-layer (first (filter (partial layer-type :background)
-                                       layers))]
-                 (parse-background cells (lookup-layer background-layer)))
-
-      (if-let [building-layer (first (filter (partial layer-type :buildings)
-                                             layers))]
-                 (parse-buildings cells (lookup-layer building-layer))))))
+      (doseq [layer layers]
+        parse-layer layer))))
