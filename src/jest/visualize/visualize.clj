@@ -1,4 +1,4 @@
-(ns jest.visualize
+(ns jest.visualize.visualize
   (:require [jest.world.path :as path])
   (:require [jest.world.cell :as cell])
   (:require [brick.image :as image])
@@ -17,34 +17,7 @@
   (drawable/->Grid (cell/world-width) (cell/world-height)
                    (into {} (for [c (cell/all-cells)]
                               [(cell/coords c) (cell-draw-fn c)]))))
-
-(defn line
-  #^{:doc (str "Returns a 1-arity function that calculates "
-               "an n-dimentional point at pro")
-     :line :simple}
-  [from to]
-  {:pre [(= (count from) (count to))]}
-  (fn [progress]
-    {:pre [(>= progress 0)
-           (<= progress 1)]}
-    (let [togo (- 1 progress)]
-      (vec (map (fn [from-c to-c]
-                  (+
-                   (* progress to-c)
-                   (* togo from-c)))
-                from
-                to)))))
-
-(defn line-length [l]
-  ())
-
-(defn lines [ls]
-
-  
-  (fn [progress]
     ))
-
-(defn interval-map)
 
 (defn vehicle->location-fn
   #^{:doc (str "Return a location-fn of a vehicle.\n"
