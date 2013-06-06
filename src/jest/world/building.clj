@@ -19,7 +19,7 @@
   [type]
   (all-cells #(= (building-type %1) type)))
 
-(defn- add-building
+(defn add-building
   "adds a building to the given cell"
   [c type & other-fields]
   {:pre [(not (building-type c))]}
@@ -81,7 +81,7 @@
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
-         (all-cells-type ~(keyword type)))))) 
+         (all-cells-type ~(keyword type))))))
 
 (defbuilding spawn :vehicle-type)
 (defbuilding supply :resource-type)
@@ -100,4 +100,3 @@
   [c]
   {:pre [(spawn? c)]}
   (:vehicle-type c))
-
