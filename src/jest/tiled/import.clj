@@ -10,7 +10,6 @@
 
 ;; V0.1; Only support for roads, no
 
-
 (defn- lookup-table
   [m]
   (fn [k]
@@ -42,25 +41,9 @@
 (defn layer-type [n l]
   (= n (keyword (:name l))))
 
-
-
 (defn layer-selector [_ layer _]
   (println layer)
   (keyword (layer :name)))
-
-(defmulti parse-layer layer-selector)
-
-(defmethod parse-layer :background [lookup layer cells]
-  (map cell/set-background cells
-       (map lookup (:data layer))))
-(defmethod parse-layer :grass [lookup layer cells]
-  (map cell/set-background cells
-       (map lookup (:data layer))))
-
-(defmethod parse-layer :roads [lookup layer]
-  {:buildings
-   (map lookup (:data layer))})
-
 
 (defn- parse-tilesets
   "Parses the the tilesets entry in a valid level, returning index->image and
@@ -107,12 +90,3 @@
       (if-let [building-layer (first (filter (partial layer-type :buildings)
                                              layers))]
                  (parse-buildings cells (lookup-layer building-layer))))))
-
-(defn- extract-tileset-info
-  "Returns required information from the tiled-map for creating Brick tilesets"
-  [tileset]
-  {:name (:name tileset)
-   :image (:image tileset)
-   :tileheight (:tileheight tileset)
-   :tilewidth (:tilewidth tileset)
-   :dict (:properties tileset)})
