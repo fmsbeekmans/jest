@@ -1,30 +1,30 @@
 (ns jest.color)
 
-(defn hue-to-radian [h]
+(defn hue->radian [h]
 	(/ (* (mod h 256) 2 Math/PI)
 	   256))
 
-(defn radian-to-vector [r]
+(defn radian->vector [r]
   [(Math/cos r)
    (Math/sin r)])
 
-(def hue-to-vector (comp radian-to-vector hue-to-radian))
+(def hue->vector (comp radian->vector hue->radian))
 
-(defn vector-to-radian [[x y]]
+(defn vector->radian [[x y]]
   (let [atan (Math/atan2 y x)]
     (if (>= atan 0)
       atan
       (+ atan (* 2 Math/PI)))))
 	   
-(defn radian-to-hue [r]
+(defn radian->hue [r]
   (mod  (Math/round  (* 256
                         (/ r (* 2 Math/PI))))
         256))
 
-(def vector-to-hue (comp radian-to-hue vector-to-radian))
+(def vector->hue (comp radian->hue vector->radian))
 
 
 (defn average-hue [h1 h2]
-  (vector-to-hue (map +
-                      (hue-to-vector h1)
-                      (hue-to-vector h2))))
+  (vector->hue (map +
+                      (hue->vector h1)
+                      (hue->vector h2))))
