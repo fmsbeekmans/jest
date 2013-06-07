@@ -10,10 +10,9 @@
       atan
       (+ atan (* 2 Math/PI)))))
 	   
-(defn average-hue [h1 h2]
-  (vector->hue (map +
-                      (hue->vector h1)
-                      (hue->vector h2))))
+(defn average-hue [& hs]
+  (vector->hue (apply map +
+                      (map hue->vector hs))))
 
 (defmulti hue type)
 
