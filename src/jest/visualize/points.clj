@@ -1,6 +1,6 @@
 (ns jest.visualize.points)
 
-(defn line
+(defn stroke
   #^{:doc (str "Returns a 1-arity function that calculates "
                "an n-dimentional point at pro")}
   [from to]
@@ -16,7 +16,7 @@
                      (* togo from-c)))
                   from
                   to))))
-    {:line-type :simple}))
+    {:stroke-type :simple}))
 
 (defn start-point [l]
   (l 0))
@@ -26,28 +26,63 @@
 
 (defmulti length
   (fn [l]
-    (:line-type (meta l))))
+    (:stroke-type (meta l))))
 
 (defmulti tangent
-  (fn [l]
-    (:line-type (meta l))))
+  (fn [l p [d1 d2]]
+    (:stroke-type (meta l))))
 
-(defn lines [ls]
-  (let [total-length (apply + (map length ls))
-        sub-lines (loop [s 0
-                         ls' ls
-                         m {}]
-                    (if (seq ls')
-                      (let [sub-line (first ls')
-                            length' (/ (length sub-line) total-length)
-                            s' (+ s length')]
-                        (println sub-line)
-                        (recur
-                         s'
-                         (rest ls')
-                         (assoc m [s s'] [[s length'] sub-line])))
-                      m))]
-    sub-lines))
+(defn strokes-connected?
+  [ss]
+  (if (seq ss)
+    (loop [stroke (first ss)
+           last-p (start-point stroke)
+           ss' ss]
+      (if  (seq ss')
+        (if (= last-p (start-point stroke))
+          (recur (second ss')
+                 (end-point stroke)
+                 (rest ss'))
+          false)
+        true))
+    false))
+
+(defn index-sub-strokes
+  [ss]
+  {:pre [(strokes-connected? ss)]}
+    (let [total-length (apply + (map length ss))]
+    (loop [sum 0
+           ss' ss
+           m {}]
+      (if (seq ss')
+        (let [sub-stroke (first ss')
+              length' (/ (length sub-stroke) total-length)
+              sum' (+ sum length')]
+          (recur
+           sum'
+           (rest ss')
+           (assoc m [sum sum']
+                  {:offset sum
+                   :progress length'
+                   :stroke sub-stroke})))
+        m))))
+
+(defn stroke-comp
+  [ss]
+  {:pre [(strokes-connected? ss)]}
+  (fn [p]
+    (if (= p 0)
+      (start-point (first ss))
+      (first (keep (fn [[[start end] {offset :offset
+                               p' :progress
+                               stroke :stroke
+                               }]]
+                     (if (and
+                          (> p start)
+                          (<= p end))
+                       (stroke (/ (- p offset)
+                                  p'))))
+                   (index-sub-strokes ss))))))
 
 (defmethod length :simple
   [l]
@@ -61,12 +96,16 @@
 
 (defmethod tangent
   :simple
-  ([l]
+  ([l _ [d1 d2]]
       (let [p1 (start-point l)
             p2 (l 1)
-            dx (- (p2 0)
-                  (p1 0))
-            dy (- (p2 1)
-                  (p1 1))]
-        (Math/atan (/ dy
-                      dx)))))
+            dx (- (p2 d1)
+                  (p1 d1))
+            dy (- (p2 d2)
+                  (p1 d2))]
+        (if (= dx 0)
+          (* Math/PI (if (> dy 0)
+                       0.5
+                       1.5))
+          (Math/atan (/ dy
+                        dx))))))
