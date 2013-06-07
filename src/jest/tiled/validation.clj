@@ -35,5 +35,5 @@
               json-val/boolean-validator)
       wrapper (or level-validator
                   (fn [_] nil))]
-  (defn- valid-level? [json-schema]
+  (defn valid-level? [json-schema]
     (wrapper json-schema)))
