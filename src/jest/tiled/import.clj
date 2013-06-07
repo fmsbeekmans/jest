@@ -57,7 +57,7 @@
   (println layer)
   (keyword (layer :name)))
 
-(defn- parse-tilesets
+(defn parse-tilesets
   "Parses the the tilesets entry in a valid level, returning index->image and
    index->keyword dictionaries"
   [tilesets]
