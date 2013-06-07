@@ -70,19 +70,22 @@
 (defn stroke-comp
   [ss]
   {:pre [(strokes-connected? ss)]}
-  (fn [p]
-    (if (= p 0)
-      (start-point (first ss))
-      (first (keep (fn [[[start end] {offset :offset
-                               p' :progress
-                               stroke :stroke
-                               }]]
-                     (if (and
-                          (> p start)
-                          (<= p end))
-                       (stroke (/ (- p offset)
-                                  p'))))
-                   (index-sub-strokes ss))))))
+  (with-meta
+    (fn [p]
+      (if (= p 0)
+        (start-point (first ss))
+        (first (keep (fn [[[start end] {offset :offset
+                                       p' :progress
+                                       stroke :stroke
+                                       }]]
+                       (if (and
+                            (> p start)
+                            (<= p end))
+                         (stroke (/ (- p offset)
+                                    p'))))
+                     (index-sub-strokes ss)))))
+    {:stroke-type :composed
+     :sub-strokes (index-sub-strokes ss)}))
 
 (defmethod length :simple
   [l]
