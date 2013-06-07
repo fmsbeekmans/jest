@@ -1,8 +1,11 @@
 (ns jest.visualize.visualize
-  (:require [jest.world.path :as path])
-  (:require [jest.world.cell :as cell])
   (:require [brick.image :as image])
-  (:require [brick.drawable :as drawable]))
+  (:require [brick.drawable :as drawable])
+  
+  (:require [jest.visualize.points :as points])
+  (:require [jest.world.path :as path])
+  (:require [jest.world.cell :as cell]))
+
 
 ; TODO
 (defn tile-lookup [k]
@@ -17,7 +20,6 @@
   (drawable/->Grid (cell/world-width) (cell/world-height)
                    (into {} (for [c (cell/all-cells)]
                               [(cell/coords c) (cell-draw-fn c)]))))
-    ))
 
 (defn vehicle->location-fn
   #^{:doc (str "Return a location-fn of a vehicle.\n"
@@ -30,19 +32,11 @@
     (fn [progress]
       {:pre [(>= progress 0)
              (<= progress 1)]}
-      (let [[sub-line sub-progress]
+      (let [[sub-stroke sub-progress]
             (if (< progress 1/2)
-              [(line start mid) (* 2 progress)]
-              [(line mid end)   (dec (* 2 progress))])]
-        (sub-line sub-progress)))))
-
-(comment
-  {:coord [0 0],
-   :paths {},
-   :background :none,
-   :building-type nil,
-   :vehicle-type nil,
-   :resource-type nil})
+              [(points/stroke start mid) (* 2 progress)]
+              [(points/stroke mid end)   (dec (* 2 progress))])]
+        (sub-stroke sub-progress)))))
 
 (defn cell-bg [c]
   (image/path->PImage (clojure.java.io/resource "grass.png")))
