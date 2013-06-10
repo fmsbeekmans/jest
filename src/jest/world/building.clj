@@ -9,7 +9,7 @@
 ;; Make empty fn generate warnings
 (defn get-build-function [k]
   (or (@constructor-atom k)
-      (fn [& args])))
+      nil))
 
 (defn building-type
   "Returns the building type for the given cell."
