@@ -67,18 +67,16 @@
 (def tmp-schedule)
 (def tmp-calculate-game-time)
 
-(defn idfn [x] (fn [& _] x))
-
 (defn swap-scheduler []
   (if (= scheduler/schedule mock-schedule)
-    (do (alter-var-root #'scheduler/schedule (idfn tmp-schedule))
-        (alter-var-root #'scheduler/calculate-game-time (idfn tmp-calculate-game-time))
-        (alter-var-root #'mock-game-time (idfn (new-mock-game-time)))
-        (alter-var-root #'mock-tasks (idfn (new-mock-tasks))))
+    (do (alter-var-root #'scheduler/schedule (constantly tmp-schedule))
+        (alter-var-root #'scheduler/calculate-game-time (constantly tmp-calculate-game-time))
+        (alter-var-root #'mock-game-time (constantly (new-mock-game-time)))
+        (alter-var-root #'mock-tasks (constantly (new-mock-tasks))))
 
-    (do (alter-var-root #'tmp-schedule (idfn scheduler/schedule))
-        (alter-var-root #'tmp-calculate-game-time (idfn scheduler/calculate-game-time))
-        (alter-var-root #'mock-game-time (idfn (atom 0)))
-        (alter-var-root #'mock-tasks (idfn (atom {})))
-        (alter-var-root #'scheduler/schedule (idfn mock-schedule))
-        (alter-var-root #'scheduler/calculate-game-time (idfn mock-calculate-game-time)))))
+    (do (alter-var-root #'tmp-schedule (constantly scheduler/schedule))
+        (alter-var-root #'tmp-calculate-game-time (constantly scheduler/calculate-game-time))
+        (alter-var-root #'mock-game-time (constantly (atom 0)))
+        (alter-var-root #'mock-tasks (constantly (atom {})))
+        (alter-var-root #'scheduler/schedule (constantly mock-schedule))
+        (alter-var-root #'scheduler/calculate-game-time (constantly mock-calculate-game-time)))))
