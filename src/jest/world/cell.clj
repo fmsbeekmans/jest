@@ -46,7 +46,7 @@
 (defmacro with-temp-world
   "For testing purposes, rebind the world state to an empty map."
   [& body]
-  `(binding [*world* (atom {})]
+  `(with-redefs [*world* (atom {})]
      ~@body))
 
 (defmacro with-initialized-temp-world
