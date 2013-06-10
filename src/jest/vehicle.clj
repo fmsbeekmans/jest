@@ -2,7 +2,8 @@
   (:use [jest.world.cell :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
         [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path opposite-dirs]]
-        [jest.scheduler :only [game-time schedule offset]]))
+        [jest.scheduler :only [game-time schedule offset]]
+        [jest.color :only [hue average-hue hue-difference]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
 
@@ -91,6 +92,42 @@
             (offset (/ (vehicle->duration (vehicle id))
                        2))))
 
+(defn cargo? [vehicle]
+  (not (not (:cargo vehicle))))
+
+(defmulti vehicle-transition-state
+  "Does the required work for a vehicle upon moving into a cell. dispatches on [state cargo? cell-type]"
+  (fn vehicle-transition-state-dispatch
+    [id]
+    (let [vehicle (vehicle id)]
+      [(:state vehicle)
+       (not (not (:cargo vehicle)))
+       (:building-type (vehicle-cell vehicle))])))
+
+(defmethod vehicle-transition-state :default
+  [id])
+
+(defmethod vehicle-transition-state
+  [:moving false :spawn]
+  [id]
+  (println "I should despawn!")
+  (start-despawning id))
+
+(defmethod vehicle-transition-state
+  [:moving false :supply]
+  [id]
+  (println "I should pick up something!"))
+
+(defmethod vehicle-transition-state
+  [:moving true :mixer]
+  [id]
+  (println "I should drop off and mix something!"))
+
+(defmethod vehicle-transition-state
+  [:moving true :depot]
+  [id]
+  (println "I should drop off something!"))
+
 (defn- move-vehicle
   [id direction]
   {:pre [(let [v (vehicle id)
@@ -105,8 +142,7 @@
      (unload-vehicle v)
      (load-vehicle (to path) v)
      (update-vehicle id vehicle-enter)
-     (if (spawn? (vehicle-cell (vehicle id)))
-       (start-despawning id)))))
+     (vehicle-transition-state id))))
 
 (defn- schedule-move [id]
   (schedule (fn []
