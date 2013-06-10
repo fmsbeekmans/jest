@@ -17,23 +17,14 @@
 (def meta-schema-url (clojure.java.io/resource "meta.schema"))
 (def level-schema-url (clojure.java.io/resource "level.schema"))
 
-(let [schema-validator
-         (-?> meta-schema-url
-              read-json
-              json-val/validator
-              json-val/boolean-validator)
-      wrapper (or schema-validator
-                  (fn [_] nil))]
-  (defn- valid-schema? [json-schema]
-    (wrapper json-schema)))
-
-(let [level-validator
-         (-?> level-schema-url
-              read-json
-              valid-schema?
-              json-val/validator
-              json-val/boolean-validator)
-      wrapper (or level-validator
-                  (fn [_] nil))]
-  (defn valid-level? [json-schema]
-    (wrapper json-schema)))
+(defn create-validator [schema f]
+  (let [level-validator
+        (-?> schema
+             read-json
+             f
+             json-val/validator
+             json-val/boolean-validator)
+        wrapper (or level-validator
+                    (fn [_] nil))]
+    (fn [json-schema]
+      (wrapper json-schema))))
