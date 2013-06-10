@@ -42,3 +42,14 @@
   `(with-redefs [scheduler/schedule mock-schedule
                  scheduler/calculate-game-time mock-calculate-game-time]
      ~@body))
+
+(defn vec-roughly
+  [target margin]
+  ; maak roughly-fn's aan in volgorde.
+  (fn [actual]
+    (= (count actual)
+       (count (take-while truthy
+                          (map (fn [t a]
+                                 ((roughly t margin) a))
+                               target
+                               actual))))))
