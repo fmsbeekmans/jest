@@ -27,3 +27,6 @@
 
 (defmethod hue clojure.lang.Keyword [color-name]
   (colors color-name))
+
+(defn hue-difference [h1 h2]
+  (Math/abs (- h1 h2)))
