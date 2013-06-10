@@ -7,6 +7,10 @@
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
 
+(def vehicle-magnitude {:truck 1
+                        :train 5
+                        :boat 10})
+
 (defn vehicle->duration [v]
   (path->duration (vehicle->path (:type v))))
   
@@ -98,8 +102,7 @@
 (defn vehicle-transition-state-dispatch
   [id]
   (let [vehicle (vehicle id)]
-    [(:state vehicle)
-     (not (not (:cargo vehicle)))
+    [(not (not (:cargo vehicle)))
      (:building-type (vehicle-cell vehicle))]))
 
 
@@ -111,12 +114,12 @@
   [id])
 
 (defmethod vehicle-transition-state
-  [:moving false :spawn]
+  [false :spawn]
   [id]
   (start-despawning id))
 
 (defmethod vehicle-transition-state
-  [:moving true :spawn]
+  [true :spawn]
   [id]
   ;;TODO add penalty for despawning with cargo
   (start-despawning id))
@@ -126,18 +129,32 @@
   (assoc vehicle :cargo resource-type))
 
 (defmethod vehicle-transition-state
-  [:moving false :supply]
+  [false :supply]
   [id]
   (update-vehicle id set-cargo
                   (:resource-type (vehicle-cell (vehicle id)))))
 
-(defmethod vehicle-transition-state
-  [:moving true :mixer]
-  [id]
-  (println "I should drop off and mix something!"))
+(defn- mix-colors [cell color magnitude]
+  (let [[existing-color existing-magnitude] (or (:resource cell)
+                                                [nil 0])
+        new-color (apply average-hue (concat (repeat magnitude color)
+                                   (repeat existing-magnitude existing-color)))
+        new-magnitude (+ magnitude existing-magnitude)]
+    (assoc cell :resource [new-color new-magnitude])))
 
 (defmethod vehicle-transition-state
-  [:moving true :depot]
+  [false :mixer]
+  [id]
+  (println "I should pick up the mix result!"))
+
+(defmethod vehicle-transition-state
+  [true :mixer]
+  [id]
+  (alter-cell mix-colors (:cargo (vehicle id)) (vehicle-magnitude (:type (vehicle id))))
+  (update-vehicle id set-cargo nil))
+
+(defmethod vehicle-transition-state
+  [true :depot]
   [id]
   (when (< (hue-difference (:cargo (vehicle id))
                           (:resource-type (vehicle-cell (vehicle id))))
