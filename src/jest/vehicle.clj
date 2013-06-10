@@ -32,13 +32,6 @@
      (first (filter #(= id (:id %))
                     (:vehicles c)))))
 
-(defn vehicle-state-change [id state]
-  (update-vehicle id assoc :state state))
-
-(defn- schedule-state-change [id state time]
-  (schedule #(dosync (vehicle-state-change id state))
-            time))
-
 (defn update-vehicle
   [id f & args]
   (let [v (vehicle id)
@@ -46,6 +39,14 @@
     (alter-cell (vehicle-cell v)
                 update-in [:vehicles] #(conj (disj % v)
                                              nv))))
+
+(defn vehicle-state-change [id state]
+  (update-vehicle id assoc :state state))
+
+(defn- schedule-state-change [id state time]
+  (schedule #(dosync (vehicle-state-change id state))
+            time))
+
 (defn- load-vehicle [c v]
   "Loads a vehicle on the given cell"
   (let [v (assoc v :coords (coords c))]
