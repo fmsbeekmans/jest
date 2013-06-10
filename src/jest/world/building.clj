@@ -4,6 +4,13 @@
         jest.util
         jest.world.cell))
 
+(def ^:private constructor-atom (atom {}))
+
+;; Make empty fn generate warnings
+(defn get-build-function [k]
+  (or (@constructor-atom k)
+      (fn [& args])))
+
 (defn building-type
   "Returns the building type for the given cell."
   [c]
@@ -81,7 +88,8 @@
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
-         (all-cells-type ~(keyword type))))))
+         (all-cells-type ~(keyword type)))
+       (swap! constructor-atom #(assoc % ~(keyword type) ~build)))))
 
 (defbuilding spawn :vehicle-type)
 (defbuilding supply :resource-type)

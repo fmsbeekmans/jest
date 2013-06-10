@@ -1,6 +1,7 @@
 (ns jest.world.path
   "Functions for adding, removing and searching for roads, rails and canals."
-  (:use jest.util
+  (:use clojure.core.incubator
+        jest.util
         jest.world.cell))
 
 ; Temporary convention:
@@ -50,7 +51,7 @@
 
 (def path->duration {})
 
-(defmacro defpath
+(defmacro- defpath
   "Defines a path type. path-type is a keyword naming the path type, vehicle-type is a keyword naming the vehicle type, and duration is the time spent in a cell while traversing such a path."
   [path-type vehicle-type duration]
   (let [pred (symbol (format "%s?" (name path-type)))
