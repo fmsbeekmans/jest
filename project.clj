@@ -11,5 +11,5 @@
                              [codox "0.6.4"]
                              [lein-cloverage "1.0.2"]]
                    :dependencies [[midje "1.5.1"]]}}
-  :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/world-state"
+  :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/dev"
           :src-linenum-anchor-prefix "L"})
