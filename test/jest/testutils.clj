@@ -76,7 +76,7 @@
 
     (do (alter-var-root #'tmp-schedule (constantly scheduler/schedule))
         (alter-var-root #'tmp-calculate-game-time (constantly scheduler/calculate-game-time))
-        (alter-var-root #'mock-game-time (constantly (atom 0)))
-        (alter-var-root #'mock-tasks (constantly (atom {})))
+        (alter-var-root #'mock-game-time (constantly (new-mock-game-time)))
+        (alter-var-root #'mock-tasks (constantly (new-mock-tasks)))
         (alter-var-root #'scheduler/schedule (constantly mock-schedule))
         (alter-var-root #'scheduler/calculate-game-time (constantly mock-calculate-game-time)))))
