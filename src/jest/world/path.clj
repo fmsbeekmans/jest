@@ -1,6 +1,7 @@
 (ns jest.world.path
   "Functions for adding, removing and searching for roads, rails and canals."
-  (:use jest.util
+  (:use clojure.core.incubator
+        jest.util
         jest.world.cell))
 
 ; Temporary convention:
@@ -8,7 +9,7 @@
 ; be used for the transportation of any resource. In other words, every path
 ; has an implied :any color.
 
-(defrecord Path [type direction inout resources routes])
+(defrecord Path [type coords direction inout resources routes])
 
 ;; TODO
 ; Implementation of the following functions doesn't always take into
@@ -47,7 +48,7 @@
 
 (def path->duration {})
 
-(defmacro defpath
+(defmacro- defpath
   "Defines a path type. path-type is a keyword naming the path type, vehicle-type is a keyword naming the vehicle type, and duration is the time spent in a cell while traversing such a path."
   [path-type vehicle-type duration]
   (let [pred (symbol (format "%s?" (name path-type)))
@@ -82,6 +83,16 @@
   [path]
   (= :out (:inout path)))
 
+(defn from
+  "Returns the cell this path comes from."
+  [path]
+  (cell (:coords path)))
+
+(defn to
+  "Returns the cell this path goes to."
+  [path]
+  (direction (from path) (:direction path)))
+
 (defn- update-path
   [c path]
   (assoc-in c [:paths (:direction path)] path))
@@ -91,8 +102,9 @@
   [c direction type inout]
   {:pre [(not (get-in c [:paths direction]))]}
   (update-path c (map->Path {:type type
-                          :direction direction
-                          :inout inout})))
+                             :coords (coords c)
+                             :direction direction
+                             :inout inout})))
 
 (defn- remove-path
   "removes the path from the cell for the given direction"

@@ -1,4 +1,5 @@
 (ns jest.testutils
+  (:require [jest.scheduler :as scheduler])
   (:use [jest.world.cell :only [cell with-initialized-temp-world]]
         [jest.world.path :only [build-path complete-paths]]
         [jest.world.building :only [build-spawn]]
@@ -26,3 +27,18 @@
   (build-path (cell [5 6]) :west :pipe)
   (build-path (cell [4 6]) :north :pipe)
   (build-path (cell [4 5]) :east :pipe))
+
+(defn mock-schedule
+  "mock version for schedule. Ignores the schedule time and runs the function right away. Useful in tests."
+  [task time]
+  (task))
+
+(defn mock-calculate-game-time
+  "mock version of calculate-game-time. Always returns 0."
+  []
+  0)
+
+(defmacro with-mock-scheduler [& body]
+  `(with-redefs [scheduler/schedule mock-schedule
+                 scheduler/calculate-game-time mock-calculate-game-time]
+     ~@body))
