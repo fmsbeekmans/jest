@@ -53,3 +53,12 @@
                                  ((roughly t margin) a))
                                target
                                actual))))))
+
+(defn roughly-angle
+  [target margin]
+  (fn [actual]
+    (or
+     ((roughly (mod (+ (* 2 Math/PI) target) (* 2 Math/PI)) margin)
+      (mod (+ (* 2 Math/PI) actual) (* 2 Math/PI)))
+     ((roughly (mod (+ (* 3 Math/PI) target) (* 2 Math/PI)) margin)
+      (mod (+ (* 3 Math/PI) actual) (* 2 Math/PI))))))
