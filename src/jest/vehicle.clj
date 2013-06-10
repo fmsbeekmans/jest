@@ -118,6 +118,7 @@
 (defmethod vehicle-transition-state
   [:moving true :spawn]
   [id]
+  ;;TODO add penalty for despawning with cargo
   (start-despawning id))
 
 (defn set-cargo
