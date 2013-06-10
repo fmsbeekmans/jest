@@ -95,14 +95,17 @@
 (defn cargo? [vehicle]
   (not (not (:cargo vehicle))))
 
+(defn vehicle-transition-state-dispatch
+  [id]
+  (let [vehicle (vehicle id)]
+    [(:state vehicle)
+     (not (not (:cargo vehicle)))
+     (:building-type (vehicle-cell vehicle))]))
+
+
 (defmulti vehicle-transition-state
   "Does the required work for a vehicle upon moving into a cell. dispatches on [state cargo? cell-type]"
-  (fn vehicle-transition-state-dispatch
-    [id]
-    (let [vehicle (vehicle id)]
-      [(:state vehicle)
-       (not (not (:cargo vehicle)))
-       (:building-type (vehicle-cell vehicle))])))
+  vehicle-transition-state-dispatch)
 
 (defmethod vehicle-transition-state :default
   [id])
@@ -110,13 +113,22 @@
 (defmethod vehicle-transition-state
   [:moving false :spawn]
   [id]
-  (println "I should despawn!")
   (start-despawning id))
+
+(defmethod vehicle-transition-state
+  [:moving true :spawn]
+  [id]
+  (start-despawning id))
+
+(defn set-cargo
+  [vehicle resource-type]
+  (assoc vehicle :cargo resource-type))
 
 (defmethod vehicle-transition-state
   [:moving false :supply]
   [id]
-  (println "I should pick up something!"))
+  (update-vehicle id set-cargo
+                  (:resource-type (vehicle-cell (vehicle id)))))
 
 (defmethod vehicle-transition-state
   [:moving true :mixer]
@@ -126,9 +138,13 @@
 (defmethod vehicle-transition-state
   [:moving true :depot]
   [id]
-  (println "I should drop off something!"))
+  (when (< (hue-difference (:cargo (vehicle id))
+                          (:resource-type (vehicle-cell (vehicle id))))
+           (/ Math/PI 8))
+    ;;TODO this should also update some score
+    (update-vehicle id set-cargo nil)))
 
-(defn- move-vehicle
+(defn move-vehicle
   [id direction]
   {:pre [(let [v (vehicle id)
                path (path (vehicle-cell v) direction)]
