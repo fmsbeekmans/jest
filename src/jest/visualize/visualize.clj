@@ -20,6 +20,19 @@
                    (into {} (for [c (cell/all-cells)]
                               [(cell/coords c) (cell-draw-fn c)]))))
 
+(defn visualize-world-state
+  [world-state]
+  (comment
+    (->Stack (vec (juxt ...) worldstate)))
+  )
+
+(defn vehicles->Stack
+  [world-statke]
+  (comment
+    (-> Stack (vec (map
+                    (fn [vehicle]
+                      ))))))
+
 (defn vehicle->location-fn
   #^{:doc (str "Return a location-fn of a vehicle.\n"
                "The location-fn is a 1-arity fn where it's input is the progres, "
