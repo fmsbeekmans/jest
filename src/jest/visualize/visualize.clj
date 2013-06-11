@@ -33,23 +33,6 @@
                     (fn [vehicle]
                       ))))))
 
-(defn vehicle->location-fn
-  #^{:doc (str "Return a location-fn of a vehicle.\n"
-               "The location-fn is a 1-arity fn where it's input is the progres, "
-               "0" is the start of the animation and 1 the end.)}
-  [v]
-  (let [start [1 1]
-        end [1 -1]
-        mid [0 0]]
-    (fn [progress]
-      {:pre [(>= progress 0)
-             (<= progress 1)]}
-      (let [[sub-stroke sub-progress]
-            (if (< progress 1/2)
-              [(points/stroke start mid) (* 2 progress)]
-              [(points/stroke mid end)   (dec (* 2 progress))])]
-        (sub-stroke sub-progress)))))
-
 (defn cell-bg [c]
   (image/path->PImage (clojure.java.io/resource "grass.png")))
 
