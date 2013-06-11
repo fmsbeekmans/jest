@@ -5,11 +5,25 @@
         [clojure.test :only [deftest]])
   (:require [jest.world.building :as building]))
 
+(fact "Spawn should be buildable"
+      (building/get-build-function :spawn) =not=> nil)
+
+(fact "Supply should be buildable"
+      (building/get-build-function :supply) =not=> nil)
+
+(fact "Mixers should be buildable"
+      (building/get-build-function :mixer) =not=> nil)
+
+(fact "Depots should be buildable"
+      (building/get-build-function :depot) =not=> nil)
+
+(fact "Transmogrifier should not be buildable"
+      (building/get-build-function :transmogrifier) => nil)
 
 (world-fact [10 10]
             "After initialization, there are no buildings."
             (map building/building-type (all-cells)) => (n-of nil 100))
-  
+
 (world-fact [10 10]
             "Spawns can be built"
             (building/build-spawn (cell [3 3]) :truck)
@@ -21,7 +35,7 @@
             (building/build-supply (cell [3 3]) :red)
             (building/building-type (cell [3 3])) => :supply
             (building/resource-type (cell [3 3])) => :red)
-              
+
 (world-fact [10 10]
             "Mixers can be built"
             (building/build-mixer (cell [3 3]))
@@ -70,7 +84,7 @@
     (building/build-mixer c))
   (doseq [c (map cell depots)]
     (building/build-depot c :blue))
-  
+
   (fact "Spawns can be found on a map."
     (set (map coords (building/all-spawns))) => spawns)
   (fact "Supplies can be found on a map."

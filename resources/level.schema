@@ -1,0 +1,106 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "#level",
+    "title": "Level",
+    "description": "A Level for the Brick tiling engine",
+    "type": "object",
+    "properties": {
+        "height": {
+            "description": "height of the layer, in tiles",
+            "type": "integer"
+        },
+        "width": {
+            "description": "width of the layer, in tiles",
+            "type": "integer"
+        },
+        "tileheight": {
+            "description": "height of each tile",
+            "type": "integer"
+        },
+        "tilewidth": {
+            "description": "width of each tile",
+            "type": "integer"
+        },
+        "tilesets": {
+            "description": "tilesets used in this level",
+            "type": "array"
+            "items": {
+
+                "title": "Tileset",
+                "description": "A tileset for the Brick tiling engine",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The name of the tileset",
+                        "type": "string"
+                    },
+                    "image": {
+                        "description": "The path of the image of the tileset",
+                        "type": "string"
+                    },
+                    "imagewidth": {
+                        "description": "width of the image",
+                        "type": "integer"
+                    },
+                    "imageheight": {
+                        "description": "height of the image",
+                        "type": "integer"
+                    },
+                    "tileheight": {
+                        "description": "height of each tile",
+                        "type": "integer"
+                    },
+                    "tilewidth": {
+                        "description": "width of each tile",
+                        "type": "integer"
+                    },
+                    "properties": {
+                        "description": "The dictionary mapping between tile indexes and named tiles",
+                        "type": "object"
+                    }
+                },
+                "required": ["image", "tileheight", "tilewidth", "properties"]
+            }
+        },
+        "layers": {
+            "description": "layers making up this level",
+            "type": "array"
+            "items": {
+                "title": "Layer",
+                "description": "A Layer for the Brick tiling engine",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The name of the tileset",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "height of the layer, in tiles",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "width of the layer, in tiles",
+                        "type": "integer"
+                    },
+                    "visible": {
+                        "description": "height of each tile",
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "description": "width of each tile",
+                        "type": "array"
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "type": {
+                        "description": "The layer type as used in the brick engine",
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "width", "height", "visible", "data", "type"]
+            }
+        }
+    },
+    "required": ["height", "width", "tileheight", "tilewidth", "tilesets", "layers"]
+}

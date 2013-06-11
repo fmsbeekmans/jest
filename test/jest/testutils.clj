@@ -20,6 +20,7 @@
 
 (defn build-spawn-circle []
   {:post [(seq (complete-paths (cell [5 5])))]}
+
   (build-spawn (cell [5 5]) :truck)
   (build-path (cell [5 5]) :east :road)
   (build-path (cell [6 5]) :south :road)
