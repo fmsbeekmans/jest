@@ -110,20 +110,6 @@
   {:pre [(= (:stroke-type (meta ss)) :composed)]}
   (first
    (if (= 0 p)
-     (:indexed-sub-strokes (meta ss))
-     (keep
-      (fn [[[start end] sub-stroke]]
-        (if (and
-             (> p start)
-             (<= p end))
-          sub-stroke))
-      (:indexed-sub-strokes (meta ss))))))
-
-(defn sub-stroke
-  [ss p]
-  {:pre [(= (:stroke-type (meta ss)) :composed)]}
-  (first
-   (if (= 0 p)
      (keep
       (fn [[[start end] sub-stroke]]
         (if (= 0 start)
@@ -142,18 +128,17 @@
   {:pre [(strokes-connected? ss)]}
   (with-meta
     (fn [p]
-      (if (= p 0)
-        (start-point (first ss))
-        (first (keep (fn [[[start end] {offset :offset
-                                       p' :progress
-                                       stroke :stroke
-                                       }]]
-                       (if (and
-                            (> p start)
-                            (<= p end))
-                         (stroke (/ (- p offset)
-                                    p'))))
-                     (index-sub-strokes ss)))))
+      (start-point (first ss))
+      (first (keep (fn [[[start end] {offset :offset
+                                     p' :progress
+                                     stroke :stroke
+                                     }]]
+                     (if (and
+                          (> p start)
+                          (<= p end))
+                       (stroke (/ (- p offset)
+                                  p'))))
+                   (index-sub-strokes ss))))
     {:stroke-type :composed
      :indexed-sub-strokes (index-sub-strokes ss)}))
 

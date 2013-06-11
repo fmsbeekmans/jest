@@ -13,17 +13,28 @@
       (l nil) =not=> (throws clojure.lang.ArityException)
       (l nil nil) => (throws clojure.lang.ArityException)))
 
+  (fact "strokes-connected?"
+    (points/strokes-connected? []) => falsey
+    (points/strokes-connected? [(points/stroke [0 0]
+                                               [1 1])
+                                (points/stroke [1 1]
+                                               [2 0])]) => truthy
+    (points/strokes-connected? [(points/stroke [0 0]
+                                               [1 0])
+                                (points/stroke [1 1]
+                                               [2 0])]) => falsey)
+  
   (fact "Stroke basic functionality"
-    ((points/stroke [3] [7]) 0.5) => (vec-roughly [5] 0)
-    ((points/stroke [3 4] [7 0]) 0.25) => (vec-roughly [4 3] 0)
-    ((points/stroke [1 2 3 4 5 6] [4 5 6 7 8 9]) 0.5)
+    (points/point (points/stroke [3] [7]) 0.5) => (vec-roughly [5] 0)
+    (points/point (points/stroke [3 4] [7 0]) 0.25) => (vec-roughly [4 3] 0)
+    (points/point (points/stroke [1 2 3 4 5 6] [4 5 6 7 8 9]) 0.5)
       => (vec-roughly [2.5 3.5 4.5 5.5 6.5 7.5] 0)
 
     ;; begin
-      ((points/stroke [3] [7]) 0) => (vec-roughly [3] 0)
+      (points/point (points/stroke [3] [7]) 0) => (vec-roughly [3] 0)
 
     ;; end
-      ((points/stroke [3] [7]) 1) => (vec-roughly [7] 0))
+      (points/point (points/stroke [3] [7]) 1) => (vec-roughly [7] 0))
   
     (fact "From point a to point a is not a stroke."
       ((points/stroke [1.1] [1.1]) 0.9) => (throws java.lang.AssertionError)))
@@ -95,11 +106,11 @@
                                                     [1 1])
                                      (points/stroke [1 1]
                                                     [2 0])])]
-      (lines 0) => (vec-roughly [0 0] 0)
-      (lines 0.25) => (vec-roughly [0.5 0.5] 0)
-      (lines 0.5) => [1.0 1.0]
-      (lines 0) => [0 0]
-      (lines 1) => [2.0 0.0]))
+      (points/point lines 0) => (vec-roughly [0 0] 0)
+      (points/point lines 0.25) => (vec-roughly [0.5 0.5] 0)
+      (points/point lines 0.5) => (vec-roughly [1.0 1.0] 0)
+      (points/point lines 0) => (vec-roughly [0 0] 0)
+      (points/point lines 1) => (vec-roughly [2.0 0.0] 0)))
   (let [lines0 (points/stroke-comp [(points/stroke [0 0]
                                                    [1 1])
                                     (points/stroke [1 1]

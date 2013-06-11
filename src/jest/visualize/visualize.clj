@@ -12,7 +12,6 @@
   {:bg ()}
   )
 
-
 (defn layer-from-world-state
   "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
   [cell-draw-fn]
