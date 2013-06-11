@@ -23,7 +23,8 @@
 (defn visualize-world-state
   [world-state]
   (comment
-    (->Stack (vec (juxt ...) worldstate)))
+    (->Stack (vec (juxt
+                   ) worldstate)))
   )
 
 (defn vehicles->Stack
@@ -70,3 +71,5 @@
 
 (defn cell-explosions [c]
   (image/path->PImage (clojure.java.io/resource "explosions.png")))
+
+(defn render [])
