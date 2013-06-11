@@ -9,8 +9,6 @@
             [jest.tiled.validation :as validation]
             [brick.image :as image]))
 
-;; V0.1; Only support for roads, no
-
 (defn- workable-world
   []
   (for [x (range (cell/world-width))
@@ -29,11 +27,12 @@
 (defn- parse [f cells lookup-fn layer]
   (map f cells (map lookup-fn (:data layer))))
 
+(defn layer-selector [layer _ _]
+  (keyword (layer :name)))
+
 (defmulti parse-layer
   "Updates the loaded world with the data supplied in the layer"
-  (fn [layer _ _]
-    (println "in selector")
-    (keyword (:name layer))))
+  layer-selector)
 
 (defmethod parse-layer :background [layer lookup cells]
   (parse cell/set-background cells lookup layer))
@@ -53,9 +52,6 @@
 (defmethod parse-layer :default [_ _ _]
   (println "default handler"))
 
-(defn layer-selector [_ layer _]
-  (println layer)
-  (keyword (layer :name)))
 
 (defn parse-tilesets
   "Parses the the tilesets entry in a valid level, returning index->image and
