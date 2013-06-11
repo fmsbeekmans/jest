@@ -28,11 +28,11 @@
 (def valid-level?
   (validation/create-validator validation/level-schema-url valid-schema?))
 
-(fact "a validator which somewhere along the it's creation process hits a nil, should always return nil"
+(fact "a validator which somewhere along it's creation process stumbles upon a nil, should always return nil"
       (let [nil-all (validation/create-validator nil anything)]
         (nil-all anything) => nil))
 
-(fact "valid-level? should validate and return a simple-level"
+(fact "valid-level? should validate and return a valid level"
       (valid-level? simple-level) => simple-level)
 
 (fact "valid-level? should invalidate an invalid-level and return nil"
