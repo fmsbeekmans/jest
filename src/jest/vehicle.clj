@@ -151,7 +151,7 @@
 (defmethod vehicle-transition-state
   [true :mixer]
   [id]
-  (alter-cell mix-colors (:cargo (vehicle id)) (vehicle-magnitude (:type (vehicle id))))
+  (alter-cell (vehicle-cell (vehicle id)) mix-colors (:cargo (vehicle id)) (vehicle-magnitude (:type (vehicle id))))
   (update-vehicle id set-cargo nil))
 
 (defmethod vehicle-transition-state
