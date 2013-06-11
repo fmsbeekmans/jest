@@ -143,25 +143,41 @@
         new-magnitude (+ magnitude existing-magnitude)]
     (assoc cell :resource [new-color new-magnitude])))
 
+(defn- reduce-resource [cell amount]
+  {:post [(or (nil? (:resource cell))
+              (>= (resource-count cell) 0))]}
+  (assoc cell :resource (if (= amount (resource-count cell))
+                          nil
+                          [(resource-color cell)
+                           (- (resource-count cell)
+                              amount)])))
+
 (defmethod vehicle-transition-state
   [false :mixer]
   [id]
-  (println "I should pick up the mix result!"))
+  (dosync
+   (let [color (resource-color (vehicle-cell (vehicle id)))
+         pickup-count (max (resource-count (vehicle-cell (vehicle id)))
+                           (cargo-count (vehicle id)))]
+     (alter-cell (vehicle-cell (vehicle id))
+                 reduce-resource pickup-count)
+     (update-vehicle id set-cargo color pickup-count))))
 
 (defmethod vehicle-transition-state
   [true :mixer]
   [id]
-  (alter-cell (vehicle-cell (vehicle id)) mix-colors (:cargo (vehicle id)) (vehicle-magnitude (:type (vehicle id))))
-  (update-vehicle id set-cargo nil))
+  (dosync
+   (alter-cell (vehicle-cell (vehicle id)) mix-colors (cargo-color (vehicle id)) (cargo-count (vehicle id)))
+   (update-vehicle id clear-cargo)))
 
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
-  (when (< (hue-difference (:cargo (vehicle id))
+  (when (< (hue-difference (cargo-color (vehicle id))
                           (:resource-type (vehicle-cell (vehicle id))))
            (/ Math/PI 8))
     ;;TODO this should also update some score
-    (update-vehicle id set-cargo nil)))
+    (update-vehicle id clear-cargo)))
 
 (defn move-vehicle
   [id direction]
