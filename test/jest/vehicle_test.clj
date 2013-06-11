@@ -1,6 +1,7 @@
 (ns jest.vehicle-test
   (:use midje.sweet
-        jest.testutils)
+        jest.testutils
+        jest.color)
   (:require [jest.world.building :as b]
             [jest.world.cell :as c]
             [jest.vehicle :as v]))
@@ -61,3 +62,41 @@
    (tick 5) ;vehicle should be gone now
    (v/vehicle id) => nil
    ))
+
+(spawn-fact
+ "A vehicle that passes through a supply picks up a resource."
+ (let [resource (hue :red)
+       id (:id (v/spawn (c/cell [5 5])))]
+   (b/build-supply (c/cell [6 6]) (hue :red))
+   (tick 19) ; just before entering cell 6 6, should have nothing
+   (:cargo (v/vehicle id)) => nil
+   (tick 1) ; moved into the supply
+   (:cargo (v/vehicle id)) => (roughly (hue :red) 0.01)))
+
+(spawn-fact
+ "A vehicle that passes through a depot without having cargo does nothing."
+ (b/build-depot (c/cell [6 6]) (hue :red))
+ (tick 20)
+ (let [id (:id (v/spawn (c/cell [5 5])))]
+   (:cargo (v/vehicle id))) => nil)
+
+
+(spawn-fact
+ "A vehicle that passes through a depot after passing through a supply with the same resource drops its resource."
+ (b/build-supply (c/cell [6 6]) (hue :green))
+ (b/build-depot (c/cell [4 6]) (hue :green))
+ (let [id (:id (v/spawn (c/cell [5 5])))]
+   (tick 39) ; should have cargo
+   (:cargo (v/vehicle id)) => (roughly (hue :green) 0.1)
+   (tick 1) ;at depot, should drop cargo
+   (:cargo (v/vehicle id)) => nil))
+
+(spawn-fact
+ "A vehicle that passes through a depot after passing through a supply with another resource drops its resource."
+ (b/build-supply (c/cell [6 6]) (hue :green))
+ (b/build-depot (c/cell [4 6]) (hue :red))
+ (let [id (:id (v/spawn (c/cell [5 5])))]
+   (tick 39) ; should have cargo
+   (:cargo (v/vehicle id)) => (roughly (hue :green) 0.1)
+   (tick 1) ;at depot, should not drop cargo
+   (:cargo (v/vehicle id)) =not=> nil))
