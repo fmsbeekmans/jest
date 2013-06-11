@@ -72,7 +72,8 @@
   "select the preferred path for this vehicle"
   [v]
   (let [paths (out-paths (vehicle-cell v))]
-    (rand-nth (filter #(= (path-type %) (vehicle->path (:type v))) paths))))
+    (if (seq paths)
+      (rand-nth (filter #(= (path-type %) (vehicle->path (:type v))) paths)))))
 
 (defn- select-exit [v]
   (assoc v
