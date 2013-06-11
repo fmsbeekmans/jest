@@ -8,7 +8,7 @@
 (world-fact [10 10]
             "layer from world state builds a valid grid drawable"
             (build-spawn-circle)
-            (let [grid (visualize/layer-from-world-state (fn [c]
+            (let [grid (visualize/world-state->Grid (fn [c]
                                                          (if (building/spawn? c)
                                                            (drawable/->Stack [])
                                                            (drawable/->Nothing))))]
