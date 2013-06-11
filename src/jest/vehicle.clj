@@ -203,4 +203,4 @@
 
 
 (defn all-vehicles []
-  (remove nil? (flatten (map vehicles (all-cells)))))
+  (remove nil? (flatten (map (comp seq vehicles) (all-cells)))))
