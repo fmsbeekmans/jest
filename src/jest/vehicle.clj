@@ -7,9 +7,12 @@
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
 
-(def vehicle-magnitude {:truck 1
-                        :train 5
-                        :boat 10})
+(def cargo-capacity {:truck 1
+                     :train 5
+                     :boat 10})
+
+(defn cargo-color [v] (first (:cargo v)))
+(defn cargo-count [v] (or (second (:cargo v)) 0))
 
 (defn vehicle->duration [v]
   (path->duration (vehicle->path (:type v))))
