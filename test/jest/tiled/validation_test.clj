@@ -28,6 +28,12 @@
 (def valid-level?
   (validation/create-validator validation/level-schema-url valid-schema?))
 
+(fact "The meta-schema-url should not be nil"
+      validation/meta-schema-url =not=> nil)
+
+(fact "The level-schema-url should not be nil"
+      validation/level-schema-url =not=> nil)
+
 (fact "a validator which somewhere along it's creation process stumbles upon a nil, should always return nil"
       (let [nil-all (validation/create-validator nil anything)]
         (nil-all anything) => nil))
