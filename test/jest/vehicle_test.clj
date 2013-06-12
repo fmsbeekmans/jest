@@ -217,20 +217,25 @@
  (tick 100) =not=> (throws Exception)
  )
 
+(defn build-crossroad [west-east-type north-south-type]
+  (let [west-east-vehicle (p/path->vehicle west-east-type)
+        north-south-vehicle (p/path->vehicle north-south-type)]
+    (b/build-mixer (c/cell [5 5]))
+    (b/build-spawn (c/cell [3 5]) west-east-vehicle)
+    (b/build-spawn (c/cell [6 5]) west-east-vehicle)
+    (b/build-supply (c/cell [4 5]) (hue :red))
+    (p/build-path (c/cell [3 5]) :east west-east-type)
+    (p/build-path (c/cell [4 5]) :east west-east-type)
+    (p/build-path (c/cell [5 5]) :east west-east-type)
+    
+    (b/build-spawn (c/cell [5 4]) north-south-vehicle)
+    (b/build-spawn (c/cell [5 6]) north-south-vehicle)
+    (p/build-path (c/cell [5 4]) :south north-south-type)
+    (p/build-path (c/cell [5 5]) :south north-south-type)))
+
 (world-fact [10 10]
             "An empty vehicle that enters a mixer that contains resources picks up resources"
-            (b/build-mixer (c/cell [5 5]))
-            (b/build-spawn (c/cell [3 5]) :boat)
-            (b/build-spawn (c/cell [6 5]) :boat)
-            (b/build-supply (c/cell [4 5]) (hue :red))
-            (p/build-path (c/cell [3 5]) :east :canal)
-            (p/build-path (c/cell [4 5]) :east :canal)
-            (p/build-path (c/cell [5 5]) :east :canal)
-
-            (b/build-spawn (c/cell [5 4]) :boat)
-            (b/build-spawn (c/cell [5 6]) :boat)
-            (p/build-path (c/cell [5 4]) :south :canal)
-            (p/build-path (c/cell [5 5]) :south :canal)
+            (build-crossroad :canal :canal)
 
             (v/spawn (c/cell [3 5]))
             (tick 60) ;boat dropped off cargo
@@ -242,3 +247,4 @@
               (tick 1)
               (v/cargo-count (v/vehicle id)) => 10
               (v/resource-count (c/cell [5 5])) => 0))
+
