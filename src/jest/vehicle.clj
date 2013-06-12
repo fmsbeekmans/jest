@@ -132,14 +132,27 @@
   (start-despawning id))
 
 (defn set-cargo
-  [vehicle resource-type]
-  (assoc vehicle :cargo resource-type))
+  [vehicle resource-color resource-count]
+  (assoc vehicle :cargo [resource-color resource-count]))
+
+(defn clear-cargo
+  [vehicle]
+  (assoc vehicle :cargo nil))
 
 (defmethod vehicle-transition-state
   [false :supply]
   [id]
   (update-vehicle id set-cargo
-                  (:resource-type (vehicle-cell (vehicle id)))))
+                  (:resource-type (vehicle-cell (vehicle id)))
+                  (cargo-capacity (:type (vehicle id)))))
+
+(defn resource-color [cell]
+  (first (:resource cell)))
+
+(defn resource-count [cell]
+  (or
+   (second (:resource cell))
+   0))
 
 (defn- mix-colors [cell color magnitude]
   (let [[existing-color existing-magnitude] (or (:resource cell)
@@ -163,8 +176,8 @@
   [id]
   (dosync
    (let [color (resource-color (vehicle-cell (vehicle id)))
-         pickup-count (max (resource-count (vehicle-cell (vehicle id)))
-                           (cargo-count (vehicle id)))]
+         pickup-count (min (resource-count (vehicle-cell (vehicle id)))
+                           (cargo-capacity (:type (vehicle id))))]
      (alter-cell (vehicle-cell (vehicle id))
                  reduce-resource pickup-count)
      (update-vehicle id set-cargo color pickup-count))))
