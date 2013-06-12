@@ -109,7 +109,7 @@
 (defn vehicle-transition-state-dispatch
   [id]
   (let [vehicle (vehicle id)]
-    [(not (not (:cargo vehicle)))
+    [(cargo? vehicle)
      (:building-type (vehicle-cell vehicle))]))
 
 
