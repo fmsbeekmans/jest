@@ -10,12 +10,14 @@
                  [com.fasterxml.jackson.core/jackson-core "2.2.0"]
                  [slingshot "0.10.3"]
                  [org.clojure/core.incubator "0.1.2"]
-                 [jest/brick "0.0.1-SNAPSHOT"]
-                 ]
+                 [jest/brick "0.0.1-SNAPSHOT"]]
+
   :repositories {"pievolution" "http://pievolution.org/maven-repo/"}
   :profiles {:dev {:plugins [[lein-midje "3.0.0"]
                              [codox "0.6.4"]
                              [lein-cloverage "1.0.2"]]
-                   :dependencies [[midje "1.5.1"]]}}
+                   :dependencies [[midje "1.5.1"]]
+                   :source-paths ["dev/"]}}
+  :resource-paths ["resources/"]
   :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/dev"
           :src-linenum-anchor-prefix "L"})

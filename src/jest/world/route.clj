@@ -9,7 +9,6 @@
   existing path"
   [path color]
   {:pre [path
-         color
          (not (contains? (:routes path) color))]}
   (assoc path :routes
          (set (conj (:routes path) color))))
@@ -18,9 +17,11 @@
   "Removes any existing routes for the specified color from an
   existing path"
   [path color]
-  {:pre [(contains? color (:routes path))]}
+  {:pre [path
+         (contains? (:routes path) color)]}
   (update-in path [:routes]
              #(disj % color)))
+
 
 (defn build-route
   "Adds a colored route to an existing path in cell c"
@@ -33,3 +34,9 @@
   [c dir color]
   (dosync
    (alter-cell c #(remove-route % color) (get-in c [:paths dir]))))
+
+(defn all-routes
+  [c]
+  (for [[d p] (:paths c)
+        :when (seq (:routes p))]
+    [d (:type p) (:routes p)]))
