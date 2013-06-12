@@ -86,6 +86,9 @@
     :entry-time (:exit-time v)
     :entry-direction (opposite-dirs (:exit-direction v))))
 
+(defn despawning? [id]
+  (= (:state (vehicle id)) :despawning))
+
 (defn start-despawning [id]
   {:pre [(spawn? (vehicle-cell (vehicle id)))]}
   (vehicle-state-change id :despawning)
@@ -199,7 +202,8 @@
   (schedule (fn []
               (dosync
                (move-vehicle id (:exit-direction (vehicle id)))
-               (schedule-move id)))
+               (when-not (despawning? id)
+                 (schedule-move id))))
             (offset (vehicle->duration (vehicle id)))))
 
 (defn spawn
