@@ -270,3 +270,9 @@
               (tick (p/path->duration :canal))
               (v/cargo-count (v/vehicle id)) => (v/cargo-capacity :train)
               (v/resource-count (c/cell [5 5])) => 0))
+
+(fact "vehicle transition dispatch works"
+      (v/vehicle-transition-state-dispatch ..vehicle-id..) => [..cargo-type.. ..building-type..]
+      (provided (v/vehicle ..vehicle-id..) => ..vehicle..
+                (v/cargo? ..vehicle..) => ..cargo-type..
+                (v/vehicle-cell ..vehicle..) => {:building-type ..building-type..}))
