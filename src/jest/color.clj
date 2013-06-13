@@ -30,3 +30,12 @@
 
 (defn hue-difference [h1 h2]
   (Math/abs (- h1 h2)))
+
+(def +delta+ (/ Math/PI 8))
+
+(defn hue-matches? [h1 h2]
+  (< (hue-difference h1 h2) +delta+))
+
+(defn contains-hue? [coll h]
+  (boolean (seq (filter (partial hue-matches? h)
+                        coll))))
