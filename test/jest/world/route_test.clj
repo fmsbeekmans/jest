@@ -30,8 +30,12 @@
 (fact "add-route should add routes to paths that aren't already included in the path"
       (let [p {:routes #{..existing-route..}}]
         (#'route/add-route p ..new-route..) =>
-        {:routes #{..new-route.. ..existing-route..}}))
+        {:routes #{..new-route.. ..existing-route..}}
+        (provided (jest.color/hue-difference ..new-route.. ..existing-route..) => 1))
+
+)
 
 (fact "remove-route should remove existing routes from a path"
         (#'route/remove-route {:routes #{..some-route..}} ..some-route..) =>
-        {:routes #{}})
+        {:routes #{}}
+        (provided (jest.color/hue-difference ..some-route.. ..some-route..) => 0))
