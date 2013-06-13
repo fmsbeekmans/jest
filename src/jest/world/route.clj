@@ -2,14 +2,15 @@
   "Functions for adding, removing and searching for routes along roads, rails and canals."
   (:use jest.util
         jest.world.path
-        jest.world.cell))
+        jest.world.cell
+        jest.color))
 
 (defn- add-route
   "Adds a route for resources of the specified color to an
   existing path"
   [path color]
   {:pre [path
-         (not (contains? (:routes path) color))]}
+         (not (contains-hue? (:routes path) color))]}
   (assoc path :routes
          (set (conj (:routes path) color))))
 
@@ -18,7 +19,7 @@
   existing path"
   [path color]
   {:pre [path
-         (contains? (:routes path) color)]}
+         (contains-hue? (:routes path) color)]}
   (update-in path [:routes]
              #(disj % color)))
 
@@ -27,13 +28,13 @@
   "Adds a colored route to an existing path in cell c"
   [c dir color]
   (dosync
-   (alter-cell c #(add-route % color) (get-in c [:paths dir]))))
+   (alter-cell c #(update-in % [:paths dir] add-route color))))
 
 (defn unbuild-route
   "unbuilds a colored route from an existing path in cell c"
   [c dir color]
   (dosync
-   (alter-cell c #(remove-route % color) (get-in c [:paths dir]))))
+   (alter-cell c #(update-in % [:paths dir] remove-route color))))
 
 (defn all-routes
   [c]
