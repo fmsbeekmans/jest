@@ -3,7 +3,7 @@
         [jest.world.building :only [vehicle-type spawn?]]
         [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path opposite-dirs]]
         [jest.scheduler :only [game-time schedule offset]]
-        [jest.color :only [hue average-hue hue-difference]]))
+        [jest.color :only [hue average-hue hue-difference +delta+]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
 
@@ -71,12 +71,41 @@
                update-in [:vehicles] disj v))
   (assoc v :coords nil))
 
+(defn- dir-num [dir]
+  (.indexOf [:north :east :south :west] dir))
+
+(defn route-score [color path]
+  (if color
+    (let [hue-diffs  (map (partial hue-difference color)
+                          (:routes path))]
+      (if (seq hue-diffs)
+        (apply min hue-diffs)))))
+
+(defn best-route [color paths]
+  (let [route-scores (remove (comp nil? second) (map #(vector %
+                                                   (route-score color %))
+                                          paths))
+        sorted-routes (sort #(let [s1 (second %1)
+                                   s2 (second %2)]
+                               (< s1 s2))
+                            route-scores)]
+    (first sorted-routes)))
+
+;; if there are routes, vehicle carries cargo, and best matching route is less than <delta> away, select path with that route.
+;; otherwise, select first clockwise
+(defn preference [color p1 p2]
+  (let [[best-path best-score] (best-route color [p1 p2])]
+    (if (and best-path
+             (<= best-score +delta+))
+      (=  best-path p1)
+      (<= (dir-num (:direction p1)) (dir-num (:direction p2))))))
+
 (defn preferred-path
   "select the preferred path for this vehicle"
   [v]
   (let [paths (out-paths (vehicle-cell v))]
-    (if (seq paths)
-      (rand-nth (filter #(= (path-type %) (vehicle->path (:type v))) paths)))))
+    (first (sort (partial preference (cargo-color v))
+                 paths))))
 
 (defn- select-exit [v]
   (assoc v
