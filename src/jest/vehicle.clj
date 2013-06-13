@@ -81,13 +81,18 @@
       (if (seq hue-diffs)
         (apply min hue-diffs)))))
 
+(defn dir-sort-fn [p1 p2]
+  (<= (dir-num (:direction p1)) (dir-num (:direction p2))))
+
 (defn best-route [color paths]
   (let [route-scores (remove (comp nil? second) (map #(vector %
                                                    (route-score color %))
                                           paths))
         sorted-routes (sort #(let [s1 (second %1)
                                    s2 (second %2)]
-                               (< s1 s2))
+                               (if (= s1 s2)
+                                 (dir-sort-fn %1 %2)
+                                 (< s1 s2)))
                             route-scores)]
     (first sorted-routes)))
 
@@ -98,7 +103,7 @@
     (if (and best-path
              (<= best-score +delta+))
       (=  best-path p1)
-      (<= (dir-num (:direction p1)) (dir-num (:direction p2))))))
+      (dir-sort-fn p1 p2))))
 
 (defn preferred-path
   "select the preferred path for this vehicle"

@@ -286,7 +286,7 @@
   (tick (v/vehicle->duration (v/vehicle vehicle-id))))
 
 (world-fact [10 10]
-            "when multiple out-routes are encountered without routes, pick the first one in clockwise from :north"
+            "when multiple out-paths are encountered without routes, pick the first one in clockwise from :north"
             (b/build-spawn (c/cell [5 5]) :truck)
             (p/build-path (c/cell [5 5]) :south :road)
             (p/build-path (c/cell [5 6]) :south :road)
@@ -301,7 +301,7 @@
 
 
 (world-fact [10 10]
-            "when multiple out-routes are encountered where one has a matching route, pick the one with the route"
+            "when multiple out-paths are encountered where one has a matching route, pick the one with the route"
             (b/build-spawn (c/cell [5 4]) :truck)
             (b/build-supply (c/cell [5 5]) (hue :red))
             (p/build-path (c/cell [5 4]) :south :road)
@@ -323,7 +323,7 @@
               ))
 
 (world-fact [10 10]
-            "when multiple out-routes are encountered with routes, while not carrying any cargo, the first one in clockwise order"
+            "when multiple out-paths are encountered with routes, while not carrying any cargo, the first one in clockwise order"
             (b/build-spawn (c/cell [5 4]) :truck)
             (p/build-path (c/cell [5 4]) :south :road)
             (p/build-path (c/cell [5 5]) :south :road)
@@ -338,12 +338,12 @@
             (with-spawned-vehicle [truck [5 4]]
               (tick-move truck)
               (tick-move truck)
-              (tick-move truck) ;should have picked west
+              (tick-move truck) ;should have picked east
               (:coords (v/vehicle truck)) => [6 6]
               ))
 
 (world-fact [10 10]
-            "when multiple out-routes are encountered with routes, while carrying non-matching cargo, the first one in clockwise order"
+            "when multiple out-paths are encountered with routes, while carrying non-matching cargo, the first one in clockwise order is selected"
             (b/build-spawn (c/cell [5 4]) :truck)
             (b/build-supply (c/cell [5 5]) (hue :yellow))
             (p/build-path (c/cell [5 4]) :south :road)
@@ -359,6 +359,26 @@
             (with-spawned-vehicle [truck [5 4]]
               (tick-move truck)
               (tick-move truck)
-              (tick-move truck) ;should have picked west
+              (tick-move truck) ;should have picked east
+              (:coords (v/vehicle truck)) => [6 6]
+              ))
+
+(world-fact [10 10]
+            "when multiple matching out-paths are encountered with routes, while carrying non-matching cargo, the first matching one in clockwise order is selected"
+            (b/build-spawn (c/cell [5 4]) :truck)
+            (b/build-supply (c/cell [5 5]) (hue :red))
+            (p/build-path (c/cell [5 4]) :south :road)
+            (p/build-path (c/cell [5 5]) :south :road)
+            (p/build-path (c/cell [5 6]) :south :road)
+            (p/build-path (c/cell [5 6]) :west :road)
+            (p/build-path (c/cell [5 6]) :east :road)
+
+            (r/build-route (c/cell [5 6]) :east (hue :red))
+            (r/build-route (c/cell [5 6]) :south (hue :red))
+
+            (with-spawned-vehicle [truck [5 4]]
+              (tick-move truck)
+              (tick-move truck)
+              (tick-move truck) ;should have picked east
               (:coords (v/vehicle truck)) => [6 6]
               ))
