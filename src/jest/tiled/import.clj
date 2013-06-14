@@ -63,8 +63,7 @@
 (defmethod parse-layer :canal [layer lookup cells]
   (parse (partial place-paths :canal) cells lookup layer))
 
-(defmethod parse-layer :default [_ _ _]
-  (println "default handler"))
+(defmethod parse-layer :default [_ _ _])
 
 
 (defn parse-tilesets
