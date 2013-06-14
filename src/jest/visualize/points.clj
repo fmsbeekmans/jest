@@ -12,12 +12,12 @@
 
 (defmulti tangent
   "Return the tangent of a stroke at progress p from dimensions d1 to d2."
-  (fn [s p [d1 d2]]
+  (fn [s _ [_ _]]
     (:stroke-type (meta s))))
 
 (defmulti point
   "Return a point at a certain progress in a stroke."
-  (fn [s p]
+  (fn [s _]
     (:stroke-type (meta s))))
 
 ;; Helper functions
