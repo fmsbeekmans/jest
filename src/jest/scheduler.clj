@@ -9,17 +9,23 @@
 (defn- time-millis []
   (.getTime (Date.)))
 
-(defn calculate-game-time []
+(defn calculate-game-time
   "Calculates the current game time"
+  []
   {:pre [@timer-data]}
   (let [[start-time paused] @timer-data]
     (or paused
         (- (time-millis) start-time))))
 
-(defn- calculate-real-time [game-time]
+(defn- calculate-real-time
+  "Maps a game time to real time."
+  [game-time]
   (+ (first @timer-data) game-time))
 
-(defn- calculate-delay [game-time]
+(defn- calculate-delay
+  "Calculates the difference between the given game time and the current real
+   time."
+  [game-time]
   (- (calculate-real-time game-time) (time-millis)))
 
 (def ^{:doc "A derefable variable specifying the current game time, in
@@ -68,7 +74,9 @@
   (and (started?)
        (boolean (second @timer-data))))
 
-(defn- unschedule-wrapper [task time]
+(defn- unschedule-wrapper
+  "Wraps a function to remove itself from the task list after running."
+  [task time]
   (fn []
     (task)
     (swap! tasks
@@ -79,27 +87,38 @@
                  (dissoc tasks time)
                  (assoc tasks time updated-task-list)))))))
 
-(defn- register-with-scheduler [task time]
+(defn- register-with-scheduler
+  "Registers a function with the Java scheduler."
+  [task time]
   (.schedule @thread-pool
              (unschedule-wrapper task time)
              (calculate-delay time)
              TimeUnit/MILLISECONDS))
 
-(defn- collect-task-map [f]
+(defn- collect-task-map
+  "maps over all tasks and returns the result of running a function on them,
+   grouped by time. The function receives 2 arguments: task time and a vector of
+   2 elements, the task function and the Future object returned by the Java
+   scheduler."
+  [f]
   (fn [tasks]
     (into {}
           (for [[time task-list] tasks]
             [time (doall (for [[task future] task-list]
                            (f time [task future])))]))))
 
-(defn- unregister-all []
+(defn- unregister-all
+  "Unregisters all tasks from the Java scheduler."
+  []
   {:pre [(paused?)]}
   (swap! tasks
          (collect-task-map (fn [_ [task future]]
                              (.cancel future false)
                              [task nil]))))
 
-(defn- reregister-all []
+(defn- reregister-all
+  "Reregisters all tasks with the Java scheduler."
+  []
   {:pre [(not (paused?))]}
   (swap! tasks
          (collect-task-map (fn [time [task _]]
