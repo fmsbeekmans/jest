@@ -12,7 +12,9 @@
 
 (defrecord Path [type coords direction inout resources routes])
 
-(defn path-type [path]
+(defn path-type
+  "Returns the type of the given path."
+  [path]
   (:type path))
 
 ;; TODO
