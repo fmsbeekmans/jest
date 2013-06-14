@@ -29,7 +29,7 @@
 
 (defn- parse [f cells lookup-fn layer]
   (doall
-   (map f cells (map lookup-fn (:data layer))))
+   (map f cells (map lookup-fn (:data layer)))))
 
 (defn layer-selector [layer _ _]
   (keyword (layer :name)))
