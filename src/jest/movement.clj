@@ -1,4 +1,5 @@
 (ns jest.movement
+  "Vehicle movement actions. This includes picking up and dropping off cargo."
   (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color vehicle-state-change update-vehicle unload-vehicle vehicle->duration cargo? set-cargo cargo-capacity cargo-count clear-cargo load-vehicle despawning? map->Vehicle]]
         [jest.color :only [hue-difference <=delta?]]
         [jest.world :only [alter-cell coords]]
@@ -8,23 +9,39 @@
 
 (defonce ^:private idc (atom 0))
 
-(defn- next-idc []
+(defn- next-idc
+  "Generates a unique id using a counter."
+  []
   (swap! idc inc))
 
-(defn- dir-num [dir]
+(defn- dir-num
+  "Maps a direction to a number, going clockwise from :north = 0."
+  [dir]
   (.indexOf [:north :east :south :west] dir))
 
-(defn route-score [color path]
+(defn route-score
+  "Returns the lowest hue difference with the given color among the routes for
+   the given path. If there are no routes, route-score returns nil. A lower
+   route score is better."
+  [color path]
   (if color
     (let [hue-diffs  (map (partial hue-difference color)
                           (:routes path))]
       (if (seq hue-diffs)
         (apply min hue-diffs)))))
 
-(defn dir-sort-fn [p1 p2]
-  (<= (dir-num (:direction p1)) (dir-num (:direction p2))))
+(defn- dir-sort-fn
+  "Sorter function for paths. Returns true if p1 should go before p2, false
+   otherwise. Sorting happens based on clockwise direction, with :north first."
+  [p1 p2]
+  (<= (dir-num (:direction p1))
+      (dir-num (:direction p2))))
 
-(defn best-route [color paths]
+(defn best-route
+  "Returns the path that best matches the given color. This is either a path
+   with a route close to the given color, or the first path in clockwise
+   order starting from :north."
+  [color paths]
   (let [route-scores (remove (comp nil? second) (map #(vector %
                                                    (route-score color %))
                                           paths))
@@ -36,37 +53,56 @@
                             route-scores)]
     (first sorted-routes)))
 
-;; if there are routes, vehicle carries cargo, and best matching route is less than <delta> away, select path with that route.
+;; if there are routes, vehicle carries cargo, and best matching route is less
+;; than <delta> away, select path with that route.
 ;; otherwise, select first clockwise
-(defn preference [color p1 p2]
+(defn preference
+  "Sorter function for paths. Returns true if p1 is the best match, false
+   otherwise. This is decided by either best-route, or if the best route score
+   is too high, by dir-sort-fn."
+  [color p1 p2]
   (let [[best-path best-score] (best-route color [p1 p2])]
     (if (and best-path
              (<=delta? best-score))
       (= best-path p1)
-       (dir-sort-fn p1 p2))))
+      (dir-sort-fn p1 p2))))
 
 (defn preferred-path
-  "select the preferred path for this vehicle"
+  "select the preferred path for this vehicle, as decided by the preference
+   function."
   [v]
   (let [paths (out-paths (vehicle-cell v))]
     (first (sort (partial preference (cargo-color v))
                  paths))))
 
-(defn- select-exit [v]
+(defn- select-exit
+  "Returns a Vehicle record that is the given vehicle record with an exit time
+   and exit direction attached to it. Exit time is based on the vehicle type,
+   exit-direction on preferred-path."
+  [v]
   (assoc v
     :exit-time (+ (:entry-time v)
                   (path->duration (vehicle->path (:type v))))
     :exit-direction (:direction (preferred-path v))))
 
-(defn- vehicle-enter [v]
+(defn- vehicle-enter
+  "Returns a Vehicle record that is the vehicle record with an entry time and
+   entry direction attached to it. Both are based on the exit values for the
+   given vehicle."
+  [v]
   (assoc (select-exit v)
     :entry-time (:exit-time v)
     :entry-direction (opposite-dirs (:exit-direction v))))
 
-(defn- vehicle-clear-exit [v]
+(defn- vehicle-clear-exit
+  "Returns a Vehicle record with the exit information cleared."
+  [v]
   (assoc v :exit-time nil :exit-direction nil))
 
-(defn start-despawning [id]
+(defn start-despawning
+  "Modifies the state of the vehicle with the given id to :despawning, and
+   schedules removal from the map."
+  [id]
   {:pre [(spawn? (vehicle-cell (vehicle id)))]}
   (vehicle-state-change id :despawning)
   (update-vehicle id vehicle-clear-exit)
@@ -75,6 +111,8 @@
                        2))))
 
 (defn vehicle-transition-state-dispatch
+  "Dispatch function for the vehicle-transition-state multimethod.
+   Dispatch happens on [cargo? cell-type]."
   [id]
   (let [vehicle (vehicle id)]
     [(cargo? vehicle)
@@ -82,7 +120,8 @@
 
 
 (defmulti vehicle-transition-state
-  "Does the required work for a vehicle upon moving into a cell. dispatches on [state cargo? cell-type]"
+  "Does the required work for a vehicle upon moving into a cell.
+   Dispatch happens on [cargo? cell-type]."
   vehicle-transition-state-dispatch)
 
 (defmethod vehicle-transition-state :default
@@ -136,6 +175,9 @@
     (clear-cargo id)))
 
 (defn move-vehicle
+  "Moves the vehicle with the given id in the given direction. This will also
+   perform any actions required for this vehicle on the given cell, such as
+   picking up and dropping off cargo."
   [id direction]
   {:pre [(let [v (vehicle id)
                path (path (vehicle-cell v) direction)]
@@ -151,7 +193,10 @@
      (update-vehicle id vehicle-enter)
      (vehicle-transition-state id))))
 
-(defn- schedule-move [id]
+(defn- schedule-move
+  "Schedules the next move for the vehicle with the given id. If the vehicle has
+   state :despawning, no move is scheduled."
+  [id]
   (schedule (fn []
               (dosync
                (move-vehicle id (:exit-direction (vehicle id)))
@@ -159,11 +204,16 @@
                  (schedule-move id))))
             (offset (vehicle->duration (vehicle id)))))
 
-(defn- schedule-state-change [id state time]
+(defn- schedule-state-change
+  "Schedules a state change for the vehicle with the given id to the given state
+   at the given time."
+  [id state time]
   (schedule #(dosync (vehicle-state-change id state))
             time))
 
-(defn- create-vehicle-on-spawn [c]
+(defn- load-vehicle-on-spawn
+  "Loads a vehicle on a spawn point, setting all initial state."
+  [c]
   {:pre [(spawn? c)]}
   (dosync
    (load-vehicle c (select-exit (map->Vehicle
@@ -177,7 +227,7 @@
   "Spawns a vehicle on the given cell."
   [c]
   {:pre [(spawn? c)]}
-  (let [vehicle (create-vehicle-on-spawn c)]
+  (let [vehicle (load-vehicle-on-spawn c)]
     (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
                                                     2))
     (schedule-move (:id vehicle))
