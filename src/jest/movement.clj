@@ -232,5 +232,3 @@
                                                     2))
     (schedule-move (:id vehicle))
     vehicle))
-
-
