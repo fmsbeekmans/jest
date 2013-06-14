@@ -103,8 +103,7 @@
 (defn reduce-resource [cell amount]
   {:post [(or (nil? (:resource cell))
               (>= (resource-count cell) 0))]}
-  (assoc cell :resource (if (= amount (resource-count cell))
-                          nil
+  (assoc cell :resource (when-not (= amount (resource-count cell))
                           [(resource-color cell)
                            (- (resource-count cell)
                               amount)])))
