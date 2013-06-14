@@ -28,6 +28,7 @@
   (reify clojure.lang.IDeref
     (deref [_] (calculate-game-time))))
 
+
 (defn start!
   "Starts the scheduler. After calling start, game-time will become
   valid and schedule may be called."
@@ -50,11 +51,22 @@
    (reset! tasks nil))
   nil)
 
+(defn started?
+  "Returns true if the scheduler has been started, false otherwise."
+  []
+  (boolean @timer-data))
+
+(defn scheduler-reset!
+  "Resets the scheduler to a stopped state, regardless of what it was in before"
+  []
+  (if (started?)
+    (stop!)))
+
 (defn paused?
   "Returns true if the scheduler has been paused, false otherwise."
   []
-  {:pre [@timer-data]}
-  (boolean (second @timer-data)))
+  (and (started?)
+       (boolean (second @timer-data))))
 
 (defn- unschedule-wrapper [task time]
   (fn []
