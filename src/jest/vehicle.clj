@@ -46,8 +46,9 @@
 (defn vehicle-state-change [id state]
   (update-vehicle id assoc :state state))
 
-(defn load-vehicle [c v]
+(defn load-vehicle
   "Loads a vehicle on the given cell"
+  [c v]
   (let [v (assoc v :coords (coords c))]
     (alter-cell c
                 update-in [:vehicles] conj v)
