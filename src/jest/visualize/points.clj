@@ -71,16 +71,16 @@ get the needed. Defined are simple and composite.")
 
 (defmethod tangent
   :simple
-  ([l _ [d1 d2]]
-     "Tangent on a single stroke from dimension d1 to d2, progress is th irrelevant."
-      (let [p1 (start-point l)
-            p2 (l 1)
-            dx (- (p2 d1)
-                  (p1 d1))
-            dy (- (p2 d2)
-                  (p1 d2))]
-        (Math/atan2 dy
-                    dx))))
+  [l _ [d1 d2]]
+  "Tangent on a single stroke from dimension d1 to d2,progress is irrelevant."
+  (let [p1 (start-point l)
+        p2 (l 1)
+        dx (- (p2 d1)
+              (p1 d1))
+        dy (- (p2 d2)
+              (p1 d2))]
+    (Math/atan2 dy
+                dx)))
 
 ;; Composed
 
@@ -106,7 +106,10 @@ get the needed. Defined are simple and composite.")
 
 (defn index-sub-strokes
   [ss]
-  "Make a map of a vector of strokes, where the key is a relative progress interval and as value a map of offset, howmuch stroke comes before this starts in absolute? progress, relative, how long is this sub-stroke? and the stroke itself."
+  "Make a map of a vector of strokes, where the key is a relative progress
+interval and as value a map of offset, howmuch stroke comes before this
+starts in absolute? progress, relative, how long is this sub-stroke? and the
+stroke itself."
   {:pre [(strokes-connected? ss)]}
   (let [total-length (apply + (map length ss))]
     (loop [sum 0
