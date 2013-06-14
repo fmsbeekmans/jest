@@ -53,3 +53,13 @@
                         (if (world/direction-exists? c :east)
                           (= c (world/direction (world/direction c :east) :west))
                           true))) => (n-of true 100)))
+
+
+(cell/with-initialized-temp-world [1 1]
+        (let [c #(world/cell [0 0])]
+          (fact "Cell has no background when constructed"
+                (:background (c)) => nil)
+          (fact "Cell background can be set"
+                (do
+                  (cell/set-background (c) ..anything..)
+                  (:background (c)) => ..anything..))))
