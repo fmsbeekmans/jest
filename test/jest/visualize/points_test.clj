@@ -23,7 +23,7 @@
                                                [1 0])
                                 (points/stroke [1 1]
                                                [2 0])]) => falsey)
-  
+
   (fact "Stroke basic functionality"
     (points/point (points/stroke [3] [7]) 0.5) => (vec-roughly [5] 0)
     (points/point (points/stroke [3 4] [7 0]) 0.25) => (vec-roughly [4 3] 0)
@@ -35,7 +35,7 @@
 
     ;; end
       (points/point (points/stroke [3] [7]) 1) => (vec-roughly [7] 0))
-  
+
     (fact "From point a to point a is not a stroke."
       ((points/stroke [1.1] [1.1]) 0.9) => (throws java.lang.AssertionError)))
 

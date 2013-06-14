@@ -56,8 +56,8 @@
   (<= dh +delta+))
 
 (defn hue-matches?
-  "Returns true iff the hue difference between h1 and h2 is less than or equal to
-   the delta."
+  "Returns true iff the hue difference between h1 and h2 is less than or equal
+   to the delta."
   [h1 h2]
   (<=delta? (hue-difference h1 h2)))
 

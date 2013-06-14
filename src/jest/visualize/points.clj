@@ -1,5 +1,5 @@
 (ns jest.visualize.points
-  "Helps to define routes through n-dimentional spaces and 
+  "Helps to define routes through n-dimentional spaces and
    get the needed. Defined are simple and composite.")
 
 
@@ -27,7 +27,7 @@
   [l]
   (point l 0))
 
-(defn end-point 
+(defn end-point
   "Short hand for point at the end."
   [l]
   (point l 1))
