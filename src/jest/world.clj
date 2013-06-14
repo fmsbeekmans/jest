@@ -58,9 +58,9 @@
   [c]
   (:coord (maybe-deref c)))
 
-(def directions
-  #^{:private true
-     :doc "A map of direction keywords to coord delta's"}
+(def ^{:private true
+       :doc "A map of direction keywords to coord delta's"}
+  directions
   {:north [0 -1]
    :south [0 1]
    :west [-1 0]
