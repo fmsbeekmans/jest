@@ -22,12 +22,14 @@
 
 ;; Helper functions
 
-(defn start-point [l]
+(defn start-point
   "Short hand for the point at the start."
+  [l]
   (point l 0))
 
-(defn end-point [l]
+(defn end-point 
   "Short hand for point at the end."
+  [l]
   (point l 1))
 
 ;; Simple stroke
