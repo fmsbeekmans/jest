@@ -155,6 +155,9 @@
   (send schedule-agent
         (fn [_]
           (swap! tasks
-                 update-in [time] conj [task
-                                        (register-with-scheduler task time)])))
+                 update-in [time] conj
+                 (if (paused?)
+                   [task nil]
+                   [task
+                    (register-with-scheduler task time)]))))
   nil)
