@@ -44,7 +44,10 @@
 (defn hue-difference
   "Returns the difference between twho hues."
   [h1 h2]
-  (Math/abs (- h1 h2)))
+  (let [diff (Math/abs (- h1 h2))]
+    (if (>= diff Math/PI)
+      (Math/abs (- (* 2 Math/PI) (- h1) h2))
+      diff)))
 
 (def ^:private +delta+ (/ Math/PI 8))
 
