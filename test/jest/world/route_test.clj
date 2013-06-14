@@ -3,7 +3,8 @@
         jest.testutils
         [jest.world.cell :only [with-initialized-temp-world]]
         [jest.world :only [cell all-cells]])
-  (:require [jest.world.route :as route]))
+  (:require [jest.world.route :as route]
+            [jest.world.path :as path]))
 
 (fact "all-routes should return an empty seq if there are no valid routes"
       (route/all-routes {}) => '()
@@ -40,3 +41,23 @@
         (#'route/remove-route {:routes #{..some-route..}} ..some-route..) =>
         {:routes #{}}
         (provided (jest.color/hue-difference ..some-route.. ..some-route..) => 0))
+
+(with-initialized-temp-world [2 1]
+  (fact "A route can be added and removed from paths on cells"
+        (let [ce #(cell [0 0])
+              d :east
+              t :road
+              co 1]
+          (path/build-path (ce) d t)
+          (route/all-routes (ce)) => '()
+          (route/build-route (ce) d co)
+          (route/all-routes (ce)) => (seq [[d t #{co}]])
+          (route/unbuild-route (ce) d co)
+          (route/all-routes (ce)) => '()
+
+
+
+
+
+          ))
+  )
