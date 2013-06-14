@@ -42,27 +42,35 @@
     [in out]))
 
 (defn paths
+  "Returns all paths at the given cell, optionally filtered on a type."
   ([c]
      (sequence (vals (:paths c))))
   ([c type]
      (filter #(= type (:type %)) (paths c))))
 
-(def path->vehicle {})
-(def vehicle->path {})
+(def ^{:doc "Given a path type, returns a vehicle type."}
+  path->vehicle {})
+(def ^{:doc "Given a vehicle type, returns a path type."}
+  vehicle->path {})
 
-(def path->duration {})
+(def ^{:doc "Given a path type, returns a duration vehicles should spend
+traversing such a path"}
+  path->duration {})
 
 (defmacro- defpath
   "Defines a path type. path-type is a keyword naming the path type,
   vehicle-type is a keyword naming the vehicle type, and duration is
   the time spent in a cell while traversing such a path."
   [path-type vehicle-type duration]
-  (let [pred (symbol (format "%s?" (name path-type)))
-        getall (symbol (plural (name path-type)))]
+  (let [name (name path-type)
+        pred (symbol (format "%s?" name))
+        getall (symbol (plural name))]
     `(do (defn ~pred
+           ~(format "Returns true iff the given path is a %s." name)
            [~'path]
            (= ~path-type (:type ~'path)))
          (defn ~getall
+           ~(format "Returns all %s at this cell." (plural name))
            [~'cell]
            (paths ~'cell ~path-type))
 
