@@ -15,17 +15,22 @@
   [v]
   (reset! *world* v))
 
-(defn world-width
-  "Returns the width of the loaded world."
-  []
-  (inc
-   (apply max (map first (keys @*world*)))))
+(let [max-wrapper
+      (fn [& args]
+        (if (seq args)
+          (apply max args)
+          -1))]
+  (defn world-width
+    "Returns the width of the loaded world."
+    []
+    (inc
+     (apply max-wrapper (map first (keys @*world*)))))
 
-(defn world-height
-  "Returns the height of the loaded world."
-  []
-  (inc
-   (apply max (map second (keys @*world*)))))
+  (defn world-height
+    "Returns the height of the loaded world."
+    []
+    (inc
+     (apply max-wrapper (map second (keys @*world*))))))
 
 (defn world-size
   "Returns the size of the loaded world as a [width height] tuple"

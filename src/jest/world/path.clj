@@ -123,8 +123,7 @@
 
 
 (def opposite-dirs
-  #^{:private true
-     :doc "A map of direction opposites"}
+     "A map of direction opposites"
   {:north :south,
    :south :north,
    :west :east,
