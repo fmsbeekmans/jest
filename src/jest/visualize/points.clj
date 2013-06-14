@@ -1,7 +1,6 @@
-(ns
-    #^{:doc (str "Helps to define routes through n-dimentional spaces and "
-                 "get the needed. Defined are simple and composite.")}
-    jest.visualize.points)
+(ns jest.visualize.points
+  "Helps to define routes through n-dimentional spaces and 
+get the needed. Defined are simple and composite.")
 
 
 ;; Multi methods for strokes.
@@ -107,11 +106,7 @@
 
 (defn index-sub-strokes
   [ss]
-  #^{:doc (str "Make a map of a vector of strokes, where the key "
-               "is a relative progress interval and as value a map of "
-               "offset, howmuch stroke comes before this starts in absolute? "
-               "progress, relative, how long is this sub-stroke? "
-               "and the stroke itself.")}
+  "Make a map of a vector of strokes, where the key is a relative progress interval and as value a map of offset, howmuch stroke comes before this starts in absolute? progress, relative, how long is this sub-stroke? and the stroke itself."
   {:pre [(strokes-connected? ss)]}
   (let [total-length (apply + (map length ss))]
     (loop [sum 0
@@ -160,7 +155,6 @@
 
 (defmethod point :composed
   [s p]
-  "Where is p on a composed stroke?"
   (let [{offset :offset
          p' :progress
          sub-stroke :stroke} (sub-stroke s p)]
@@ -169,13 +163,11 @@
 
 (defmethod length :composed
   [ss]
-  "How long are all the sub-strokes of this stroke combined?"
   (apply + (map length
                 (map :stroke (vals (:indexed-sub-strokes (meta ss)))))))
 
 (defmethod tangent :composed
   [ss p [d1 d2]]
-  "What's the tangent of this stroke at p from d1 to d2?"
   (let [{offset :offset
          p' :progress
          sub-stroke :stroke} (sub-stroke ss p)]
