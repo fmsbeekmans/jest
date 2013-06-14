@@ -120,7 +120,11 @@ distance between it's ends."
                                                    [1 1])
                                     (points/stroke [1 1]
                                                    [2 0])
-                                    lines0])]
+                                    (points/stroke-comp
+                                     [(points/stroke [2 0]
+                                                     [3 1])
+                                      (points/stroke [3 1]
+                                                     [4 0])])])]
     (fact "Tangent asks the tangent of the correct sub-stroke."
       (points/tangent lines0 0 [0 1]) => (roughly-angle (* Math/PI 0.25) 0)
       (points/tangent lines0 0.5 [0 1]) => (roughly-angle (* Math/PI 0.25) 0)
