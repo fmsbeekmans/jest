@@ -8,8 +8,10 @@
 
 (def ^:private constructor-atom (atom {}))
 
-;; Make empty fn generate warnings
-(defn get-build-function [k]
+;; TODO: Make empty fn generate warnings
+(defn get-build-function
+  "Given a keyword, returns a function used to construct this building type."
+  [k]
   (or (@constructor-atom k)
       nil))
 
@@ -113,15 +115,22 @@
 
 
 ;; functions for mixers
-(defn resource-color [cell]
+(defn resource-color
+  "Returns the color of the resource at this cell."
+  [cell]
   (first (:resource cell)))
 
-(defn resource-count [cell]
+(defn resource-count
+  "Returns the amount of resource at this cell."
+  [cell]
   (or
    (second (:resource cell))
    0))
 
-(defn- mix-colors' [cell color magnitude]
+(defn- mix-colors'
+  "Given a cell, returns a cell with the given color mixed with existing color
+   there. Magnitude represents how much color should be mixed."
+  [cell color magnitude]
   (let [[existing-color existing-magnitude] (or (:resource cell)
                                                 [nil 0])
         new-color (apply average-hue (concat (repeat magnitude color)
@@ -129,10 +138,16 @@
         new-magnitude (+ magnitude existing-magnitude)]
     (assoc cell :resource [new-color new-magnitude])))
 
-(defn mix-colors [cell color magnitude]
+(defn mix-colors
+  "Given a cell, alters this cell in the world state to mix the given color
+   at the given magnitude with existing colors there."
+  [cell color magnitude]
   (alter-cell cell mix-colors' color magnitude))
 
-(defn- reduce-resource' [cell amount]
+(defn- reduce-resource'
+  "Given a cell, returns a cell with the resource amount reduced with the given
+   amount."
+  [cell amount]
   {:post [(or (nil? (:resource cell))
               (>= (resource-count cell) 0))]}
   (assoc cell :resource (when-not (= amount (resource-count cell))
@@ -140,5 +155,8 @@
                            (- (resource-count cell)
                               amount)])))
 
-(defn reduce-resource [cell amount]
+(defn reduce-resource
+  "Given a cell, alters this cell in the world state to reduce the resource
+   amount with the given amount."
+  [cell amount]
   (alter-cell cell reduce-resource' amount))
