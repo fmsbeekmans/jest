@@ -34,12 +34,14 @@
 (def mock-tasks)
 
 (defn mock-calculate-game-time
-  "mock version of calculate-game-time. Always returns the current mock time, which can be forwarded using tick."
+  "mock version of calculate-game-time. Always returns the current mock time,
+which can be forwarded using tick."
   []
   @mock-game-time)
 
 (defn mock-schedule
-  "mock version for schedule. Ignores the schedule time and runs the function right away. Useful in tests."
+  "mock version for schedule. Ignores the schedule time and
+runs the function right away. Useful in tests."
   [task time]
   (dosync
    (if (<= time @scheduler/game-time)
@@ -47,7 +49,8 @@
      (alter mock-tasks update-in [time] conj task))))
 
 (defn tick
-  "forwards the scheduler n milliseconds, running all scheduled tasks in order. By default n is 1"
+  "forwards the scheduler n milliseconds,
+running all scheduled tasks in order.By default n is 1"
   ([] (tick 1))
   ([n] (dotimes [_ n]
          (swap! mock-game-time inc)
@@ -70,17 +73,27 @@
 
 (defn swap-scheduler []
   (if (= scheduler/schedule mock-schedule)
-    (do (alter-var-root #'scheduler/schedule (constantly tmp-schedule))
-        (alter-var-root #'scheduler/calculate-game-time (constantly tmp-calculate-game-time))
-        (alter-var-root #'mock-game-time (constantly (new-mock-game-time)))
-        (alter-var-root #'mock-tasks (constantly (new-mock-tasks))))
+    (do (alter-var-root #'scheduler/schedule
+                        (constantly tmp-schedule))
+        (alter-var-root #'scheduler/calculate-game-time
+                        (constantly tmp-calculate-game-time))
+        (alter-var-root #'mock-game-time
+                        (constantly (new-mock-game-time)))
+        (alter-var-root #'mock-tasks
+                        (constantly (new-mock-tasks))))
 
-    (do (alter-var-root #'tmp-schedule (constantly scheduler/schedule))
-        (alter-var-root #'tmp-calculate-game-time (constantly scheduler/calculate-game-time))
-        (alter-var-root #'mock-game-time (constantly (new-mock-game-time)))
-        (alter-var-root #'mock-tasks (constantly (new-mock-tasks)))
-        (alter-var-root #'scheduler/schedule (constantly mock-schedule))
-        (alter-var-root #'scheduler/calculate-game-time (constantly mock-calculate-game-time)))))
+    (do (alter-var-root #'tmp-schedule
+                        (constantly scheduler/schedule))
+        (alter-var-root #'tmp-calculate-game-time
+                        (constantly scheduler/calculate-game-time))
+        (alter-var-root #'mock-game-time
+                        (constantly (new-mock-game-time)))
+        (alter-var-root #'mock-tasks
+                        (constantly (new-mock-tasks)))
+        (alter-var-root #'scheduler/schedule
+                        (constantly mock-schedule))
+        (alter-var-root #'scheduler/calculate-game-time
+                        (constantly mock-calculate-game-time)))))
 
 (defn vec-roughly
   [target margin]
