@@ -33,8 +33,11 @@
 
 (def +delta+ (/ Math/PI 8))
 
+(defn <=delta? [dh]
+  (<= dh +delta+))
+
 (defn hue-matches? [h1 h2]
-  (< (hue-difference h1 h2) +delta+))
+  (<=delta? (hue-difference h1 h2)))
 
 (defn contains-hue? [coll h]
   (boolean (seq (filter (partial hue-matches? h)
