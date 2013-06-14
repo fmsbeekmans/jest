@@ -1,6 +1,6 @@
 (ns jest.world
   "Public interface for the world state."
-  (:use jest.util))
+  (:use [jest.util :only [maybe-deref]]))
 
 (defonce
   #^{:dynamic true

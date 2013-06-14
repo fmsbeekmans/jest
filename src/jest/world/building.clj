@@ -1,7 +1,7 @@
 (ns jest.world.building
   "Functions for adding, removing and searching for buildings."
   (:use [clojure.core.incubator :only [defmacro-]]
-        jest.util
+        [jest.util :only [plural]]
         [jest.world :only [alter-cell all-cells cell]]
         [jest.color :only [average-hue]]))
 

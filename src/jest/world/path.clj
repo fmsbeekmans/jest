@@ -1,7 +1,7 @@
 (ns jest.world.path
   "Functions for adding, removing and searching for roads, rails and canals."
   (:use [clojure.core.incubator :only [defmacro-]]
-        jest.util
+        [jest.util :only [plural]]
         [jest.world :only [cell direction coords alter-cell]]))
 
 ; Temporary convention:
