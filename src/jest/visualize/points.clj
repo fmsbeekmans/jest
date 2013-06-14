@@ -1,4 +1,8 @@
-(ns jest.visualize.points)
+(ns
+    #^{:doc (str "Helps to define routes through n-dimentional spaces and "
+                 "get the needed. Defined are simple and composite.")}
+    jest.visualize.points)
+
 
 ;; Multi methods for strokes.
 
