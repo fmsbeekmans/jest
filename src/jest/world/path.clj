@@ -2,6 +2,7 @@
   "Functions for adding, removing and searching for roads, rails and canals."
   (:use clojure.core.incubator
         jest.util
+        jest.world
         jest.world.cell))
 
 ; Temporary convention:

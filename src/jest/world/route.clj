@@ -2,6 +2,7 @@
   "Functions for adding, removing and searching for routes along roads, rails and canals."
   (:use jest.util
         jest.world.path
+        jest.world
         jest.world.cell))
 
 (defn- add-route

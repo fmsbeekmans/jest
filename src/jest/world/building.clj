@@ -2,6 +2,7 @@
   "Functions for adding, removing and searching for buildings."
   (:use clojure.core.incubator
         jest.util
+        jest.world
         jest.world.cell))
 
 (def ^:private constructor-atom (atom {}))

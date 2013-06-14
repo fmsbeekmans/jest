@@ -11,9 +11,9 @@
 
 (defn- workable-world
   []
-  (for [y (range (cell/world-height))
-        x (range (cell/world-width))]
-    (cell/cell [x y])))
+  (for [y (range (world/world-height))
+        x (range (world/world-width))]
+    (world/cell [x y])))
 
 (defn- place-building [c d]
   (let [parts (clojure.string/split (name d) #"-")

@@ -1,7 +1,8 @@
 (ns jest.world.route-test
   (:use midje.sweet
         jest.testutils
-        [jest.world.cell :only [with-initialized-temp-world cell all-cells]])
+        [jest.world.cell :only [with-initialized-temp-world]]
+        [jest.world :only [cell all-cells]])
   (:require [jest.world.route :as route]))
 
 (fact "all-routes should return an empty seq if there are no valid routes"

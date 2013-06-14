@@ -1,5 +1,5 @@
 (ns jest.vehicle
-  (:use [jest.world.cell :only [cell alter-cell coords]]
+  (:use [jest.world :only [cell alter-cell coords]]
         [jest.world.building :only [vehicle-type spawn?]]
         [jest.world.path :only [in-paths out-paths from to]]
         [jest.scheduler :only [game-time schedule]]))
@@ -70,4 +70,3 @@
   ; naar = spawn? => despawn
   ; schedule!
   ; schedule schedule-move!)
-

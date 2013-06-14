@@ -1,7 +1,7 @@
 (ns jest.visualize.visualize
   (:require [brick.image :as image])
   (:require [brick.drawable :as drawable])
-  
+  (:require [jest.world :as world])
   (:require [jest.visualize.points :as points])
   (:require [jest.vehicle :as vehicle])
   (:require [jest.world.path :as path])
@@ -19,9 +19,9 @@
   "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
   [cell-draw-fn]
   {:post [(every? drawable/drawable? (vals (:grid %)))]}
-  (drawable/->Grid (cell/world-width) (cell/world-height)
-                   (into {} (for [c (cell/all-cells)]
-                              [(cell/coords c) (cell-draw-fn c)]))))
+  (drawable/->Grid (world/world-width) (world/world-height)
+                   (into {} (for [c (world/all-cells)]
+                              [(world/coords c) (cell-draw-fn c)]))))
 
 (defn vehicles->Stack
   [vehicles-fn
@@ -54,7 +54,7 @@
 
 (defn cell-road [c]
   (if (seq (filter (fn [[_ v]]
-                
+
                 (= :road (:type v))) (:paths c)))
     (drawable/->Image (image/path->PImage (clojure.java.io/resource "road.png")))
     (drawable/->Nothing)))
