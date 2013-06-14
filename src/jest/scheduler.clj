@@ -5,7 +5,6 @@
 (defonce ^:private timer-data (atom nil))
 (defonce ^:private thread-pool (atom nil))
 (defonce ^:private tasks (atom {}))
-  
 
 (defn- time-millis []
   (.getTime (Date.)))
@@ -23,15 +22,16 @@
 (defn- calculate-delay [game-time]
   (- (calculate-real-time game-time) (time-millis)))
 
-(def ^{:doc "A derefable variable specifying the current game time, in milliseconds. Only valid after the scheduler has started."}
+(def ^{:doc "A derefable variable specifying the current game time, in
+            milliseconds. Only valid after the scheduler has started."}
   game-time
   (reify clojure.lang.IDeref
     (deref [_] (calculate-game-time))))
 
 (defn start!
-  "Starts the scheduler. After calling start, game-time will become valid and schedule may be called."
-  []
-  {:pre [(not @timer-data)
+  "Starts the scheduler. After calling start, game-time will become
+  valid and schedule may be called."
+  [] {:pre [(not @timer-data)
          (not @thread-pool)]}
   (io!
    (reset! timer-data [(time-millis) nil])
@@ -39,10 +39,10 @@
   nil)
 
 (defn stop!
-  "Stops the scheduler. After calling stop, game-time will become invalid and schedule may not be called anymore."
-  []
-  {:pre [@timer-data
-         @thread-pool]}
+  "Stops the scheduler. After calling stop, game-time will become
+  invalid and schedule may not be called anymore."
+  [] {:pre
+  [@timer-data @thread-pool]}
   (io!
    (reset! timer-data nil)
    (.shutdownNow @thread-pool)
@@ -92,9 +92,10 @@
   (swap! tasks
          (collect-task-map (fn [time [task _]]
                              [task (register-with-scheduler task time)]))))
-  
+
 (defn pause!
-  "Pauses the scheduler. The game-time clock will freeze, and none of the scheduled tasks will run until the scheduler is resumed again."
+  "Pauses the scheduler. The game-time clock will freeze, and none of the
+  scheduled tasks will run until the scheduler is resumed again."
   []
   {:pre [@timer-data
          (not (second @timer-data))]}
@@ -105,7 +106,8 @@
    @game-time))
 
 (defn resume!
-  "Resumes the scheduler. The game-time clock starts running again, and the scheduled tasks will run at their scheduled game times."
+  "Resumes the scheduler. The game-time clock starts running again, and the
+   scheduled tasks will run at their scheduled game times."
   []
   {:pre [@timer-data
          (second @timer-data)]}
@@ -118,7 +120,8 @@
      resume-time)))
 
 (defn offset
-  "Calculates a future game time dt time-units in the future. By default, time-units is :milliseconds. Other allowed values are :seconds and :minutes."
+  "Calculates a future game time dt time-units in the future. By default,
+  time-units is :milliseconds. Other allowed values are :seconds and :minutes."
   ([dt]
      (+ @game-time dt))
   ([dt time-unit]
@@ -133,9 +136,10 @@
 (def ^:private schedule-agent (agent nil))
 
 (defn schedule
-  "Schedules the given task at the specified game time. This may only be called if the scheduler has started. This function is safe to call from a transaction."
-  [task time]
-  {:pre [@timer-data]}
+  "Schedules the given task at the specified game time. This may only
+  be called if the scheduler has started. This function is safe to
+  call from a transaction."
+  [task time] {:pre [@timer-data]}
   (send schedule-agent
         (fn [_]
           (swap! tasks

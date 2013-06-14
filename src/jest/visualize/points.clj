@@ -135,10 +135,10 @@
   "At which sub-stroke is p?"
   {:pre [(= (:stroke-type (meta ss)) :composed)]}
   (first
-   (if (= 0 p)
+   (if (zero? p)
      (keep
       (fn [[[start end] sub-stroke]]
-        (if (= 0 start)
+        (if (zero? start)
           sub-stroke))
       (:indexed-sub-strokes (meta ss)))
      (keep

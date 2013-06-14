@@ -7,7 +7,7 @@
   (instance? clojure.lang.IDeref d))
 
 (defn maybe-deref
-  "Returns the derefed d if d is a derefable. if d is not a derefable, it is returned directly."
+  "Returns the value referred to by d, or d itself if d is not derefable"
   [d]
   (if (derefable? d)
     (deref d)

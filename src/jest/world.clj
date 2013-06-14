@@ -5,29 +5,30 @@
 (defonce
   #^{:dynamic true
      :private true
-     :doc "Binding containing the world state as an atom containing a map from [x y] coordinates to cells."}
+     :doc "Binding containing the world state as an atom containing a
+          map from [x y] coordinates to cells."}
   *world*
   (atom {}))
 
 (defn reset-world
-  "Forcefully sets the world to value v."
+  "Forcefully resets the world to value v."
   [v]
   (reset! *world* v))
 
 (defn world-width
-  "Returns the width of the world."
+  "Returns the width of the loaded world."
   []
   (inc
    (apply max (map first (keys @*world*)))))
 
 (defn world-height
-  "Returns the height of the world."
+  "Returns the height of the loaded world."
   []
   (inc
    (apply max (map second (keys @*world*)))))
 
 (defn world-size
-  "Returns the size of the world as [sx sy]"
+  "Returns the size of the loaded world as a [width height] tuple"
   []
   [(world-width) (world-height)])
 
@@ -53,32 +54,37 @@
   (:coord (maybe-deref c)))
 
 (def directions
+  #^{:private true
+     :doc "A map of direction keywords to coord delta's"}
   {:north [0 -1]
    :south [0 1]
    :west [-1 0]
    :east [1 0]})
 
-(defn- calculate-coord [cell dir]
+(defn- calculate-coord
+  "Returns the [x y] coord of the location of a possible adjacent cell
+  to c in direction dir"
+  [cell dir]
   (vec (map + (coords cell) (dir directions))))
 
 (defn direction
-  "returns cell in the given direction"
+  "Returns cell in the given direction"
   [c dir]
   (cell (calculate-coord c dir)))
 
 (defn direction-exists?
-  "returns whether the cell is connected in the given direction"
+  "Returns whether the cell is connected in the given direction"
   [c dir]
   (boolean (cell-ref (calculate-coord c dir))))
 
 (defn all-cells
-  "returns a list of all cells, optionally filtered by a predicate"
+  "Returns a list of all cells, optionally filtered by a predicate"
   ([]
      (map (comp deref second) @*world*))
   ([pred]
      (filter pred (all-cells))))
 
 (defn alter-cell
-  "Alters a cell. This must be called within a transaction."
+  "Alters a cell through it's ref. Must be called within a transaction."
   ([c f & args]
      (apply alter (@*world* (coords c)) f args)))

@@ -53,7 +53,9 @@
 (def path->duration {})
 
 (defmacro- defpath
-  "Defines a path type. path-type is a keyword naming the path type, vehicle-type is a keyword naming the vehicle type, and duration is the time spent in a cell while traversing such a path."
+  "Defines a path type. path-type is a keyword naming the path type,
+  vehicle-type is a keyword naming the vehicle type, and duration is
+  the time spent in a cell while traversing such a path."
   [path-type vehicle-type duration]
   (let [pred (symbol (format "%s?" (name path-type)))
         getall (symbol (plural (name path-type)))]
@@ -98,6 +100,7 @@
   (direction (from path) (:direction path)))
 
 (defn- update-path
+  "Forces an assoc of path into c."
   [c path]
   (assoc-in c [:paths (:direction path)] path))
 
@@ -120,6 +123,8 @@
 
 
 (def opposite-dirs
+  #^{:private true
+     :doc "A map of direction opposites"}
   {:north :south,
    :south :north,
    :west :east,

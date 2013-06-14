@@ -15,7 +15,10 @@
   :repositories {"pievolution" "http://pievolution.org/maven-repo/"}
   :profiles {:dev {:plugins [[lein-midje "3.0.0"]
                              [codox "0.6.4"]
-                             [lein-cloverage "1.0.2"]]
+                             [lein-cloverage "1.0.2"]
+                             [lein-bikeshed "0.1.3"]
+                             [jonase/eastwood "0.0.2"]
+                             [lein-kibit "0.0.8"]]
                    :dependencies [[midje "1.5.1"]]
                    :source-paths ["dev/"]}}
   :resource-paths ["resources/"]

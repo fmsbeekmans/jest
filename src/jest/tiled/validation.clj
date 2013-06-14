@@ -34,8 +34,6 @@
              read-json
              f
              json-val/validator
-             json-val/boolean-validator)
-        wrapper (or level-validator
-                    (fn [_] nil))]
-    (fn [json-schema]
-      (wrapper json-schema))))
+             json-val/boolean-validator)]
+    (or level-validator
+        (constantly nil))))

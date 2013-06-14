@@ -27,9 +27,7 @@
   [vehicles-fn
    vehicle-draw-fn]
   (comment
-    (-> Stack (vec (map
-                    (fn [vehicle]
-                      ))))))
+    (vec Stack (map (fn [vehicle])))))
 
 (defn visualize-world-state
   []

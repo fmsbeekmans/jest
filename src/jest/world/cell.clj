@@ -3,11 +3,11 @@
   (:use jest.util)
   (:require [jest.world :as world]))
 
-(defrecord Cell [coord paths background building-type vehicle-type resource-type vehicles])
-
+(defrecord Cell [coord paths background building-type
+                 vehicle-type resource-type vehicles])
 
 (defn- world-grid
-  "generates and returns a world grid of the given dimension."
+  "Generates and returns a world grid of the given dimension."
   [sx sy]
   (reduce conj {}
           (for [x (range sx)
@@ -22,7 +22,8 @@
   (world/reset-world (world-grid sx sy)))
 
 (defn set-background
-  "Alters world state by setting the background on cell c to the given background."
+  "Alters world state by setting the background on cell c to the given
+  background."
   [c background]
   (dosync
    (world/alter-cell c assoc :background background)))
