@@ -1,5 +1,6 @@
 (ns jest.world.route
-  "Functions for adding, removing and searching for routes along roads, rails and canals."
+  "Functions for adding, removing and searching for routes along
+  roads, rails and canals."
   (:use jest.util
         jest.world.path
         jest.world
@@ -37,6 +38,7 @@
    (alter-cell c #(remove-route % color) (get-in c [:paths dir]))))
 
 (defn all-routes
+  "Returns tuples of [direction type routes] for a cell c."
   [c]
   (for [[d p] (:paths c)
         :when (seq (:routes p))]

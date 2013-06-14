@@ -41,4 +41,4 @@
   (fn [json-data]
     ((validator-f json-data
                   identity
-                  (fn [_] nil)))))
+                  (constantly nil)))))

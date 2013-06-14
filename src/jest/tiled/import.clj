@@ -10,24 +10,32 @@
             [brick.image :as image]))
 
 (defn- workable-world
+  "Returns an ordered copy of the loaded world"
   []
   (for [y (range (world/world-height))
         x (range (world/world-width))]
     (world/cell [x y])))
 
-(defn- place-building [c d]
+(defn- place-building
+  "Parses keyword d an places the correct building in cell c"
+  [c d]
   (let [parts (clojure.string/split (name d) #"-")
         type (first parts)
         r (map keyword (rest parts))]
     (apply (partial ( building/get-build-function (keyword type)) c) r)))
 
-(defn- place-paths [type c d]
+(defn- place-paths
+  "Parses keyword d and constructs the correct path type in cell c"
+  [type c d]
   (if (keyword? d)
     (let [parts (clojure.string/split (name d) #"-")
           dir (keyword (last parts))]
       (path/build-path c dir type))))
 
-(defn- parse [f cells lookup-fn layer]
+(defn- parse
+  "Apply a function to all cells with the given lookup-fn and the
+  data-section of layer"
+  [f cells lookup-fn layer]
   (doall
    (map f cells (map lookup-fn (:data layer)))))
 
