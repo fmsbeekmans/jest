@@ -11,8 +11,8 @@
 
 (defn- workable-world
   []
-  (for [x (range (cell/world-width))
-        y (range (cell/world-height))]
+  (for [y (range (cell/world-height))
+        x (range (cell/world-width))]
     (cell/cell [x y])))
 
 (defn- place-building [c d]
@@ -22,10 +22,14 @@
     (apply (partial ( building/get-build-function (keyword type)) c) r)))
 
 (defn- place-paths [type c d]
-  (path/build-path c d type))
+  (if (keyword? d)
+    (let [parts (clojure.string/split (name d) #"-")
+          dir (keyword (last parts))]
+      (path/build-path c dir type))))
 
 (defn- parse [f cells lookup-fn layer]
-  (map f cells (map lookup-fn (:data layer))))
+  (doall
+   (map f cells (map lookup-fn (:data layer))))
 
 (defn layer-selector [layer _ _]
   (keyword (layer :name)))
