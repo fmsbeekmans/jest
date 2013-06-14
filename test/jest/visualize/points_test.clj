@@ -45,7 +45,8 @@
     (points/start-point l) => (vec-roughly [4 2] 0)
     (points/end-point l) (vec-roughly [2 3] 0)))
 
-(fact "Length returns the length of a stroke is the euclidean distance between it's ends."
+(fact "Length returns the length of a stroke is the euclidean
+distance between it's ends."
   (points/length (points/stroke [0 0 0]
                               [0 4 0])) => (roughly 4 0))
 
@@ -119,10 +120,7 @@
                                                    [1 1])
                                     (points/stroke [1 1]
                                                    [2 0])
-                                    (points/stroke-comp [(points/stroke [2 0]
-                                                                        [3 1])
-                                                         (points/stroke [3 1]
-                                                                        [4 0])])])]
+                                    lines0])]
     (fact "Tangent asks the tangent of the correct sub-stroke."
       (points/tangent lines0 0 [0 1]) => (roughly-angle (* Math/PI 0.25) 0)
       (points/tangent lines0 0.5 [0 1]) => (roughly-angle (* Math/PI 0.25) 0)
