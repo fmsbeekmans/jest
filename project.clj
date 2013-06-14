@@ -1,8 +1,8 @@
 (defproject jest "0.0.0-SNAPSHOT"
   :description "Multi touch game for the city of Delft"
   :url "http://www.github.com/fmsbeekmans/Jest.git"
-  :license {:name "GPL 3 and higher"
-            :url " https://gnu.org/licenses/gpl.html"}
+  :license {:name "Eclipse Public License - v1.0"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/core.incubator "0.1.2"]
                  [com.github.fge/json-schema-validator "2.1.3"]
