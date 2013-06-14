@@ -162,17 +162,21 @@
   (schedule #(dosync (vehicle-state-change id state))
             time))
 
+(defn- create-vehicle-on-spawn [c]
+  {:pre [(spawn? c)]}
+  (dosync
+   (load-vehicle c (select-exit (map->Vehicle
+                                 {:id (next-idc)
+                                  :type (vehicle-type c)
+                                  :coords (coords c)
+                                  :entry-time @game-time
+                                  :state :spawning})))))
 
 (defn spawn
   "Spawns a vehicle on the given cell."
   [c]
   {:pre [(spawn? c)]}
-  (let [vehicle (dosync (load-vehicle c (select-exit (map->Vehicle
-                                                      {:id (next-idc)
-                                                       :type (vehicle-type c)
-                                                       :coords (coords c)
-                                                       :entry-time @game-time
-                                                       :state :spawning}))))]
+  (let [vehicle (create-vehicle-on-spawn c)]
     (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
                                                     2))
     (schedule-move (:id vehicle))
