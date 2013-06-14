@@ -8,8 +8,7 @@
             [jest.world.cell :as c]
             [jest.world.route :as r]
             [jest.vehicle :as v]
-            [jest.movement :as m]
-            [jest.score :as s]))
+            [jest.movement :as m]))
 
 (defmacro spawn-fact [doc & body]
   `(world-fact [10 10]
