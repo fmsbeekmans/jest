@@ -102,9 +102,9 @@
 (defmethod vehicle-transition-state
   [false :supply]
   [id]
-  (update-vehicle id set-cargo
-                  (:resource-type (vehicle-cell (vehicle id)))
-                  (cargo-capacity (:type (vehicle id)))))
+  (set-cargo id
+             (:resource-type (vehicle-cell (vehicle id)))
+             (cargo-capacity (:type (vehicle id)))))
 
 (defmethod vehicle-transition-state
   [false :mixer]
@@ -115,7 +115,7 @@
                            (cargo-capacity (:type (vehicle id))))]
      (alter-cell (vehicle-cell (vehicle id))
                  reduce-resource pickup-count)
-     (update-vehicle id set-cargo color pickup-count))))
+     (set-cargo id color pickup-count))))
 
 
 (defmethod vehicle-transition-state
@@ -123,7 +123,7 @@
   [id]
   (dosync
    (alter-cell (vehicle-cell (vehicle id)) mix-colors (cargo-color (vehicle id)) (cargo-count (vehicle id)))
-   (update-vehicle id clear-cargo)))
+   (clear-cargo id)))
 
 (defmethod vehicle-transition-state
   [true :depot]
@@ -132,7 +132,7 @@
                           (:resource-type (vehicle-cell (vehicle id))))
            (/ Math/PI 8))
     ;;TODO this should also update some score
-    (update-vehicle id clear-cargo)))
+    (clear-cargo id)))
 
 (defn move-vehicle
   [id direction]

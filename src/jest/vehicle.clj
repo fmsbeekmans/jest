@@ -23,9 +23,9 @@
 (:vehicles c))
 
 (defn vehicle-cell
-"Returns the cell this vehicle is on"
-[v]
-(cell (:coords v)))
+  "Returns the cell this vehicle is on"
+  [v]
+  (cell (:coords v)))
 
 (defn vehicle
   ([id]
@@ -78,12 +78,14 @@
   (not (not (:cargo vehicle))))
 
 (defn set-cargo
-  [vehicle resource-color resource-count]
-  (assoc vehicle :cargo [resource-color resource-count]))
+  [id resource-color resource-count]
+  (update-vehicle id
+                  assoc :cargo [resource-color resource-count]))
 
 (defn clear-cargo
-  [vehicle]
-  (assoc vehicle :cargo nil))
+  [id]
+  (update-vehicle id
+                  assoc :cargo nil))
 
 (defn all-vehicles []
   (remove nil? (flatten (map (comp seq vehicles) (all-cells)))))
