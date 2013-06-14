@@ -113,8 +113,7 @@
    (let [color (resource-color (vehicle-cell (vehicle id)))
          pickup-count (min (resource-count (vehicle-cell (vehicle id)))
                            (cargo-capacity (:type (vehicle id))))]
-     (alter-cell (vehicle-cell (vehicle id))
-                 reduce-resource pickup-count)
+     (reduce-resource (vehicle-cell (vehicle id)) pickup-count)
      (set-cargo id color pickup-count))))
 
 
@@ -122,7 +121,9 @@
   [true :mixer]
   [id]
   (dosync
-   (alter-cell (vehicle-cell (vehicle id)) mix-colors (cargo-color (vehicle id)) (cargo-count (vehicle id)))
+   (mix-colors (vehicle-cell (vehicle id))
+               (cargo-color (vehicle id))
+               (cargo-count (vehicle id)))
    (clear-cargo id)))
 
 (defmethod vehicle-transition-state

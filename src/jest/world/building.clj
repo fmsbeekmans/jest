@@ -121,7 +121,7 @@
    (second (:resource cell))
    0))
 
-(defn mix-colors [cell color magnitude]
+(defn- mix-colors' [cell color magnitude]
   (let [[existing-color existing-magnitude] (or (:resource cell)
                                                 [nil 0])
         new-color (apply average-hue (concat (repeat magnitude color)
@@ -129,7 +129,10 @@
         new-magnitude (+ magnitude existing-magnitude)]
     (assoc cell :resource [new-color new-magnitude])))
 
-(defn reduce-resource [cell amount]
+(defn mix-colors [cell color magnitude]
+  (alter-cell cell mix-colors' color magnitude))
+
+(defn- reduce-resource' [cell amount]
   {:post [(or (nil? (:resource cell))
               (>= (resource-count cell) 0))]}
   (assoc cell :resource (when-not (= amount (resource-count cell))
@@ -137,3 +140,5 @@
                            (- (resource-count cell)
                               amount)])))
 
+(defn reduce-resource [cell amount]
+  (alter-cell cell reduce-resource' amount))
