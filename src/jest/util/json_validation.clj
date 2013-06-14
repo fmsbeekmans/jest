@@ -9,7 +9,7 @@
 (defn- JsonNode->data
   "Converts a jackson JsonNode to clojure data"
   [node]
-  (json/read-str (.toString node)
+  (json/read-str (str node)
                  :key-fn keyword))
 
 (defn- data->JsonNode
@@ -28,7 +28,7 @@
         (let [report (.validate schema (data->JsonNode json-data))
               success? #(.isSuccess report)
               report-json (JsonNode->data (.asJson report))]
-          (apply #(partial %1 %2)
+          (apply partial
                  (if (success?)
                    [on-success json-data]
                    [on-failure report-json]))))))
