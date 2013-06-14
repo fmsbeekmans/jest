@@ -3,7 +3,8 @@
   (:use clojure.core.incubator
         jest.util
         jest.world
-        jest.world.cell))
+        jest.world.cell
+        jest.color))
 
 (def ^:private constructor-atom (atom {}))
 
@@ -109,3 +110,30 @@
   [c]
   {:pre [(spawn? c)]}
   (:vehicle-type c))
+
+
+;; functions for mixers
+(defn resource-color [cell]
+  (first (:resource cell)))
+
+(defn resource-count [cell]
+  (or
+   (second (:resource cell))
+   0))
+
+(defn mix-colors [cell color magnitude]
+  (let [[existing-color existing-magnitude] (or (:resource cell)
+                                                [nil 0])
+        new-color (apply average-hue (concat (repeat magnitude color)
+                                   (repeat existing-magnitude existing-color)))
+        new-magnitude (+ magnitude existing-magnitude)]
+    (assoc cell :resource [new-color new-magnitude])))
+
+(defn reduce-resource [cell amount]
+  {:post [(or (nil? (:resource cell))
+              (>= (resource-count cell) 0))]}
+  (assoc cell :resource (when-not (= amount (resource-count cell))
+                          [(resource-color cell)
+                           (- (resource-count cell)
+                              amount)])))
+

@@ -242,14 +242,14 @@
 
             (m/spawn (w/cell [3 5]))
             (tick (* 3 (p/path->duration :canal))) ;boat dropped off cargo
-            (v/resource-count (w/cell [5 5])) => 10
+            (b/resource-count (w/cell [5 5])) => 10
             (let [id (:id (m/spawn (w/cell [5 4])))]
               (tick 19)
               (v/cargo-count (v/vehicle id)) => 0
-              (v/resource-count (w/cell [5 5])) => 10
+              (b/resource-count (w/cell [5 5])) => 10
               (tick 1)
               (v/cargo-count (v/vehicle id)) => 10
-              (v/resource-count (w/cell [5 5])) => 0))
+              (b/resource-count (w/cell [5 5])) => 0))
 
 (world-fact [10 10]
             "When a vehicle can't pick up all the available content at a resource, it only picks up as much as it can carry"
@@ -260,7 +260,7 @@
             (let [id (:id (m/spawn (w/cell [5 4])))]
               (tick (p/path->duration :rails))
               (v/cargo-count (v/vehicle id)) => (v/cargo-capacity :train)
-              (v/resource-count (w/cell [5 5])) => (- (v/cargo-capacity :boat)
+              (b/resource-count (w/cell [5 5])) => (- (v/cargo-capacity :boat)
                                                       (v/cargo-capacity :train))))
 
 (world-fact [10 10]
@@ -272,7 +272,7 @@
             (let [id (:id (m/spawn (w/cell [5 4])))]
               (tick (p/path->duration :canal))
               (v/cargo-count (v/vehicle id)) => (v/cargo-capacity :train)
-              (v/resource-count (w/cell [5 5])) => 0))
+              (b/resource-count (w/cell [5 5])) => 0))
 
 (fact "vehicle transition dispatch works"
       (m/vehicle-transition-state-dispatch ..vehicle-id..) => [..cargo-type.. ..building-type..]
