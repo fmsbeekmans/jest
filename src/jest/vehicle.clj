@@ -2,11 +2,14 @@
   "Code for vehicle manipulation"
   (:use [jest.world :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
-        [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path opposite-dirs]]
+        [jest.world.path :only [in-paths out-paths from to path-type
+                                vehicle->path path->duration path
+                                opposite-dirs]]
         [jest.scheduler :only [game-time schedule offset]]
-        [jest.color :only [hue average-hue hue-difference +delta+]]))
+        [jest.color :only [hue average-hue hue-difference]]))
 
-(defrecord Vehicle [id type coords entry-time entry-direction exit-time exit-direction cargo state])
+(defrecord Vehicle [id type coords entry-time entry-direction
+                    exit-time exit-direction cargo state])
 
 (def ^{:doc "Returns how much cargo each vehicle type can carry"}
   cargo-capacity {:truck 1
@@ -27,7 +30,7 @@
   "Returns the amount of time the given vehicle should spend in a cell."
   [v]
   (path->duration (vehicle->path (:type v))))
-  
+
 (defn vehicles
   "Returns the vehicles on the given cell."
   [c]
@@ -60,7 +63,8 @@
 
 (defn vehicle-state-change
   "Updates the vehicle with the given id to the given state.
-   State should be a keyword, one of :spawning, :despawning, :moving, :exploding"
+   State should be a keyword, one of :spawning, :despawning,
+   :moving, :exploding"
   [id state]
   (update-vehicle id assoc :state state))
 

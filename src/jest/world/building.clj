@@ -1,15 +1,16 @@
 (ns jest.world.building
   "Functions for adding, removing and searching for buildings."
-  (:use clojure.core.incubator
-        jest.util
-        jest.world
-        jest.world.cell
-        jest.color))
+  (:use [clojure.core.incubator :only [defmacro-]]
+        [jest.util :only [plural]]
+        [jest.world :only [alter-cell all-cells cell]]
+        [jest.color :only [average-hue]]))
 
 (def ^:private constructor-atom (atom {}))
 
-;; Make empty fn generate warnings
-(defn get-build-function [k]
+;; TODO: Make empty fn generate warnings
+(defn get-build-function
+  "Given a keyword, returns a function used to construct this building type."
+  [k]
   (or (@constructor-atom k)
       nil))
 
@@ -24,7 +25,8 @@
   (not (building-type c)))
 
 (defn all-cells-type
-  "returns all cells in the currently bound world grid with the given building type"
+  "returns all cells in the currently bound world grid with the given building
+   type"
   [type]
   (all-cells #(= (building-type %1) type)))
 
@@ -57,7 +59,8 @@
         field-args (interleave fields field-syms)]
     `(do
        (defn ~pred
-         ~(format "returns whether or not this cell is of type %s." type)
+         ~(format "returns whether or not this cell is of type %s."
+                  type)
          ([~'c]
             (= (building-type ~'c) ~(keyword type)))
          ([~'x ~'y]
@@ -71,7 +74,8 @@
          (add-building ~'c ~(keyword type) ~@field-args))
 
        (defn ~build
-         ~(format "Alters world state by building a %s to the given cell.\n" type)
+         ~(format "Alters world state by building a %s to the given cell.\n"
+                  type)
          [~'c ~@field-syms]
          (dosync (alter-cell ~'c ~add ~@field-syms)))
 
@@ -83,7 +87,8 @@
          (remove-building ~'c ~@fields))
 
        (defn ~unbuild
-         ~(format "Alters world state by unbuilding a %s from the given cell." type)
+         ~(format "Alters world state by unbuilding a %s from the given cell."
+                  type)
          [~'c]
          (dosync (alter-cell ~'c ~remove)))
 
@@ -113,15 +118,22 @@
 
 
 ;; functions for mixers
-(defn resource-color [cell]
+(defn resource-color
+  "Returns the color of the resource at this cell."
+  [cell]
   (first (:resource cell)))
 
-(defn resource-count [cell]
+(defn resource-count
+  "Returns the amount of resource at this cell."
+  [cell]
   (or
    (second (:resource cell))
    0))
 
-(defn- mix-colors' [cell color magnitude]
+(defn- mix-colors'
+  "Given a cell, returns a cell with the given color mixed with existing color
+   there. Magnitude represents how much color should be mixed."
+  [cell color magnitude]
   (let [[existing-color existing-magnitude] (or (:resource cell)
                                                 [nil 0])
         new-color (apply average-hue (concat (repeat magnitude color)
@@ -129,10 +141,16 @@
         new-magnitude (+ magnitude existing-magnitude)]
     (assoc cell :resource [new-color new-magnitude])))
 
-(defn mix-colors [cell color magnitude]
+(defn mix-colors
+  "Given a cell, alters this cell in the world state to mix the given color
+   at the given magnitude with existing colors there."
+  [cell color magnitude]
   (alter-cell cell mix-colors' color magnitude))
 
-(defn- reduce-resource' [cell amount]
+(defn- reduce-resource'
+  "Given a cell, returns a cell with the resource amount reduced with the given
+   amount."
+  [cell amount]
   {:post [(or (nil? (:resource cell))
               (>= (resource-count cell) 0))]}
   (assoc cell :resource (when-not (= amount (resource-count cell))
@@ -140,5 +158,8 @@
                            (- (resource-count cell)
                               amount)])))
 
-(defn reduce-resource [cell amount]
+(defn reduce-resource
+  "Given a cell, alters this cell in the world state to reduce the resource
+   amount with the given amount."
+  [cell amount]
   (alter-cell cell reduce-resource' amount))

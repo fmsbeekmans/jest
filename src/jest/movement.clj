@@ -1,10 +1,16 @@
 (ns jest.movement
   "Vehicle movement actions. This includes picking up and dropping off cargo."
-  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color vehicle-state-change update-vehicle unload-vehicle vehicle->duration cargo? set-cargo cargo-capacity cargo-count clear-cargo load-vehicle despawning? map->Vehicle]]
+  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color
+                             vehicle-state-change update-vehicle unload-vehicle
+                             vehicle->duration cargo? set-cargo cargo-capacity
+                             cargo-count clear-cargo load-vehicle despawning?
+                             map->Vehicle]]
         [jest.color :only [hue-difference <=delta?]]
         [jest.world :only [alter-cell coords]]
-        [jest.world.path :only [out-paths path->duration vehicle->path opposite-dirs path path-type to]]
-        [jest.world.building :only [spawn? vehicle-type resource-color resource-count reduce-resource mix-colors]]
+        [jest.world.path :only [out-paths path->duration vehicle->path
+                                opposite-dirs path path-type to]]
+        [jest.world.building :only [spawn? vehicle-type resource-color
+                                    resource-count reduce-resource mix-colors]]
         [jest.scheduler :only [schedule offset game-time]]))
 
 (defonce ^:private idc (atom 0))
@@ -232,5 +238,3 @@
                                                     2))
     (schedule-move (:id vehicle))
     vehicle))
-
-

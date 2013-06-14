@@ -1,11 +1,8 @@
 (ns jest.world.route
   "Functions for adding, removing and searching for routes along
   roads, rails and canals."
-  (:use jest.util
-        jest.world.path
-        jest.world
-        jest.world.cell
-        jest.color))
+  (:use [jest.world :only [alter-cell]]
+        [jest.color :only [contains-hue?]]))
 
 (defn- add-route
   "Adds a route for resources of the specified color to an

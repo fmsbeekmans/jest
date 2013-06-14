@@ -23,7 +23,7 @@
                                                [1 0])
                                 (points/stroke [1 1]
                                                [2 0])]) => falsey)
-  
+
   (fact "Stroke basic functionality"
     (points/point (points/stroke [3] [7]) 0.5) => (vec-roughly [5] 0)
     (points/point (points/stroke [3 4] [7 0]) 0.25) => (vec-roughly [4 3] 0)
@@ -35,7 +35,7 @@
 
     ;; end
       (points/point (points/stroke [3] [7]) 1) => (vec-roughly [7] 0))
-  
+
     (fact "From point a to point a is not a stroke."
       ((points/stroke [1.1] [1.1]) 0.9) => (throws java.lang.AssertionError)))
 
@@ -45,7 +45,8 @@
     (points/start-point l) => (vec-roughly [4 2] 0)
     (points/end-point l) (vec-roughly [2 3] 0)))
 
-(fact "Length returns the length of a stroke is the euclidean distance between it's ends."
+(fact "Length returns the length of a stroke is the euclidean
+distance between it's ends."
   (points/length (points/stroke [0 0 0]
                               [0 4 0])) => (roughly 4 0))
 
@@ -119,10 +120,11 @@
                                                    [1 1])
                                     (points/stroke [1 1]
                                                    [2 0])
-                                    (points/stroke-comp [(points/stroke [2 0]
-                                                                        [3 1])
-                                                         (points/stroke [3 1]
-                                                                        [4 0])])])]
+                                    (points/stroke-comp
+                                     [(points/stroke [2 0]
+                                                     [3 1])
+                                      (points/stroke [3 1]
+                                                     [4 0])])])]
     (fact "Tangent asks the tangent of the correct sub-stroke."
       (points/tangent lines0 0 [0 1]) => (roughly-angle (* Math/PI 0.25) 0)
       (points/tangent lines0 0.5 [0 1]) => (roughly-angle (* Math/PI 0.25) 0)
