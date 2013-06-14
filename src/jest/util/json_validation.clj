@@ -1,5 +1,5 @@
 (ns jest.util.json-validation
-  "JSON validation utility functions."
+  "JSON validation utility functions, clojurized"
   (:require [clojure.data.json :as json])
   (:import com.fasterxml.jackson.databind.JsonNode
            [com.github.fge.jsonschema.main JsonSchema JsonSchemaFactory]

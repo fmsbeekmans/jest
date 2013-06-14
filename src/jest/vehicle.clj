@@ -1,5 +1,5 @@
 (ns jest.vehicle
-  (:use [jest.world.cell :only [cell alter-cell coords all-cells]]
+  (:use [jest.world :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
         [jest.world.path :only [in-paths out-paths from to path-type vehicle->path path->duration path opposite-dirs]]
         [jest.scheduler :only [game-time schedule offset]]
@@ -108,7 +108,6 @@
                           [(resource-color cell)
                            (- (resource-count cell)
                               amount)])))
-
 
 (defn all-vehicles []
   (remove nil? (flatten (map (comp seq vehicles) (all-cells)))))

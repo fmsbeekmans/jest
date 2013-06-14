@@ -1,10 +1,11 @@
 (ns jest.testutils
   (:require [jest.scheduler :as scheduler])
-  (:use [jest.world.cell :only [cell with-initialized-temp-world]]
+  (:use [jest.world :only [cell]]
+        [jest.world.cell :only [with-initialized-temp-world]]
         [jest.world.path :only [build-path complete-paths]]
         [jest.world.building :only [build-spawn]]
         midje.sweet))
-         
+
 
 (defmacro for-cells
   "test macro, give sx and sy and it will do something for each cell."

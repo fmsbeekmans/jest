@@ -1,11 +1,14 @@
 (ns jest.visualize.visualize
   (:require [brick.image :as image])
   (:require [brick.drawable :as drawable])
-  
+  (:require [jest.world :as world])
   (:require [jest.visualize.points :as points])
+  (:require [jest.vehicle :as vehicle])
   (:require [jest.world.path :as path])
   (:require [jest.world.cell :as cell]))
 
+(declare cell-bg)
+(declare cell-road)
 
 ; TODO
 (defn tile-lookup [k]
@@ -16,23 +19,26 @@
   "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
   [cell-draw-fn]
   {:post [(every? drawable/drawable? (vals (:grid %)))]}
-  (drawable/->Grid (cell/world-width) (cell/world-height)
-                   (into {} (for [c (cell/all-cells)]
-                              [(cell/coords c) (cell-draw-fn c)]))))
-
-(defn visualize-world-state
-  [world-state]
-  (comment
-    (->Stack (vec (juxt
-                   ) worldstate)))
-  )
+  (drawable/->Grid (world/world-width) (world/world-height)
+                   (into {} (for [c (world/all-cells)]
+                              [(world/coords c) (cell-draw-fn c)]))))
 
 (defn vehicles->Stack
-  [world-statke]
+  [vehicles-fn
+   vehicle-draw-fn]
   (comment
     (-> Stack (vec (map
                     (fn [vehicle]
                       ))))))
+
+(defn visualize-world-state
+  []
+  (drawable/->Stack (vec (juxt
+                          (world-state->Grid cell-bg)
+                          (world-state->Grid cell-road)
+                          (vehicles->Stack (fn []
+                                             (filter (fn [v] ) (vehicle/vehicles)))
+                                           (fn []))))))
 
 (defn cell-bg [c]
   (image/path->PImage (clojure.java.io/resource "grass.png")))
@@ -48,7 +54,7 @@
 
 (defn cell-road [c]
   (if (seq (filter (fn [[_ v]]
-                
+
                 (= :road (:type v))) (:paths c)))
     (drawable/->Image (image/path->PImage (clojure.java.io/resource "road.png")))
     (drawable/->Nothing)))

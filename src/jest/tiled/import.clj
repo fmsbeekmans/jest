@@ -1,5 +1,5 @@
 (ns jest.tiled.import
-  "Functions for importing tiled maps in the JSON format"
+  "Functions for importing TiLeD game-maps in the JSON format"
   (:require [clojure.data.json :as json]
             [jest.world.cell :as cell]
             [jest.world.building :as building]
@@ -11,9 +11,9 @@
 
 (defn- workable-world
   []
-  (for [x (range (cell/world-width))
-        y (range (cell/world-height))]
-    (cell/cell [x y])))
+  (for [y (range (world/world-height))
+        x (range (world/world-width))]
+    (world/cell [x y])))
 
 (defn- place-building [c d]
   (let [parts (clojure.string/split (name d) #"-")
@@ -22,16 +22,22 @@
     (apply (partial ( building/get-build-function (keyword type)) c) r)))
 
 (defn- place-paths [type c d]
-  (path/build-path c d type))
+  (if (keyword? d)
+    (let [parts (clojure.string/split (name d) #"-")
+          dir (keyword (last parts))]
+      (path/build-path c dir type))))
 
 (defn- parse [f cells lookup-fn layer]
-  (map f cells (map lookup-fn (:data layer))))
+  (doall
+   (map f cells (map lookup-fn (:data layer)))))
 
-(defn layer-selector [layer _ _]
+(defn layer-selector
+  "Extracts the type of layer in valid levels"
+  [layer _ _]
   (keyword (layer :name)))
 
 (defmulti parse-layer
-  "Updates the loaded world with the data supplied in the layer"
+  "Updates the loaded world through cells with the data supplied in the layer"
   layer-selector)
 
 (defmethod parse-layer :background [layer lookup cells]
@@ -75,15 +81,16 @@
 
 
 (defn- initialize-world
-  "Initializes a world according with the correct width and height"
+  "Initializes a world according with the correct width and height extracted
+  from tiled-world"
   [tiled-world]
   (let [w (:width tiled-world)
         h (:height tiled-world)]
     (cell/initialize-world w h)))
 
-;; TODO
-;; what should we be able to put in a world state?
-(defn parse-world [json-data]
+(defn parse-world
+  "Parses json-data in an attempt to create a consistent game world."
+  [json-data]
   (let [tilesets (parse-tilesets (:tilesets json-data))
         lookup (second tilesets)
         lookup-layer #(map lookup (:data %))

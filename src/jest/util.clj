@@ -2,16 +2,16 @@
   "Miscellaneous utility functions.")
 
 (defn derefable?
-  "Returns true if the argument can be dereferenced, false otherwise."
-  [x]
-  (instance? clojure.lang.IDeref x))
+  "Returns true if d can be dereferenced, false otherwise."
+  [d]
+  (instance? clojure.lang.IDeref d))
 
 (defn maybe-deref
-  "Returns the derefed x if x is a derefable. if x is not a derefable, it is returned directly."
-  [x]
-  (if (derefable? x)
-    (deref x)
-    x))
+  "Returns the derefed d if d is a derefable. if d is not a derefable, it is returned directly."
+  [d]
+  (if (derefable? d)
+    (deref d)
+    d))
 
 (defn plural
   "Returns a best guess of the plural of the given word"
@@ -25,18 +25,18 @@
     (format "%ss" word)))
 
 (defn ncomp
-  "Returns a function which is a composition of n f functions."
+  "Returns a function which is the composition of n f functions."
   [f n]
   (apply comp (repeat n f)))
 
 (defn offset-vec
-  "Creates a map from (index + offset) to value"
+  "Creates a map from (index + offset) to values of v"
   [v offset]
   (zipmap (map (ncomp inc offset) (range)) v))
 
 (defn offset-map
-  "Creates a map from (key + offset) to value. Key should be
-  representable as an int"
+  "Creates a map from (key + offset) to values om m. All keys should
+  be representable as an int"
   [m offset]
   (let [offset-f (ncomp inc offset)
         keyword->int #(Integer/valueOf (name %1))]

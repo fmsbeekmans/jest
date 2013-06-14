@@ -14,7 +14,7 @@
       (l nil nil) => (throws clojure.lang.ArityException)))
 
   (fact "strokes-connected?"
-    (points/strokes-connected? []) => falsey
+    (points/strokes-connected? []) => truthy
     (points/strokes-connected? [(points/stroke [0 0]
                                                [1 1])
                                 (points/stroke [1 1]

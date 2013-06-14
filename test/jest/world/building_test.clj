@@ -1,7 +1,8 @@
 (ns jest.world.building_test
   (:use midje.sweet
         jest.testutils
-        [jest.world.cell :only [with-initialized-temp-world cell all-cells coords]]
+        [jest.world :only [cell all-cells coords]]
+        [jest.world.cell :only [with-initialized-temp-world]]
         [clojure.test :only [deftest]])
   (:require [jest.world.building :as building]))
 
