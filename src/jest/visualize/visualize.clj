@@ -3,9 +3,12 @@
   (:require [brick.drawable :as drawable])
   
   (:require [jest.visualize.points :as points])
+  (:require [jest.vehicle :as vehicle])
   (:require [jest.world.path :as path])
   (:require [jest.world.cell :as cell]))
 
+(declare cell-bg)
+(declare cell-road)
 
 ; TODO
 (defn tile-lookup [k]
@@ -20,19 +23,22 @@
                    (into {} (for [c (cell/all-cells)]
                               [(cell/coords c) (cell-draw-fn c)]))))
 
-(defn visualize-world-state
-  [world-state]
-  (comment
-    (->Stack (vec (juxt
-                   ) worldstate)))
-  )
-
 (defn vehicles->Stack
-  [world-statke]
+  [vehicles-fn
+   vehicle-draw-fn]
   (comment
     (-> Stack (vec (map
                     (fn [vehicle]
                       ))))))
+
+(defn visualize-world-state
+  []
+  (drawable/->Stack (vec (juxt
+                          (world-state->Grid cell-bg)
+                          (world-state->Grid cell-road)
+                          (vehicles->Stack (fn []
+                                             (filter (fn [v] ) (vehicle/vehicles)))
+                                           (fn []))))))
 
 (defn cell-bg [c]
   (image/path->PImage (clojure.java.io/resource "grass.png")))
