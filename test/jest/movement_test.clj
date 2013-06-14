@@ -1,4 +1,4 @@
-(ns jest.vehicle-test
+(ns jest.movement-test
   (:use midje.sweet
         jest.testutils
         jest.color)
