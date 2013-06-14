@@ -62,8 +62,16 @@
                update-in [:vehicles] disj v))
   (assoc v :coords nil))
 
+
+(defn- =state [id state]
+  (= (:state (vehicle id))
+     state))
+
+(defn spawning? [id]
+  (=state id :spawning))
+
 (defn despawning? [id]
-  (= (:state (vehicle id)) :despawning))
+  (=state id :despawning))
 
 (defn cargo? [vehicle]
   (not (not (:cargo vehicle))))
