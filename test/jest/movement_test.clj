@@ -36,6 +36,23 @@
                           (m/spawn (w/cell [x y]))))]
     (v/all-vehicles) => (just vehicles :in-any-order)))
 
+(world-fact [10 10]
+  "all-vehicles with-predicate filters correctly"
+  (b/build-spawn (w/cell [0 0]) :truck)
+  (b/build-spawn (w/cell [0 1]) :boat)
+  (b/build-spawn (w/cell [0 2]) :train)
+  (b/build-spawn (w/cell [1 0]) :truck)
+  (b/build-spawn (w/cell [1 1]) :boat)
+  (b/build-spawn (w/cell [1 2]) :train)
+
+  (let [vehicles (doall (for [x (range 2)
+                              y (range 3)
+                              i (range 10)]
+                          (m/spawn (w/cell [x y]))))]
+    
+    (v/all-vehicles truck?) => (just (filter truck? vehicles) :in-any-order)
+    (count (v/all-vehicles truck?)) => 20))
+
 (spawn-fact
  "After spawning, entry time is the spawn time, exit time is spawn +
 path duration."
