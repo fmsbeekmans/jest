@@ -12,13 +12,12 @@
 
 ; TODO
 (defn tile-lookup [k]
-  {:bg ()}
-  )
+  {:bg ()})
 
 (defn world-state->Grid
   "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
   [cell-draw-fn]
-  {:post [(every? drawable/drawable? (vals (:grid %)))]}
+; {:post [(every? drawable/drawable? (vals (:grid %)))]}
   (drawable/->Grid (world/world-width) (world/world-height)
                    (into {} (for [c (world/all-cells)]
                               [(world/coords c) (cell-draw-fn c)]))))
@@ -26,23 +25,18 @@
 (defn vehicles->Stack
   [vehicles-fn
    vehicle-draw-fn]
-  (comment
-    (vec Stack (map (fn [vehicle])))))
+  (vec (drawable/->Stack (map (fn [vehicle])))))
 
 (defn world->drawable
   []
-  (drawable/->Stack (vec
-                     (juxt
-                      (world-state->Grid cell-bg)
-                      (world-state->Grid cell-road)
-                      (vehicles->Stack (vec
-                                        (fn []
-                                          (filter
-                                           (fn [v]
-                                             (= :boat (:type v))) (vehicle/all-vehicles))))
-                                       (fn []))))))
+  (drawable/->Stack (world-state->Grid cell-bg)
+                    (world-state->Grid cell-building)
+                    (world-state->Grid cell-road)))
 
 (defn cell-bg [c]
+  (image/path->PImage (clojure.java.io/resource "grass.png")))
+
+(defn cell-building [c]
   (image/path->PImage (clojure.java.io/resource "grass.png")))
 
 (defn cell-canal [c]
