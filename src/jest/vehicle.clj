@@ -135,14 +135,14 @@
     false))
 
 (defn boat?
-  "Is this a truck?"
+  "Is this a boat?"
   [t?]
   (if (map? t?)
     (= :boat (:type t?))
     false))
 
 (defn train?
-  "Is this a truck?"
+  "Is this a train?"
   [t?]
   (if (map? t?)
     (= :train (:type t?))
