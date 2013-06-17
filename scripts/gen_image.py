@@ -39,10 +39,10 @@ def i_name(i, g):
     return "part-" + str(i) + g + ".png"
 
 def create_letter(p,g):
-    i = Image.new("RGB", (64,64))
+    i = Image.new("RGB", (64,64), "magenta")
     d = ImageDraw.Draw(i)
     f = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 32)
-    d.text((0,0),g, font=f)
+    d.text((0,0),g, font=f, fill="black")
     i.save(open(i_name(p,g), "wb"), "PNG")
 
 def wrap_q(s):
