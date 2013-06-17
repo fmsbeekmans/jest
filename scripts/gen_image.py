@@ -36,7 +36,7 @@ glyphs = [
     ]
 
 def i_name(i, g):
-    return "part-" + str(i) + g + ".png"
+    return "part-" + str("%03d" % i) + g + ".png"
 
 def create_letter(p,g):
     i = Image.new("RGB", (64,64), "magenta")
