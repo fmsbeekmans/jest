@@ -1,5 +1,5 @@
 (ns jest.visualize.points
-  "Helps to define routes through n-dimentional spaces and 
+  "Helps to define routes through n-dimentional spaces and
    get the needed. Defined are simple and composite.")
 
 
@@ -12,12 +12,12 @@
 
 (defmulti tangent
   "Return the tangent of a stroke at progress p from dimensions d1 to d2."
-  (fn [s p [d1 d2]]
+  (fn [s _ [_ _]]
     (:stroke-type (meta s))))
 
 (defmulti point
   "Return a point at a certain progress in a stroke."
-  (fn [s p]
+  (fn [s _]
     (:stroke-type (meta s))))
 
 ;; Helper functions
@@ -27,7 +27,7 @@
   [l]
   (point l 0))
 
-(defn end-point 
+(defn end-point
   "Short hand for point at the end."
   [l]
   (point l 1))

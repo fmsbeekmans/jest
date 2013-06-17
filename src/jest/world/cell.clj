@@ -1,6 +1,5 @@
 (ns jest.world.cell
   "Functions for managing the world grid."
-  (:use jest.util)
   (:require [jest.world :as world]))
 
 (defrecord Cell [coord paths background building-type

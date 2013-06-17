@@ -15,7 +15,7 @@
     (if (>= atan 0)
       atan
       (+ atan (* 2 Math/PI)))))
-	   
+
 (defn average-hue
   "Returns the average of the given hues."
   [& hs]
@@ -34,13 +34,11 @@
   {:red (hue 0)
    :yellow (hue 60)
    :green (hue 120)
-   :blue (hue 240)}) 
+   :blue (hue 240)})
 
 (defmethod hue clojure.lang.Keyword [color-name]
   (colors color-name))
 
-;; TODO this is not right, hue difference between 0.1*pi and 1.9*pi is 0.2*pi,
-;; not 1.8*pi.
 (defn hue-difference
   "Returns the difference between twho hues."
   [h1 h2]
@@ -58,8 +56,8 @@
   (<= dh +delta+))
 
 (defn hue-matches?
-  "Returns true iff the hue difference between h1 and h2 is less than or equal to
-   the delta."
+  "Returns true iff the hue difference between h1 and h2 is less than or equal
+   to the delta."
   [h1 h2]
   (<=delta? (hue-difference h1 h2)))
 

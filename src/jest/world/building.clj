@@ -1,10 +1,9 @@
 (ns jest.world.building
   "Functions for adding, removing and searching for buildings."
-  (:use clojure.core.incubator
-        jest.util
-        jest.world
-        jest.world.cell
-        jest.color))
+  (:use [clojure.core.incubator :only [defmacro-]]
+        [jest.util :only [plural]]
+        [jest.world :only [alter-cell all-cells cell]]
+        [jest.color :only [average-hue]]))
 
 (def ^:private constructor-atom (atom {}))
 
@@ -26,7 +25,8 @@
   (not (building-type c)))
 
 (defn all-cells-type
-  "returns all cells in the currently bound world grid with the given building type"
+  "returns all cells in the currently bound world grid with the given building
+   type"
   [type]
   (all-cells #(= (building-type %1) type)))
 
@@ -59,7 +59,8 @@
         field-args (interleave fields field-syms)]
     `(do
        (defn ~pred
-         ~(format "returns whether or not this cell is of type %s." type)
+         ~(format "returns whether or not this cell is of type %s."
+                  type)
          ([~'c]
             (= (building-type ~'c) ~(keyword type)))
          ([~'x ~'y]
@@ -73,7 +74,8 @@
          (add-building ~'c ~(keyword type) ~@field-args))
 
        (defn ~build
-         ~(format "Alters world state by building a %s to the given cell.\n" type)
+         ~(format "Alters world state by building a %s to the given cell.\n"
+                  type)
          [~'c ~@field-syms]
          (dosync (alter-cell ~'c ~add ~@field-syms)))
 
@@ -85,7 +87,8 @@
          (remove-building ~'c ~@fields))
 
        (defn ~unbuild
-         ~(format "Alters world state by unbuilding a %s from the given cell." type)
+         ~(format "Alters world state by unbuilding a %s from the given cell."
+                  type)
          [~'c]
          (dosync (alter-cell ~'c ~remove)))
 
