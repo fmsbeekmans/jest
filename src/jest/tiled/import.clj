@@ -20,10 +20,11 @@
 (defn- place-building
   "Parses keyword d an places the correct building in cell c"
   [c d]
-  (let [parts (clojure.string/split (name d) #"-")
-        type (first parts)
-        r (map keyword (rest parts))]
-    (apply (partial ( building/get-build-function (keyword type)) c) r)))
+  (if (keyword? d)
+    (let [parts (clojure.string/split (name d) #"-")
+          type (first parts)
+          r (map keyword (rest parts))]
+      (apply (partial ( building/get-build-function (keyword type)) c) r))))
 
 (defn- place-paths
   "Parses keyword d and constructs the correct path type in cell c"
@@ -43,11 +44,12 @@
 (defn layer-selector
   "Extracts the type of layer in valid levels"
   [layer _ _]
+  (println (layer :name))
   (keyword (layer :name)))
 
 (defmulti parse-layer
   "Updates the loaded world through cells with the data supplied in the layer"
-  layer-selector)
+  #'layer-selector)
 
 (defmethod parse-layer :background [layer lookup cells]
   (parse cell/set-background cells lookup layer))
@@ -59,6 +61,7 @@
   (parse (partial place-paths :road) cells lookup layer))
 
 (defmethod parse-layer :rails [layer lookup cells]
+  (println (:data layer))
   (parse (partial place-paths :rails) cells lookup layer))
 
 (defmethod parse-layer :canal [layer lookup cells]
@@ -83,8 +86,8 @@
                        [(:tilewidth current-tileset)
                         (:tileheight current-tileset)])]
         (recur (rest tilesets)
-               (into images (util/offset-vec image-vec (count images)))
-               (into props (util/offset-map prop (count images)))))
+               (into images (util/offset-vec image-vec (inc (count images))))
+               (into props (util/offset-map prop (inc (count images))))))
       [images props])))
 
 
