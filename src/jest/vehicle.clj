@@ -121,3 +121,27 @@
   ([]
       (remove nil? (flatten (map (comp seq vehicles) (all-cells)))))
   ([p]
+     (filter p (all-vehicles))))
+
+(defn truck?
+  "Is this a truck?"
+  [t?]
+  (if (map? t?)
+    (= :truck (:type t?))
+    false))
+
+(defn boat?
+  "Is this a truck?"
+  [t?]
+  (if (map? t?)
+    (= :boat (:type t?))
+    false))
+
+(defn train?
+  "Is this a truck?"
+  [t?]
+  (if (map? t?)
+    (= :train (:type t?))
+    false))
+
+
