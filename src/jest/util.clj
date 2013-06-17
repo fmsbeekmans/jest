@@ -51,3 +51,10 @@
         (for [ [k v] m1
                :when (contains? m2 v)]
           [k (m2 v)])))
+
+(defn remap-maps
+  [m1 m2]
+  (into {}
+        (for [ [k v] m1
+               :when (contains? m2 k)]
+          [(m2 k) v])))
