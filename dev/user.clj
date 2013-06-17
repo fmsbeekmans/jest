@@ -12,7 +12,7 @@
         jest.scheduler))
 
 
-(defn main []
+(defn user-setup []
   (initialize-world 10 10)
   (build-spawn-circle)
 
@@ -23,4 +23,3 @@
   (spawn (cell [5 5]))
 
   (drawable->sketch! (world->drawable)))
-
