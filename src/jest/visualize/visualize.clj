@@ -8,6 +8,7 @@
   (:require [jest.world.cell :as cell]))
 
 (declare cell-bg)
+(declare cell-building)
 (declare cell-road)
 
 ; TODO
@@ -31,16 +32,13 @@
 
 (defn world->drawable
   []
-  (drawable/->Stack (vec
-                     (juxt
-                      (world-state->Grid cell-bg)
-                      (world-state->Grid cell-road)
-                      (vehicles->Stack (vec
-                                        (fn []
-                                          (filter
-                                           (fn [v]
-                                             (= :boat (:type v))) (vehicle/all-vehicles))))
-                                       (fn []))))))
+  (drawable/->Stack
+   [(world-state->Grid cell-bg)
+    (world-state->Grid cell-building)
+    (world-state->Grid cell-road)
+    (vehicles->Stack (vec
+                      (filter (vehicle/vehicles vehicle/truck?)))
+)]))
 
 (defn cell-bg [c]
   (image/path->PImage (clojure.java.io/resource "grass.png")))
