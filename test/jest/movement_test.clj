@@ -50,8 +50,8 @@
                               i (range 10)]
                           (m/spawn (w/cell [x y]))))]
     
-    (v/all-vehicles truck?) => (just (filter truck? vehicles) :in-any-order)
-    (count (v/all-vehicles truck?)) => 20))
+    (v/all-vehicles v/truck?) => (just (filter v/truck? vehicles) :in-any-order)
+    (count (v/all-vehicles v/truck?)) => 20))
 
 (spawn-fact
  "After spawning, entry time is the spawn time, exit time is spawn +
