@@ -61,7 +61,7 @@ def create_all():
     s = ""
     for i,[g,n] in enumerate(glyphs):
         create_letter(i,g)
-        s += create_mapping(i,n) + " "
+        s += create_mapping(i,n) + ","
     return s
 
 def delete_all():
