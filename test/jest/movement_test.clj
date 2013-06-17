@@ -53,6 +53,31 @@
     (v/all-vehicles v/truck?) => (just (filter v/truck? vehicles) :in-any-order)
     (count (v/all-vehicles v/truck?)) => 20))
 
+(world-fact [10 10]
+  "vehicle-type predicates work correctly."
+  (b/build-spawn (w/cell [0 0]) :truck)
+  (b/build-spawn (w/cell [0 1]) :boat)
+  (b/build-spawn (w/cell [0 2]) :train)
+  (b/build-spawn (w/cell [1 0]) :truck)
+  (b/build-spawn (w/cell [1 1]) :boat)
+  (b/build-spawn (w/cell [1 2]) :train)
+
+  (let [vehicles (doall (for [x (range 2)
+                              y (range 3)]
+                          (m/spawn (w/cell [x y]))))]
+    (doseq [v (v/vehicles (w/cell [0 0]))]
+      (v/truck? v) => truthy
+      (v/boat? v) => falsey
+      (v/train? v) => falsey)
+    (doseq [v (v/vehicles (w/cell [0 1]))]
+      (v/truck? v) => falsey
+      (v/boat? v) => truthy
+      (v/train? v) => falsey)
+    (doseq [v (v/vehicles (w/cell [0 2]))]
+      (v/truck? v) => falsey
+      (v/boat? v) => falsey
+      (v/train? v) => truthy)))
+
 (spawn-fact
  "After spawning, entry time is the spawn time, exit time is spawn +
 path duration."
