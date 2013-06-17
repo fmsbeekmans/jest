@@ -12,7 +12,7 @@
         jest.scheduler))
 
 
-(defn -main []
+(defn main []
   (initialize-world 10 10)
   (build-spawn-circle)
 
