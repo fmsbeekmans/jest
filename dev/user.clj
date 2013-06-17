@@ -1,8 +1,26 @@
 (ns user
   (:use clojure.repl
-        clojure.pprint)
-  (:require [jest.world.cell :as cell]
-            [jest.vehicle :as vehicle]
+        clojure.pprint
+        jest.world.cell
+        jest.visualize.visualize
+        jest.world
+        jest.movement
 
-            [jest.testutils :as tu]
-            [jest.scheduler :as scheduler]))
+        brick.drawable
+
+        jest.testutils
+        jest.scheduler))
+
+
+(defn -main []
+  (initialize-world 10 10)
+  (build-spawn-circle)
+
+  (if (started?)
+    (stop!))
+
+  (start!)
+  (spawn (cell [5 5]))
+
+  (drawable->sketch! (world->drawable)))
+
