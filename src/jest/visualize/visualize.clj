@@ -86,3 +86,5 @@
       ;maak een drawable van de wereld
       ;teken deze
       (.draw (world->drawable) [w h]))))
+
+(defn setup [tile-f])
