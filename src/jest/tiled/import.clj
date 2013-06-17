@@ -3,6 +3,7 @@
   (:require [clojure.data.json :as json]
             [jest.world.cell :as cell]
             [jest.world.building :as building]
+            [jest.visualize.visualize :as visualize]
             [jest.world.path :as path]
             [jest.world :as world]
             [jest.util :as util]
@@ -103,7 +104,11 @@
         lookup-layer #(map lookup (:data %))
         layers (:layers json-data)]
     (initialize-world json-data)
-    ;(configure renderer)
+    (visualize/setup
+     (let [lookup-map (util/remap-maps (first tilesets)
+                                       (second tilesets))]
+       (fn [k]
+         (lookup-map k (lookup-map :default)))))
     (let [cells (workable-world)]
       (doseq [layer layers]
         (parse-layer layer lookup cells)))))
