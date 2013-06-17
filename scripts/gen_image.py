@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import Image, ImageDraw, ImageFont, os, sys
+import Image, ImageDraw, ImageFont, os, sys, math
 
 glyphs = [
     ("g","grass"), #grass
@@ -35,8 +35,11 @@ glyphs = [
     ("X", "default")
     ]
 
+sane_fill = 2
+
 def i_name(i, g):
-    return "part-" + str("%03d" % i) + g + ".png"
+    fmt = ("%0" + str(sane_fill) +"d")
+    return "part-" + fmt % i + g + ".png"
 
 def create_letter(p,g):
     i = Image.new("RGB", (64,64), "magenta")
@@ -73,6 +76,7 @@ def usage():
 
 if __name__ == '__main__':
     total = len(sys.argv)
+    sane_fill = int(math.ceil(math.log(len(glyphs), 10)))
     if total != 2:
         usage()
     else:
