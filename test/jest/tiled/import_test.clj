@@ -4,6 +4,7 @@
         [clojure.test :only [deftest]])
   (:require [jest.tiled.import :as import]
             [brick.image :as image]
+            [jest.visualize.visualize :as visualize]
             [jest.world.cell :as cell]
             [jest.world :as world]
             [jest.world.path :as path]
@@ -137,7 +138,8 @@ the correct properties"
     (import/parse-world world) => nil
     (provided
      (import/parse-tilesets ..tile-sets..)
-       => [{} {..some-bg-key.. ..some-bg..}])
+     => [{} {..some-bg-key.. ..some-bg..}]
+     (visualize/setup ..some-fn..) => nil)
     (world/world-width) => 4
     (world/world-height) => 4
     (:background ( world/cell [0 0])) => ..some-bg..))
