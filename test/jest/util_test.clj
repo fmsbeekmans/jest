@@ -92,3 +92,9 @@ the input maps is empty"
     => {}
   (util/two-step-map {:a :a :b :b :c :c} {:a :a :b :b :c :c})
     => {:a :a :b :b :c :c})
+
+(fact "Hyphenate-keyword."
+  (util/hyphenate-keywords) => (keyword "")
+  (util/hyphenate-keywords :a) => :a
+  (util/hyphenate-keywords :a :b) => :a-b
+  (util/hyphenate-keywords :c :b :a) => :c-b-a)

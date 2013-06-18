@@ -5,7 +5,9 @@
         jest.visualize.visualize
         jest.world
         jest.movement
-
+        jest.util
+        jest.level
+        
         brick.drawable
 
         jest.testutils
@@ -13,13 +15,9 @@
 
 
 (defn user-setup []
-  (initialize-world 10 10)
-  (build-spawn-circle)
+  (load-level "levels/alpha_ugly.json")
+  (drawable->sketch! @world-sketch))
 
-  (if (started?)
-    (stop!))
+(user-setup)
 
-  (start!)
-  (spawn (cell [5 5]))
 
-  (drawable->sketch! (world->drawable)))

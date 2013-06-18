@@ -58,3 +58,9 @@
         (for [ [k v] m1
                :when (contains? m2 k)]
           [(m2 k) v])))
+
+(defn hyphenate-keywords
+  "Return a keyword from keywords interposed by hyphens."
+  [& ks]
+  {:pre [(every? identity (map keyword? ks))]}
+  (keyword (apply str (interpose "-" (map name ks)))))
