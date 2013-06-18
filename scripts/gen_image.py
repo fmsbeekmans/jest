@@ -30,6 +30,10 @@ glyphs = [
     ("ra>","rails-east"),
     ("rav","rails-south"),
     ("ra^","rails-north"),
+    # vehicles
+    ("Tu>","truck"),
+    ("Ta>","train"),
+    ("B>","boat"),
 
     # rest
     ("X", "default")
