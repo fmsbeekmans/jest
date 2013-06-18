@@ -98,3 +98,13 @@ the input maps is empty"
   (util/hyphenate-keywords :a) => :a
   (util/hyphenate-keywords :a :b) => :a-b
   (util/hyphenate-keywords :c :b :a) => :c-b-a)
+
+(fact "group-seq"
+  (let [in-seq (take 5 (range))
+        grouped (util/group-seq in-seq
+                           {:odd odd?
+                            :even even?
+                            :numbers number?})]
+    (:numbers grouped) => in-seq
+    (:even grouped) => '(0 2 4)
+    (:odd grouped) => '(1 3)))

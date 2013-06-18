@@ -64,3 +64,11 @@
   [& ks]
   {:pre [(every? identity (map keyword? ks))]}
   (keyword (apply str (interpose "-" (map name ks)))))
+
+(defn group-seq
+  "Partition a seq into groups."
+  [s group-ps]
+  (into {}
+        (map (fn [[group p]]
+               [group (filter p s)]) group-ps)))
+
