@@ -286,6 +286,7 @@ up resources"
 
   (m/spawn (w/cell [3 5]))
   (tick (* 3 (p/path->duration :canal))) ;boat dropped off cargo
+  (b/resource-color (w/cell [5 5])) => (roughly 0.0 0.01)
   (b/resource-count (w/cell [5 5])) => 10
   (let [id (:id (m/spawn (w/cell [5 4])))]
     (tick 19)
