@@ -22,12 +22,17 @@
   {:bg ()})
 
 (defn world-state->Grid
-  "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
+  "Builds a layer from the world state.
+cell-draw-fn is a function that returns a Drawable."
   [cell-f tiles-f]
-;  {:post [(every? drawable/drawable? (vals (:grid %)))]}
-  (drawable/->Grid (world/world-width) (world/world-height)
-                   (into {} (doall (for [c (world/all-cells)]
-                                     [(world/coords c) (tiles-f (cell-f c))])))))
+  {:post [(every? drawable/drawable? (vals (:grid %)))]}
+  (drawable/->Grid
+   (world/world-width)
+   (world/world-height)
+   (into {}
+         (doall
+          (for [c (world/all-cells)]
+            [(world/coords c) (tiles-f (cell-f c))])))))
 
 (defn vehicles->Stack
   [vehicles-fn
@@ -36,7 +41,8 @@
 
 (defn world->drawable
   [tile-f]
-  (drawable/->Stack [(world-state->Grid cell-bg tile-f)
+  (drawable/->Stack [
+;                     (world-state->Grid cell-bg tile-f)
                      (world-state->Grid cell-building tile-f)
 ;                     (world-state->Grid cell-road tile-f)
                      ]))
@@ -47,20 +53,19 @@
 (defn cell-building
   ""
   [c]
-  (if-let [type (building/building-type c)]
+  (if-let [type (building/building-type c)] 
     (do
-      (println (building/resource-type c))
-      
-      (case type
-        :spawn ((partial hyphenate-keywords type) (building/vehicle-type c))
-        :mixer ((partial hyphenate-keywords type) (building/resource-color c))
-        :supply ((partial hyphenate-keywords type) (building/resource-color c))
-        :depot ((partial hyphenate-keywords type) (building/resource-color c))))))
+      (hyphenate-keywords type
+                          (-> c
+                              ({:spawn building/vehicle-type
+                                :mixer building/resource-color
+                                :supply building/resource-color
+                                :depot building/resource-color} type)))))
 
-(defn cell-canal [c]
-  (if (seq (path/canals c))
-    (drawable/->Image (image/path->PImage (clojure.java.io/resource "canal.png")))
-    (drawable/->Nothing)))
+  (defn cell-canal [c]
+    (if (seq (path/canals c))
+      (drawable/->Image (image/path->PImage (clojure.java.io/resource "canal.png")))
+      (drawable/->Nothing))))
 
 
 (defn cell-boat [c]
