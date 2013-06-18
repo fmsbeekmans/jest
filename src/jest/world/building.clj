@@ -122,7 +122,7 @@
 (defn resource-color
   "Returns the color of the resource at this cell."
   [cell]
-  (first (:resource cell)))
+  (:resource-type cell))
 
 (defn resource-count
   "Returns the amount of resource at this cell."

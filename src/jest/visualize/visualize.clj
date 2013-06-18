@@ -25,7 +25,7 @@
   "Builds a layer from the world state.
 cell-draw-fn is a function that returns a Drawable."
   [cell-f tiles-f]
-  {:post [(every? drawable/drawable? (vals (:grid %)))]}
+;  {:post [(every? drawable/drawable? (vals (:grid %)))]}
   (drawable/->Grid
    (world/world-width)
    (world/world-height)
@@ -42,7 +42,7 @@ cell-draw-fn is a function that returns a Drawable."
 (defn world->drawable
   [tile-f]
   (drawable/->Stack [
-;                     (world-state->Grid cell-bg tile-f)
+                     (world-state->Grid cell-bg tile-f)
                      (world-state->Grid cell-building tile-f)
 ;                     (world-state->Grid cell-road tile-f)
                      ]))
@@ -53,20 +53,18 @@ cell-draw-fn is a function that returns a Drawable."
 (defn cell-building
   ""
   [c]
-  (if-let [type (building/building-type c)] 
-    (do
-      (hyphenate-keywords type
-                          (-> c
-                              ({:spawn building/vehicle-type
-                                :mixer building/resource-color
-                                :supply building/resource-color
-                                :depot building/resource-color} type)))))
+  (if-let [type (building/building-type c)]
+    (hyphenate-keywords
+     type
+     (({:spawn building/vehicle-type
+        :mixer building/resource-color
+        :supply building/resource-color
+        :depot building/resource-color} type) c))))
 
-  (defn cell-canal [c]
+(defn cell-canal [c]
     (if (seq (path/canals c))
       (drawable/->Image (image/path->PImage (clojure.java.io/resource "canal.png")))
-      (drawable/->Nothing))))
-
+      (drawable/->Nothing)))
 
 (defn cell-boat [c]
   (image/path->PImage (clojure.java.io/resource "boat.png")))
@@ -108,9 +106,9 @@ cell-draw-fn is a function that returns a Drawable."
   (reset! world-sketch
           (drawable/->Bricklet
            (atom (reify drawable/Drawable
-               (drawable/draw [this [w h]]
-                 (drawable/.draw
-                  (world->drawable
-                   tile-f)
-                  [w h]))))
+                   (drawable/draw [this [w h]]
+                     (drawable/.draw
+                      (world->drawable
+                       tile-f)
+                      [w h]))))
            (atom []))))

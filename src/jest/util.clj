@@ -62,7 +62,5 @@
 (defn hyphenate-keywords
   "Return a keyword from keywords interposed by hyphens."
   [& ks]
-  {:pre [(do (println ks) true)
-         ;(every? identity (map keyword? ks))
-         ]}
+  {:pre [(every? identity (map keyword? ks))]}
   (keyword (apply str (interpose "-" (map name ks)))))

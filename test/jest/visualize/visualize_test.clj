@@ -11,6 +11,8 @@
   (let [grid (visualize/world-state->Grid (fn [c]
                                             (if (building/spawn? c)
                                               (drawable/->Stack [])
-                                              (drawable/->Nothing))))]
+                                              (drawable/->Nothing)))
+                                          (fn [key]
+                                            key))]
     (get-in grid [:grid [5 5]]) => (drawable/->Stack [])
     (get-in grid [:grid [5 6]]) => (drawable/->Nothing)))

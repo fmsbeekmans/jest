@@ -5,7 +5,7 @@
         jest.visualize.visualize
         jest.world
         jest.movement
-
+        jest.util
         jest.level
         
         brick.drawable
@@ -16,5 +16,8 @@
 
 (defn user-setup []
   (load-level "levels/alpha_ugly.json")
-  (drawable->sketch! @world-sketch)
-  )
+  (drawable->sketch! @world-sketch))
+
+(user-setup)
+
+
