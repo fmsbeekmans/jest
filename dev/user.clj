@@ -18,6 +18,7 @@
   (load-level "levels/alpha_ugly.json")
   (drawable->sketch! @world-sketch))
 
-(user-setup)
+;(user-setup)
+
 
 
