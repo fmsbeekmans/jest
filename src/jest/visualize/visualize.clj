@@ -1,7 +1,11 @@
 (ns jest.visualize.visualize
+  "Functions to facilitate the visualisation of the world state."
+  (:use jest.util)
+  
   (:require [brick.image :as image])
   (:require [brick.drawable :as drawable])
   (:require [jest.world :as world])
+  (:require [jest.world.building :as building])
   (:require [jest.visualize.points :as points])
   (:require [jest.vehicle :as vehicle])
   (:require [jest.world.path :as path])
@@ -11,17 +15,19 @@
 (declare cell-building)
 (declare cell-road)
 
+(def world-sketch (atom nil))
+
 ; TODO
 (defn tile-lookup [k]
   {:bg ()})
 
 (defn world-state->Grid
   "Builds a layer from the world state. cell-draw-fn is a function that returns a Drawable."
-  [cell-draw-fn]
-; {:post [(every? drawable/drawable? (vals (:grid %)))]}
+  [cell-f tiles-f]
+;  {:post [(every? drawable/drawable? (vals (:grid %)))]}
   (drawable/->Grid (world/world-width) (world/world-height)
-                   (into {} (for [c (world/all-cells)]
-                              [(world/coords c) (cell-draw-fn c)]))))
+                   (into {} (doall (for [c (world/all-cells)]
+                                     [(world/coords c) (tiles-f (cell-f c))])))))
 
 (defn vehicles->Stack
   [vehicles-fn
@@ -29,16 +35,27 @@
   (vec (drawable/->Stack (map (fn [vehicle])))))
 
 (defn world->drawable
-  []
-  (drawable/->Stack (world-state->Grid cell-bg)
-                    (world-state->Grid cell-building)
-                    (world-state->Grid cell-road)))
+  [tile-f]
+  (drawable/->Stack [(world-state->Grid cell-bg tile-f)
+                     (world-state->Grid cell-building tile-f)
+;                     (world-state->Grid cell-road tile-f)
+                     ]))
 
 (defn cell-bg [c]
-  (image/path->PImage (clojure.java.io/resource "grass.png")))
+  (:background c))
 
-(defn cell-building [c]
-  (image/path->PImage (clojure.java.io/resource "grass.png")))
+(defn cell-building
+  ""
+  [c]
+  (if-let [type (building/building-type c)]
+    (do
+      (println (building/resource-type c))
+      
+      (case type
+        :spawn ((partial hyphenate-keywords type) (building/vehicle-type c))
+        :mixer ((partial hyphenate-keywords type) (building/resource-color c))
+        :supply ((partial hyphenate-keywords type) (building/resource-color c))
+        :depot ((partial hyphenate-keywords type) (building/resource-color c))))))
 
 (defn cell-canal [c]
   (if (seq (path/canals c))
@@ -65,7 +82,6 @@
     (drawable/->Image (image/path->PImage (clojure.java.io/resource "rails.png")))
     (drawable/->Nothing)))
 
-
 (defn cell-train [c]
   (image/path->PImage (clojure.java.io/resource "train.png")))
 
@@ -82,4 +98,14 @@
       ;teken deze
       (.draw (world->drawable) [w h]))))
 
-(defn setup [tile-f])
+(defn setup [tile-f]
+  ;init een bricklet met tile-set
+  (reset! world-sketch
+          (drawable/->Bricklet
+           (atom (reify drawable/Drawable
+               (drawable/draw [this [w h]]
+                 (drawable/.draw
+                  (world->drawable
+                   tile-f)
+                  [w h]))))
+           (atom []))))

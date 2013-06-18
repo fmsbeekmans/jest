@@ -107,7 +107,8 @@
   "Returns the type of resource handled on this supply or depot."
   [c]
   {:pre [(or (supply? c)
-             (depot? c))]}
+             (depot? c)
+             (mixer? c))]}
   (:resource-type c))
 
 (defn vehicle-type
