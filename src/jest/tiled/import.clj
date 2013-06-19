@@ -44,7 +44,6 @@
 (defn layer-selector
   "Extracts the type of layer in valid levels"
   [layer _ _]
-  (println (layer :name))
   (keyword (layer :name)))
 
 (defmulti parse-layer
@@ -61,7 +60,6 @@
   (parse (partial place-paths :road) cells lookup layer))
 
 (defmethod parse-layer :rails [layer lookup cells]
-  (println (:data layer))
   (parse (partial place-paths :rails) cells lookup layer))
 
 (defmethod parse-layer :canal [layer lookup cells]
@@ -80,9 +78,8 @@
     (if (seq tilesets)
       (let [current-tileset (first tilesets)
             prop (:properties current-tileset)
-            image-path (clojure.java.io/resource (:image current-tileset))
             image-vec (image/load-images
-                       (image/path->PImage image-path)
+                       (image/path->PImage (:image current-tileset))
                        [(:tilewidth current-tileset)
                         (:tileheight current-tileset)])]
         (recur (rest tilesets)
