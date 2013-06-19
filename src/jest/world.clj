@@ -51,6 +51,7 @@
 (defn cell
   "Returns the cell on the given coordinates"
   [[x y]]
+  {:pre [(cell-ref [x y])]}
   @(cell-ref [x y]))
 
 (defn coords
