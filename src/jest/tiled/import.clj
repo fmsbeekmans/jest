@@ -44,7 +44,6 @@
 (defn layer-selector
   "Extracts the type of layer in valid levels"
   [layer _ _]
-  (println (layer :name))
   (keyword (layer :name)))
 
 (defmulti parse-layer
@@ -61,7 +60,6 @@
   (parse (partial place-paths :road) cells lookup layer))
 
 (defmethod parse-layer :rails [layer lookup cells]
-  (println (:data layer))
   (parse (partial place-paths :rails) cells lookup layer))
 
 (defmethod parse-layer :canal [layer lookup cells]
@@ -86,8 +84,8 @@
                        [(:tilewidth current-tileset)
                         (:tileheight current-tileset)])]
         (recur (rest tilesets)
-               (into images (util/offset-vec image-vec (inc (count images))))
-               (into props (util/offset-map prop (inc (count images))))))
+               (into images (util/offset-vec image-vec (count images)))
+               (into props (util/offset-map prop (count images)))))
       [images props])))
 
 
