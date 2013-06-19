@@ -4,7 +4,7 @@
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
-                             map->Vehicle]]
+                             exploding? map->Vehicle]]
         [jest.color :only [hue-difference <=delta?]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
@@ -116,6 +116,21 @@
             (offset (/ (vehicle->duration (vehicle id))
                        2))))
 
+(defn- schedule-state-change
+  "Schedules a state change for the vehicle with the given id to the given state
+   at the given time."
+  [id state time]
+  (schedule #(dosync (vehicle-state-change id state))
+            time))
+
+(defn start-exploding
+  "Modifies the state of the vehicle with the given id to :exploding, and
+   schedules removal from the map."
+  [id]
+  (schedule-state-change id :exploding
+                         (offset (/ (vehicle->duration (vehicle id))
+                                    2))))
+
 (defn vehicle-transition-state-dispatch
   "Dispatch function for the vehicle-transition-state multimethod.
    Dispatch happens on [cargo? cell-type]."
@@ -130,8 +145,14 @@
    Dispatch happens on [cargo? cell-type]."
   vehicle-transition-state-dispatch)
 
+;; default case, since we ended up here none of the special cases apply.
+;; this is a good place to schedule an explosion if there's no exit path.
+;; It is good because it doesn't conflict with a (de)spawn point which 
+;; does not need an exit path.
 (defmethod vehicle-transition-state :default
-  [_])
+  [id]
+  (when-not (:exit-direction (vehicle id))
+    (start-exploding id)))
 
 (defmethod vehicle-transition-state
   [false :spawn]
@@ -180,6 +201,7 @@
     ;;TODO this should also update some score
     (clear-cargo id)))
 
+
 (defn move-vehicle
   "Moves the vehicle with the given id in the given direction. This will also
    perform any actions required for this vehicle on the given cell, such as
@@ -205,17 +227,13 @@
   [id]
   (schedule (fn []
               (dosync
-               (move-vehicle id (:exit-direction (vehicle id)))
-               (when-not (despawning? id)
-                 (schedule-move id))))
+               (if (exploding? id)
+                 (unload-vehicle (vehicle id))
+                 (do
+                   (move-vehicle id (:exit-direction (vehicle id)))
+                   (when-not (despawning? id)
+                     (schedule-move id))))))
             (offset (vehicle->duration (vehicle id)))))
-
-(defn- schedule-state-change
-  "Schedules a state change for the vehicle with the given id to the given state
-   at the given time."
-  [id state time]
-  (schedule #(dosync (vehicle-state-change id state))
-            time))
 
 (defn- load-vehicle-on-spawn
   "Loads a vehicle on a spawn point, setting all initial state."
@@ -233,8 +251,11 @@
   "Spawns a vehicle on the given cell."
   [c]
   {:pre [(spawn? c)]}
-  (let [vehicle (load-vehicle-on-spawn c)]
-    (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
-                                                    2))
-    (schedule-move (:id vehicle))
-    vehicle))
+  (dosync 
+   (let [vehicle (load-vehicle-on-spawn c)]
+     (if (:exit-direction vehicle)
+       (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
+                                                       2))
+       (start-exploding (:id vehicle)))
+     (schedule-move (:id vehicle))
+     vehicle)))

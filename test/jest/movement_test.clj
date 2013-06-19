@@ -444,3 +444,26 @@ clockwise order is selected"
     (tick-move truck)
     (tick-move truck) ;should have picked east
     (:coords (v/vehicle truck)) => [6 6]))
+
+(world-fact [10 10]
+            "A vehicle for which no exit applies explodes and despawns"
+            (b/build-spawn (w/cell [5 5]) :truck)
+            (p/build-path (w/cell [5 5]) :east :road)
+            (with-spawned-vehicle (truck [5 5])
+              (tick-move truck)
+              ;;truck is now in a cell with no valid exit
+              (:exit-direction (v/vehicle truck)) => nil
+              (tick (/ +truck-speed+ 2))
+              (v/exploding? truck) => truthy
+              (tick  (/ +truck-speed+ 2))
+              (v/vehicle truck) => nil))
+
+(world-fact [10 10]
+            "A vehicle spawned on a cell with no exit paths explodes."
+            (b/build-spawn (w/cell [5 5]) :truck)
+            (with-spawned-vehicle (truck [5 5])
+              (:exit-direction (v/vehicle truck)) => nil
+              (tick (/ +truck-speed+ 2))
+              (v/exploding? truck) => truthy
+              (tick (/ +truck-speed+ 2))
+              (v/vehicle truck) => nil))

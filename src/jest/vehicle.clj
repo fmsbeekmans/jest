@@ -102,6 +102,11 @@
   [id]
   (=state id :despawning))
 
+(defn exploding?
+  "returns true iff the vehicle with the given id is in the exploding state."
+  [id]
+  (=state id :exploding))
+
 (defn cargo?
   "Returns true iff the given vehicle has cargo"
   [vehicle]
