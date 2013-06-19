@@ -139,9 +139,7 @@ the correct properties"
     (provided
      (import/parse-tilesets ..tile-sets..)
      => [{} {..some-bg-key.. ..some-bg..}]
-     ;;TODO ..some-fn.. isn't an fn wildcard so this doesn't work!
-;     (visualize/setup ..some-fn..) => nil
-     )
+     (visualize/setup ..some-fn..) => nil)
     (world/world-width) => 4
     (world/world-height) => 4
     (:background ( world/cell [0 0])) => ..some-bg..))
