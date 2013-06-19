@@ -251,11 +251,12 @@
   "Spawns a vehicle on the given cell."
   [c]
   {:pre [(spawn? c)]}
-  (dosync 
+  (dosync
    (let [vehicle (load-vehicle-on-spawn c)]
      (if (:exit-direction vehicle)
-       (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
-                                                       2))
+       (do (println "Spawn me! :(")
+           (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
+                                                           2)))
        (start-exploding (:id vehicle)))
      (schedule-move (:id vehicle))
      vehicle)))

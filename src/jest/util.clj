@@ -62,7 +62,7 @@
 (defn hyphenate-keywords
   "Return a keyword from keywords interposed by hyphens."
   [& ks]
-  {:pre [(every? identity (map keyword? ks))]}
+;  {:pre [(every? identity (map keyword? ks))]}
   (keyword (apply str (interpose "-" (map name ks)))))
 
 (defn group-seq
@@ -71,4 +71,3 @@
   (into {}
         (map (fn [[group p]]
                [group (filter p s)]) group-ps)))
-

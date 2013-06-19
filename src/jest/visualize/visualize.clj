@@ -5,6 +5,7 @@
   (:require [brick.image :as image])
   (:require [brick.drawable :as drawable])
   (:require [jest.world :as world])
+  (:require [jest.movement :as movement])
   (:require [jest.world.building :as building])
   (:require [jest.visualize.points :as points])
   (:require [jest.vehicle :as vehicle])
@@ -16,10 +17,6 @@
 (declare cell-road)
 
 (def world-sketch (atom nil))
-
-; TODO
-(defn tile-lookup [k]
-  {:bg ()})
 
 (defn world-state->Grid
   "Builds a layer from the world state.
@@ -34,26 +31,44 @@ cell-draw-fn is a function that returns a Drawable."
           (for [c (world/all-cells)]
             [(world/coords c) (tiles-f (cell-f c))])))))
 
+(defn vehicle-scale
+  "What scale should a vehicle-tile be scaled by?
+Returns an x-scale y-scale vector."
+  []
+;  (/ 1 (world/world-width))
+  1)
+
 (defn vehicles->Stack
-  [vehicles-fn
-   vehicle-draw-fn]
-  (vec (drawable/->Stack (map (fn [vehicle])))))
+  [vehicle-type image]
+  (drawable/->Stack
+   (vec
+    (map (fn [v]
+           (println "place!")
+           (drawable/->Floating image [0.5 0.5] (vehicle-scale) 0))
+     (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
   [tile-f]
-  (drawable/->Stack [
-                     (world-state->Grid cell-bg tile-f)
-                     (world-state->Grid cell-building tile-f)
-;                     (world-state->Grid cell-road tile-f)
-                     ]))
+  (vehicles->Stack :truck
+                   (tile-f :truck))
+  (drawable/->Stack
+   [
+;    (world-state->Grid cell-bg tile-f)
+;    (world-state->Grid cell-building tile-f)
+;    (world-state->Grid cell-road tile-f)
+
+    (vehicles->Stack :truck (tile-f :rails-east))
+    ]))
 
 (defn cell-bg [c]
+  "What is the background tile-key for this cell?"
   (:background c))
 
 (defn cell-building
-  ""
+  "Which building tile-key fits this cell?"
   [c]
   (if-let [type (building/building-type c)]
+
     (hyphenate-keywords
      type
      (({:spawn building/vehicle-type
@@ -61,38 +76,33 @@ cell-draw-fn is a function that returns a Drawable."
         :supply building/resource-color
         :depot building/resource-color} type) c))))
 
-(defn cell-canal [c]
+(defn cell-canal
+  ""
+  [c]
     (if (seq (path/canals c))
       (drawable/->Image (image/path->PImage (clojure.java.io/resource "canal.png")))
       (drawable/->Nothing)))
 
-(defn cell-boat [c]
-  (image/path->PImage (clojure.java.io/resource "boat.png")))
-
-(defn cell-road [c]
-  (if (seq (filter (fn [[_ v]]
-
-                (= :road (:type v))) (:paths c)))
-    (drawable/->Image (image/path->PImage (clojure.java.io/resource "road.png")))
-    (drawable/->Nothing)))
-
-(defn cell-truck [c]
-  (image/path->PImage (clojure.java.io/resource "truck.png")))
+(defn cell-road
+  "Return the appropriate tile-key for roads in this cell."
+  [c]
+  (let [{in :in
+         out :out} (group-seq
+                    (path/paths c :road)
+                    {:in path/in-path?
+                     :out path/out-path?})]
+    ;; actual
+    (apply (partial hyphenate-keywords :road)
+           (map :direction out))
+    ;; temp
+    (if-not (empty? (first out))
+      (hyphenate-keywords :road (:direction (first out))))))
 
 (defn cell-rails [c]
   (if (seq (filter (fn [[_ v]]
                 (= :rails (:type v))) (:paths c)))
     (drawable/->Image (image/path->PImage (clojure.java.io/resource "rails.png")))
     (drawable/->Nothing)))
-
-(defn cell-train [c]
-  (image/path->PImage (clojure.java.io/resource "train.png")))
-
-(defn cell-buildings [c]
-  (image/path->PImage (clojure.java.io/resource "buildings.png")))
-
-(defn cell-explosions [c]
-  (image/path->PImage (clojure.java.io/resource "explosions.png")))
 
 (defn world->sketch []
   (reify drawable/Drawable
