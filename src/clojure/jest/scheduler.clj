@@ -9,6 +9,7 @@
 ;; An agent is used here because anything sent to an agent from within a
 ;; transaction will only run if the transaction succeeds, and will only run once
 (def ^:private schedule-agent (agent nil))
+(set-error-handler! schedule-agent clojure.stacktrace/print-stack-trace)
 (set-error-mode! schedule-agent :continue)
 
 (defn- time-millis []
