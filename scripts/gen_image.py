@@ -54,6 +54,7 @@ def create_letter(p,g):
     i.putalpha(mask)
     f = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 32)
     d.text((0,0),g, font=f, fill="black")
+    d.rectangle([30, 30, 33, 33],fill="blue")
     i.save(open(i_name(p,g), "wb"), "PNG")
 
 def wrap_q(s):
