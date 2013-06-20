@@ -10,7 +10,8 @@
   (:require [jest.visualize.points :as points])
   (:require [jest.vehicle :as vehicle])
   (:require [jest.world.path :as path])
-  (:require [jest.world.cell :as cell]))
+  (:require [jest.world.cell :as cell])
+  (:require [jest.visualize.input :as input]))
 
 (declare cell-bg)
 (declare cell-building)
@@ -206,7 +207,10 @@ Returns an x-scale y-scale vector."
                       (world->drawable
                        tile-f)
                       [w h]))))
-           (atom []))))
+           (atom [])
+           :mouse-pressed input/on-down-handler
+           :mouse-released input/on-up-handler
+           :mouse-dragged input/on-move-handler)))
 
 (defn sketch! []
   (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))

@@ -18,6 +18,7 @@
 
 (defn user-setup []
   (scheduler-reset!)
+  (jest.input.quil/setup-quil-mouse-input)
   (load-level "levels/alpha_ugly.json")
   
   (start!)
