@@ -64,7 +64,7 @@
   [& ks]
 ;  {:pre [(every? identity (map keyword? ks))]}
   ;(println ks)
-  (keyword (apply str (interpose "-" (map name ks)))))
+  (keyword (clojure.string/join "-" (map name ks))))
 
 (defn group-seq
   "Partition a seq into groups."
