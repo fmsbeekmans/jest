@@ -21,6 +21,8 @@
                              [lein-kibit "0.0.8"]]
                    :dependencies [[midje "1.5.1"]]
                    :source-paths ["dev/"]}}
+  :source-paths ["src/clojure"]
+  :java-source-paths ["src/java"]
   :resource-paths ["resources/"]
   :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/dev"
           :src-linenum-anchor-prefix "L"})
