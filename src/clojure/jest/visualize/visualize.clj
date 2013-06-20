@@ -210,3 +210,12 @@ Returns an x-scale y-scale vector."
 
 (defn sketch! []
   (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))
+
+(defn sketch-width []
+  (.getWidth @world-sketch))
+
+(defn sketch-height []
+  (.getHeight @world-sketch))
+
+(defn sketch-size []
+  [(sketch-width) (sketch-height)])
