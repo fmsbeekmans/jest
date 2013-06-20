@@ -36,7 +36,7 @@ glyphs = [
     ("B>","boat"),
 
     # rest
-    ("X", "default")
+    ("", "default")
     ]
 
 sane_fill = 2
@@ -48,6 +48,10 @@ def i_name(i, g):
 def create_letter(p,g):
     i = Image.new("RGB", (64,64), "magenta")
     d = ImageDraw.Draw(i)
+    mask=Image.new('L', i.size, color=255)
+    alpha_draw=ImageDraw.Draw(mask)
+    alpha_draw.rectangle(i.getbbox(), fill=0)
+    i.putalpha(mask)
     f = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 32)
     d.text((0,0),g, font=f, fill="black")
     i.save(open(i_name(p,g), "wb"), "PNG")
@@ -56,7 +60,7 @@ def wrap_q(s):
     return "\"" + s + "\""
 
 def create_mapping(i, s):
-    outp = wrap_q(str(i)) + ":" + wrap_q(s)
+    outp = wrap_q(str(i+1)) + ":" + wrap_q(s)
     return outp
 
 
@@ -77,6 +81,8 @@ def delete_all():
 
 def usage():
     print "Usage: either gen or clean as first argument"
+
+
 
 if __name__ == '__main__':
     total = len(sys.argv)
