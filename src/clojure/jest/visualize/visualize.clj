@@ -43,7 +43,6 @@ Returns an x-scale y-scale vector."
   (drawable/->Stack
    (vec
     (map (fn [v]
-           (println "place!")
            (drawable/->Floating image [0.5 0.5] (vehicle-scale) 0))
      (vehicle/all-vehicles vehicle/truck?)))))
 
@@ -54,10 +53,9 @@ Returns an x-scale y-scale vector."
   (drawable/->Stack
    [
 ;    (world-state->Grid cell-bg tile-f)
-;    (world-state->Grid cell-building tile-f)
+    (world-state->Grid cell-building tile-f)
 ;    (world-state->Grid cell-road tile-f)
-
-    (vehicles->Stack :truck (tile-f :rails-east))
+;    (vehicles->Stack :truck (tile-f :rails-east))
     ]))
 
 (defn cell-bg [c]
@@ -68,13 +66,12 @@ Returns an x-scale y-scale vector."
   "Which building tile-key fits this cell?"
   [c]
   (if-let [type (building/building-type c)]
-
     (hyphenate-keywords
      type
      (({:spawn building/vehicle-type
         :mixer building/resource-color
-        :supply building/resource-color
-        :depot building/resource-color} type) c))))
+        :supply building/resource-type
+        :depot building/resource-type} type) c))))
 
 (defn cell-canal
   ""
