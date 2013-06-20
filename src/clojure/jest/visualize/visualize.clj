@@ -1,7 +1,7 @@
 (ns jest.visualize.visualize
   "Functions to facilitate the visualisation of the world state."
   (:use jest.util)
-  
+
   (:require [brick.image :as image])
   (:require [brick.drawable :as drawable])
   (:require [jest.world :as world])
@@ -48,13 +48,11 @@ Returns an x-scale y-scale vector."
 
 (defn world->drawable
   [tile-f]
-  (vehicles->Stack :truck
-                   (tile-f :truck))
   (drawable/->Stack
    [
-;    (world-state->Grid cell-bg tile-f)
+    (world-state->Grid cell-bg tile-f)
     (world-state->Grid cell-building tile-f)
-;    (world-state->Grid cell-road tile-f)
+    (world-state->Grid cell-road tile-f)
 ;    (vehicles->Stack :truck (tile-f :rails-east))
     ]))
 

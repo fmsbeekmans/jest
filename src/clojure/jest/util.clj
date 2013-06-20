@@ -63,7 +63,7 @@
   "Return a keyword from keywords interposed by hyphens."
   [& ks]
 ;  {:pre [(every? identity (map keyword? ks))]}
-  (println ks)
+  ;(println ks)
   (keyword (apply str (interpose "-" (map name ks)))))
 
 (defn group-seq
