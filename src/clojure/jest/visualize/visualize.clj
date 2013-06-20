@@ -16,6 +16,7 @@
 (declare cell-building)
 (declare cell-road)
 
+(def world-bricklet (atom nil))
 (def world-sketch (atom nil))
 
 (defn world-state->Grid
@@ -108,7 +109,7 @@ Returns an x-scale y-scale vector."
 
 (defn setup [tile-f]
   ;init een bricklet met tile-set
-  (reset! world-sketch
+  (reset! world-bricklet
           (drawable/->Bricklet
            (atom (reify drawable/Drawable
                    (drawable/draw [this [w h]]
@@ -117,3 +118,6 @@ Returns an x-scale y-scale vector."
                        tile-f)
                       [w h]))))
            (atom []))))
+
+(defn sketch! []
+  (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))

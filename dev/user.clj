@@ -28,4 +28,4 @@
   (spawn (cell [4 2]))
   (println "Spaned car")
   (stop!)
-  (drawable->sketch! @world-sketch))
+  (sketch!))
