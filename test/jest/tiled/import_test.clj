@@ -40,8 +40,8 @@ image-list and dictionary"
       :properties (test-dict 4 identity)
       :name "test-tileset"}])
    =>
-   [(util/offset-vec sub-images 1)
-    (test-dict 4 #(inc (Integer/valueOf (name %1))))]
+   [(util/offset-vec sub-images 0)
+    (test-dict 4 #(Integer/valueOf (name %1)))]
    (provided
     (image/load-images
      (image/path->PImage ..image-path..)

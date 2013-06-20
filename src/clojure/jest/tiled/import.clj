@@ -83,8 +83,8 @@
                        [(:tilewidth current-tileset)
                         (:tileheight current-tileset)])]
         (recur (rest tilesets)
-               (into images (util/offset-vec image-vec (inc (count images))))
-               (into props (util/offset-map prop (inc (count images))))))
+               (into images (util/offset-vec image-vec (count images)))
+               (into props (util/offset-map prop (count images)))))
       [images props])))
 
 
