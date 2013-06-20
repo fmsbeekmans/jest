@@ -13,12 +13,29 @@
         brick.drawable
 
         jest.testutils
-        jest.scheduler))
+        jest.scheduler
 
+        jest.input.quil
+        jest.input.core))
+
+
+(def inv-directions (clojure.set/map-invert directions))
+
+
+(defn rough-staging-on-move [id pos1 pos2]
+  (let [c1 (cell pos1)
+        c2 (cell pos2)
+        direction (inv-directions (map - pos2 pos1))]
+    (if (path c1 direction)
+      (if (in-path? (path c1 direction))
+        (unbuild-path c1 direction))
+      (build-path c1 direction :road))
+    ))
 
 (defn user-setup []
   (scheduler-reset!)
-  (jest.input.quil/setup-quil-mouse-input)
+  (setup-quil-mouse-input)
+  (set-input-handler! :on-move #(rough-staging-on-move %1 %2 %3))
   (load-level "levels/alpha_ugly.json")
   
   (start!)
