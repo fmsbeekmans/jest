@@ -2,6 +2,7 @@
   "Functions for adding, removing and searching for routes along
   roads, rails and canals."
   (:use [jest.world :only [alter-cell]]
+        [jest.world.path :only [paths]]
         [jest.color :only [contains-hue?]]))
 
 (defn- add-route
@@ -41,3 +42,6 @@
   (for [[d p] (:paths c)
         :when (seq (:routes p))]
     [d (:type p) (:routes p)]))
+
+(defn paths-with-route [c color]
+  (filter #(contains-hue? (:routes %) color) (paths c)))
