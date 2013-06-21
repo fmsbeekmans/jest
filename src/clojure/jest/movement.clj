@@ -5,7 +5,7 @@
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
                              exploding? map->Vehicle]]
-        [jest.color :only [hue-difference <=delta?]]
+        [jest.color :only [hue-difference <=delta? hue]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
                                 opposite-dirs path path-type to]]
@@ -165,11 +165,14 @@
   ;;TODO add penalty for despawning with cargo
   (start-despawning id))
 
+(defn resource-hue [cell]
+  (hue (:resource-type cell)))
+
 (defmethod vehicle-transition-state
   [false :supply]
   [id]
   (set-cargo id
-             (:resource-type (vehicle-cell (vehicle id)))
+             (resource-hue (vehicle-cell (vehicle id)))
              (cargo-capacity (:type (vehicle id)))))
 
 (defmethod vehicle-transition-state
@@ -196,7 +199,7 @@
   [true :depot]
   [id]
   (when (< (hue-difference (cargo-color (vehicle id))
-                          (:resource-type (vehicle-cell (vehicle id))))
+                          (resource-hue (vehicle-cell (vehicle id))))
            (/ Math/PI 8))
     ;;TODO this should also update some score
     (clear-cargo id)))

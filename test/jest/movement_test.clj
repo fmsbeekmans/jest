@@ -158,7 +158,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
  "A vehicle that passes through a supply picks up a resource."
  (let [resource (hue :red)
        id (:id (m/spawn (w/cell [5 5])))]
-   (b/build-supply (w/cell [6 6]) (hue :red))
+   (b/build-supply (w/cell [6 6]) :red)
    (tick (dec (* 2 +truck-speed+))) ; just before entering cell 6 6, 
                                     ; should have nothing
    (v/cargo? (v/vehicle id)) => false
@@ -167,7 +167,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
 
 (spawn-fact
  "A vehicle that passes through a depot without having cargo does nothing."
- (b/build-depot (w/cell [6 6]) (hue :red))
+ (b/build-depot (w/cell [6 6]) :red)
  (tick 20)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (v/cargo? (v/vehicle id))) => false)
@@ -176,8 +176,8 @@ a vehicle has moved in its preferred direction. It then keeps moving."
 (spawn-fact
  "A vehicle that passes through a depot after passing
 through a supply with the same resource drops its resource."
- (b/build-supply (w/cell [6 6]) (hue :green))
- (b/build-depot (w/cell [4 6]) (hue :green))
+ (b/build-supply (w/cell [6 6]) :green)
+ (b/build-depot (w/cell [4 6]) :green)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (dec (* 4 +truck-speed+))) ; should have cargo
    (v/cargo-color (v/vehicle id)) => (roughly (hue :green) 0.1)
@@ -187,8 +187,8 @@ through a supply with the same resource drops its resource."
 (spawn-fact
  "A vehicle that passes through a depot after passing through
 a supply with another resource drops its resource."
- (b/build-supply (w/cell [6 6]) (hue :green))
- (b/build-depot (w/cell [4 6]) (hue :red))
+ (b/build-supply (w/cell [6 6]) :green)
+ (b/build-depot (w/cell [4 6]) :red)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (dec (* 4 +truck-speed+))) ; should have cargo
    (v/cargo-color (v/vehicle id)) => (roughly (hue :green) 0.1)
@@ -198,7 +198,7 @@ a supply with another resource drops its resource."
 (spawn-fact
  "A vehicle that passes through a mixer while carrying cargo drops
 off the cargo"
- (b/build-supply (w/cell [6 5]) (hue :green))
+ (b/build-supply (w/cell [6 5]) :green)
  (b/build-mixer (w/cell [6 6]))
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (dec (* 2 +truck-speed+)))
@@ -216,12 +216,12 @@ off the cargo"
  (b/build-mixer (w/cell [7 5]))
  (b/build-spawn (w/cell [5 5]) :truck)
  (p/build-path (w/cell [5 5]) :east :road)
- (b/build-supply (w/cell [6 5]) (hue :red))
+ (b/build-supply (w/cell [6 5]) :red)
  (p/build-path (w/cell [6 5]) :east :road)
  (p/build-path (w/cell [7 5]) :east :road)
  (b/build-spawn (w/cell [7 3]) :truck)
  (p/build-path (w/cell [7 3]) :south :road)
- (b/build-supply (w/cell [7 4]) (hue :green))
+ (b/build-supply (w/cell [7 4]) :green)
  (p/build-path (w/cell [7 4]) :south :road)
  (p/build-path (w/cell [7 5]) :south :road)
  (m/spawn (w/cell [5 5]))
@@ -236,13 +236,13 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (b/build-mixer (w/cell [7 5]))
  (b/build-spawn (w/cell [5 5]) :truck)
  (p/build-path (w/cell [5 5]) :east :road)
- (b/build-supply (w/cell [6 5]) (hue :red))
+ (b/build-supply (w/cell [6 5]) :red)
  (p/build-path (w/cell [6 5]) :east :road)
  (p/build-path (w/cell [7 5]) :east :road)
  (b/build-spawn (w/cell [8 5]) :truck)
  (b/build-spawn (w/cell [7 3]) :truck)
  (p/build-path (w/cell [7 3]) :south :road)
- (b/build-supply (w/cell [7 4]) (hue :green))
+ (b/build-supply (w/cell [7 4]) :green)
  (p/build-path (w/cell [7 4]) :south :road)
  (m/spawn (w/cell [5 5]))
  (m/spawn (w/cell [7 3]))
@@ -252,7 +252,7 @@ the magnitude at the mixer should be the sum of the cargo counts"
 
 (spawn-fact
  "A vehicle that enters a spawn point with cargo incurs a penalty."
- (b/build-supply (w/cell [6 5]) (hue :red))
+ (b/build-supply (w/cell [6 5]) :red)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (* 5 +truck-speed+))
    (tick (dec +truck-speed+)) ;vehicle should now be west of spawn, after having moved 5 cells
@@ -277,7 +277,7 @@ the magnitude at the mixer should be the sum of the cargo counts"
     (b/build-mixer (w/cell [5 5]))
     (b/build-spawn (w/cell [3 5]) west-east-vehicle)
     (b/build-spawn (w/cell [6 5]) west-east-vehicle)
-    (b/build-supply (w/cell [4 5]) (hue :red))
+    (b/build-supply (w/cell [4 5]) :red)
     (p/build-path (w/cell [3 5]) :east west-east-type)
     (p/build-path (w/cell [4 5]) :east west-east-type)
     (p/build-path (w/cell [5 5]) :east west-east-type)
@@ -365,7 +365,7 @@ pick the first one in clockwise from :north"
   "when multiple out-paths are encountered where one has a matching route,
 pick the one with the route"
   (b/build-spawn (w/cell [5 4]) :truck)
-  (b/build-supply (w/cell [5 5]) (hue :red))
+  (b/build-supply (w/cell [5 5]) :red)
   (p/build-path (w/cell [5 4]) :south :road)
   (p/build-path (w/cell [5 5]) :south :road)
   (p/build-path (w/cell [5 6]) :south :road)
@@ -407,7 +407,7 @@ while not carrying any cargo, the first one in clockwise order"
   "when multiple out-paths are encountered with routes,
 while carrying non-matching cargo, the first one in clockwise order is selected"
   (b/build-spawn (w/cell [5 4]) :truck)
-  (b/build-supply (w/cell [5 5]) (hue :yellow))
+  (b/build-supply (w/cell [5 5]) :yellow)
   (p/build-path (w/cell [5 4]) :south :road)
   (p/build-path (w/cell [5 5]) :south :road)
   (p/build-path (w/cell [5 6]) :south :road)
@@ -429,7 +429,7 @@ while carrying non-matching cargo, the first one in clockwise order is selected"
 while carrying non-matching cargo, the first matching one in
 clockwise order is selected"
   (b/build-spawn (w/cell [5 4]) :truck)
-  (b/build-supply (w/cell [5 5]) (hue :red))
+  (b/build-supply (w/cell [5 5]) :red)
   (p/build-path (w/cell [5 4]) :south :road)
   (p/build-path (w/cell [5 5]) :south :road)
   (p/build-path (w/cell [5 6]) :south :road)
