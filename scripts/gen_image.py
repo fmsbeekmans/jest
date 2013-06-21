@@ -36,7 +36,8 @@ glyphs = [
     ("B>","boat"),
 
     # rest
-    ("", "default")
+    ("", "default"),
+    ("M","mixer")
     ]
 
 sane_fill = 2

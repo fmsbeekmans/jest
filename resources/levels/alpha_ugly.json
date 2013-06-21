@@ -98,6 +98,7 @@
              "6":"spawn-boat",
              "7":"supply-red",
              "8":"supply-green",
+             "29":"mixer",
              "9":"supply-blue"
             },
          "spacing":0,
