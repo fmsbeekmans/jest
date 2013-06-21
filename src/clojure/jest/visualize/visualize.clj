@@ -137,14 +137,35 @@ Returns an x-scale y-scale vector."
                                 (vehicle-scale) Math/PI))
      (vehicle/all-vehicles vehicle/truck?)))))
 
+(defn vehicle-picker [cell]
+  (if-let [v (first (vehicle/vehicles cell))]
+    (or (vehicle/cargo-color v)
+        :no-cargo)))
+
+(defn draw-vehicle [color w h]
+  (when color
+    (quil.core/color-mode :hsb)
+    (if (= color :no-cargo)
+      (quil.core/fill 0 0 0)
+      (quil.core/fill color 255 255))
+    (quil.core/ellipse 32 32 20 20)
+    (quil.core/color-mode :rgb)))
+
+
+(defn vehicle-f [color]
+  (reify brick.drawable.Drawable
+    (draw [this [w h]]
+      (draw-vehicle color w h))))
+
 (defn world->drawable
   [tile-f]
   (drawable/->Stack
    [
 ;    (world-state->Grid cell-bg tile-f)
-;    (world-state->Grid cell-building tile-f)
+    (world-state->Grid cell-building tile-f)
     (world-state->Grid cell-road tile-f)
-    (vehicles->Stack :truck (tile-f :rails-east))
+    (world-state->Grid vehicle-picker vehicle-f)
+;    (vehicles->Stack :truck (tile-f :rails-east))
     ]))
 
 (defn cell-bg [c]
