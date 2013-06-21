@@ -81,6 +81,11 @@
     (first (sort (partial preference (cargo-color v))
                  paths))))
 
+(defn update-preferred-path
+  [v]
+  (assoc v
+    :exit-direction (:direction (preferred-path v))))
+
 (defn- select-exit
   "Returns a Vehicle record that is the given vehicle record with an exit time
    and exit direction attached to it. Exit time is based on the vehicle type,
@@ -204,7 +209,9 @@
     ;;TODO this should also update some score
     (clear-cargo id)))
 
-
+;;BIG FAT TODO update-preferrred-path does double work now
+;;reason to do preferred path last is cause the vehicle might have picked something up
+;;which alters routing decisions. so do that last!
 (defn move-vehicle
   "Moves the vehicle with the given id in the given direction. This will also
    perform any actions required for this vehicle on the given cell, such as
@@ -222,7 +229,8 @@
      (unload-vehicle v)
      (load-vehicle (to path) v)
      (update-vehicle id vehicle-enter)
-     (vehicle-transition-state id))))
+     (vehicle-transition-state id)
+     (update-vehicle id update-preferred-path))))
 
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
