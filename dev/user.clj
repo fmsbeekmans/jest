@@ -23,7 +23,7 @@
 
 (def inv-directions (clojure.set/map-invert directions))
 
-(defn build-dumb-level []
+(defn build-level []
   (initialize-world 8 8)
   (build-spawn (cell [1 1]) :truck)
   (build-path (cell [1 1]) :south :road)
@@ -41,18 +41,42 @@
 
   (build-spawn (cell [5 2]) :truck))
 
-(defn stupid-on-down [id pos]
-  (case pos
-    [1 0]
-    (spawn (cell [1 1]))
-    [2 0]
-    (spawn (cell [2 1]))
 
-    [0 0]
-    (if (paused?)
-      (resume!)
-      (pause!))
-    nil))
+(defn build-another-level []
+  (initialize-world 8 8)
+  (build-spawn (cell [1 1]) :truck)
+  (build-spawn (cell [2 1]) :truck)
+  (build-spawn (cell [3 1]) :truck)
+  (build-supply (cell [1 2]) :red)
+  (build-supply (cell [2 2]) :green)
+  (build-mixer (cell [3 3]))
+  (build-spawn (cell [4 3]) :truck)
+  (build-depot (cell [3 4]) :yellow)
+  (build-spawn (cell [3 5]) :truck)
+
+  (build-path (cell [1 1]) :south :road)
+  (build-path (cell [2 1]) :south :road)
+  (build-path (cell [3 1]) :south :road)
+  (build-path (cell [1 2]) :south :road)
+  (build-path (cell [2 2]) :south :road)
+  (build-path (cell [3 2]) :south :road)
+  (build-path (cell [1 3]) :east :road)
+  (build-path (cell [2 3]) :east :road)
+  (build-path (cell [3 3]) :east :road)
+  (build-path (cell [3 3]) :south :road)
+  (build-path (cell [3 4]) :south :road)
+)
+
+
+(defn demo-on-down [id pos]
+  (if (spawn? (direction (cell pos) :south))
+    (spawn (direction (cell pos) :south))
+    (case pos
+      [0 0]
+      (if (paused?)
+        (resume!)
+        (pause!))
+      nil)))
 
 (defn maybe-build-route [c dir]
   (if-let [v (first (vehicles c))]
@@ -84,9 +108,9 @@
   (scheduler-reset!)
   (setup-quil-mouse-input)
   (set-input-handler! :on-move #(rough-staging-on-move %1 %2 %3))
-  (set-input-handler! :on-down #(stupid-on-down %1 %2))
+  (set-input-handler! :on-down #(demo-on-down %1 %2))
   (load-level "levels/alpha_ugly.json")
-  (build-dumb-level)
+  (build-level)
 
   (start!)
   (println "Started?" (started?))
