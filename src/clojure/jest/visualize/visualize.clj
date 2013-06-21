@@ -180,12 +180,14 @@ Returns an x-scale y-scale vector."
   "Which building tile-key fits this cell?"
   [c]
   (if-let [type (building/building-type c)]
-    (hyphenate-keywords
-     type
-     (({:spawn building/vehicle-type
-        :mixer building/resource-color
-        :supply building/resource-type
-        :depot building/resource-type} type) c))))
+    (if (= type :mixer)
+      :mixer
+      (hyphenate-keywords
+       type
+       (({:spawn building/vehicle-type
+          ;:mixer building/resource-color
+          :supply building/resource-type
+          :depot building/resource-type} type) c)))))
 
 (defn cell-canal
   ""
