@@ -99,6 +99,7 @@
              "7":"supply-red",
              "8":"supply-green",
              "29":"mixer",
+             "30":"mixer-yellow",
              "9":"supply-blue"
             },
          "spacing":0,

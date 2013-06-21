@@ -37,7 +37,8 @@ glyphs = [
 
     # rest
     ("", "default"),
-    ("M","mixer")
+    ("M","mixer"),
+    ("My","mixer-yellow")
     ]
 
 sane_fill = 2
