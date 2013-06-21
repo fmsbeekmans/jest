@@ -147,7 +147,11 @@ Returns an x-scale y-scale vector."
     (quil.core/color-mode :hsb)
     (if (= color :no-cargo)
       (quil.core/fill 0 0 0)
-      (quil.core/fill color 255 255))
+      (quil.core/fill (* color
+                         (/ (* 2 Math/PI))
+                         255)
+                      255
+                      255))
     (quil.core/ellipse 32 32 20 20)
     (quil.core/color-mode :rgb)))
 
