@@ -2,11 +2,23 @@
   (:use jest.testutils
         midje.sweet)
   (:require [jest.visualize.visualize :as visualize]
+            [jest.world :as world]
             [brick.drawable :as drawable]
             [jest.world.building :as building]))
 
+(world-fact [3 3]
+  "Test the borders of a cell."
+  (with-redefs [quil.core/width (fn []
+                                  300)
+                quil.core/height (fn []
+                                   200)]
+    (visualize/cell-borders (world/cell [1 1])) => {:north 67
+                                              :west 100
+                                              :south 134
+                                              :east 200}))
+
 (world-fact [10 10]
-  "layer from world state builds a valid grid drawable"
+  "Layer from world state builds a valid grid drawable"
   (build-spawn-circle)
   (let [grid (visualize/world-state->Grid (fn [c]
                                             (if (building/spawn? c)

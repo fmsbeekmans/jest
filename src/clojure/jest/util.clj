@@ -72,3 +72,10 @@
   (into {}
         (map (fn [[group p]]
                [group (filter p s)]) group-ps)))
+
+(comment (defmacro let-on
+           [target fns & body]
+           (let-vec
+            (mapcat (fn [f]
+                      [f (eval (f target))])
+                    fns))))

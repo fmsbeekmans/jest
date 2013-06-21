@@ -97,6 +97,11 @@
   [id]
   (=state id :spawning))
 
+(defn moving?
+  "Returns true iff the vehicle with the given id is in the spawning state."
+  [id]
+  (=state id :moving))
+
 (defn despawning?
   "Returns true iff the vehicle with the given id is in the despawning state."
   [id]

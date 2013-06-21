@@ -37,9 +37,6 @@
 (defn stroke
   "Returns a linear stroke between the n-dimentional points from and to."
   [from to]
-  {:pre [(= (count from) (count to))
-         (not= from to)
-         ]}
   (with-meta
     (fn [progress]
       {:pre [(>= progress 0)

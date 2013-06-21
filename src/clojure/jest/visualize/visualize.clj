@@ -36,25 +36,114 @@ cell-draw-fn is a function that returns a Drawable."
   "What scale should a vehicle-tile be scaled by?
 Returns an x-scale y-scale vector."
   []
-;  (/ 1 (world/world-width))
-  1)
+  (/ 1 (world/world-width)))
+
+(defn cell-borders
+  [c]
+  (let [h-range ((drawable/ranges
+                  (world/world-width)
+                  (quil.core/width)) ((world/coords c) 0))
+        v-range ((drawable/ranges
+                  (world/world-height)
+                   (quil.core/height)) ((world/coords c) 1))]
+    {:north (first v-range)
+     :west (first h-range)
+     :south (apply + v-range)
+     :east (apply + h-range)}))
+
+(defn cell-center
+  "Returns the center of a cell."
+  [c]
+  (let [h-range ((drawable/ranges
+                  (world/world-width)
+                  (quil.core/width)) ((world/coords c) 0))
+        v-range ((drawable/ranges
+                  (world/world-height)
+                  (quil.core/height)) ((world/coords c) 1))]
+    [(/ (apply + h-range) 2)
+     (/ (apply + v-range) 2)]))
+
+(defn v-point
+  [center borders dir]
+  [(first center) (borders dir)])
+
+(defn h-point
+  [center borders dir]
+  [(borders dir) (second center)])
+
+(defn point-from-center
+  [center borders dir]
+  ((if (or
+         (= dir :east)
+         (= dir :west))
+      h-point
+      v-point) center borders dir))
+
+;; from en to in coords zijn de cell-coordinaten, dit moeten de game
+;; coordinaten zijn
+(defn vehicle->stroke
+  "Geef dirs op"
+  [v coords from to]
+  (cond
+   (vehicle/spawning? (:id v))
+   (do
+     (points/stroke (coords :center)
+                    (coords :to)))
+    (vehicle/moving? (:id v))
+    (do
+      (let [l1 (points/stroke (point-from-center (coords :center)
+                                                 (coords :borders)
+                                                 :north) ;;; from
+                              (coords :center))
+            l2 (points/stroke (coords :center) ; goede coord v/h
+                              (point-from-center (coords :center)
+                                                 (coords :borders)
+                                                 :east))] ;;; to
+        (points/stroke-comp [l1 l2])))
+   (vehicle/despawning? (:id v))
+   (do
+     (points/stroke (coords :center)
+                    (coords :to)))))
+
+(defn vehicle->location
+  [v]
+  (let [coords (:coords v)
+        borders (cell-borders (world/cell coords))
+        center (cell-center (world/cell coords))
+        stroke (vehicle->stroke
+                v
+                {:center center
+                 :to coords
+                 :borders borders}
+                (:entry-direction v)
+                (:exit-direction v))
+        t 0
+        ;;(/ (- (:exit-)))
+        ;; duur
+        ;; game-time - entry-time
+           ]
+    (let [[x y] (points/point stroke t)]
+      [(/ x (quil.core/width))
+       (/ y (quil.core/height))])))
 
 (defn vehicles->Stack
   [vehicle-type image]
   (drawable/->Stack
    (vec
     (map (fn [v]
-           (drawable/->Floating image [0.5 0.5] (vehicle-scale) 0))
+           (drawable/->Floating image
+                                (vehicle->location v)
+                                (vehicle-scale) Math/PI))
      (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
   [tile-f]
   (drawable/->Stack
    [
-    (world-state->Grid cell-bg tile-f)
-    (world-state->Grid cell-building tile-f)
+;    (world-state->Grid cell-bg tile-f)
+;    (world-state->Grid cell-building tile-f)
     (world-state->Grid cell-road tile-f)
-;    (vehicles->Stack :truck (tile-f :rails-east))
+    (vehicles->Stack :truck (tile-f :rails-east))
     ]))
 
 (defn cell-bg [c]
