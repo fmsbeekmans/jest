@@ -18,6 +18,7 @@
         jest.testutils
         jest.scheduler
 
+        jest.input.wm-touch
         jest.input.quil
         jest.input.core
         jest.input.interaction
@@ -113,3 +114,4 @@
   (pause!)
   (build-spawn (cell [4 2]) :truck)
   (sketch!))
+
