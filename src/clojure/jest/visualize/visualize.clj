@@ -17,6 +17,35 @@
 (declare cell-building)
 (declare cell-road)
 
+(defn temp-lookup []
+  (let [loader (comp
+                drawable/->Image
+                image/path->PImage
+                clojure.java.io/resource
+                (partial str "demo/"))]
+    (let [junctions
+          {[:east :out] (loader "00-east-out.png")
+           [:south :out](loader "01-south-out.png")
+           [:west :out] (loader "02-west-out.png")
+           [:north :out](loader "03-north-out.png")
+           [:east :in] (loader "10-east-in.png")
+           [:south :in](loader "11-south-in.png")
+           [:west :in] (loader "12-west-in.png")
+           [:north :in](loader "13-north-in.png")
+           }
+          cached-stack (memoize drawable/->Stack)]
+      (fn [c]
+         (let [roads (path/paths c :road)]
+                   (cached-stack
+                    (vec
+                     (doall
+                      (for [r roads]
+                        (do
+                          (junctions [(:direction r)
+                                      (:inout r)]))))))
+                   )))))
+
+
 (def world-bricklet (atom nil))
 (def world-sketch (atom nil))
 
@@ -167,9 +196,10 @@ Returns an x-scale y-scale vector."
    [
 ;    (world-state->Grid cell-bg tile-f)
     (world-state->Grid cell-building tile-f)
-    (world-state->Grid cell-road tile-f)
+    ;(world-state->Grid cell-road tile-f)
     (world-state->Grid vehicle-picker vehicle-f)
-;    (vehicles->Stack :truck (tile-f :rails-east))
+    (world-state->Grid identity (temp-lookup))
+    (vehicles->Stack :truck (tile-f :rails-east))
     ]))
 
 (defn cell-bg [c]

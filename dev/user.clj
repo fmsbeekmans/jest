@@ -9,7 +9,7 @@
         jest.util
         jest.world.path
         jest.level
-        
+
         brick.drawable
 
         jest.testutils
@@ -84,7 +84,7 @@
       (doseq [p (paths-with-route c (cargo-color v))]
         (unbuild-route c (:direction p) (cargo-color v)))
       (build-route c dir (cargo-color v))
-      (dosync 
+      (dosync
        (doseq [vehicle (vehicles c)]
          (update-vehicle (:id vehicle)
                          #(assoc %
@@ -114,10 +114,10 @@
 
   (start!)
   (println "Started?" (started?))
-;  (pause!)
-;  (build-spawn (cell [4 2]) :truck)
-;  (println "build spawn")
+  (pause!)
+  (build-spawn (cell [4 2]) :truck)
+  (println "build spawn")
 ;  (spawn (cell [4 2]))
-;  (println "Spaned car")
-;  (stop!)
+  (println "Spaned car")
+  (stop!)
   (sketch!))
