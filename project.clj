@@ -12,7 +12,9 @@
                  [org.clojure/core.incubator "0.1.2"]
                  [com.taoensso/timbre "2.1.2"]
                  [jest/brick "0.1.1-SNAPSHOT"]
-                 [quil/quil "1.6.0"]]
+                 [quil/quil "1.6.0"]
+                 [net.java.dev.jna/jna "3.5.2"]
+                 [net.java.dev.jna/platform "3.5.2"]]
   :repositories {"pievolution" "http://pievolution.org/maven-repo/"}
   :profiles {:dev {:plugins [[lein-midje "3.0.0"]
                              [codox "0.6.4"]
