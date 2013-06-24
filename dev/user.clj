@@ -18,7 +18,6 @@
         jest.testutils
         jest.scheduler
 
-        jest.input.wm-touch
         jest.input.quil
         jest.input.core
         jest.input.interaction
