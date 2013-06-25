@@ -115,11 +115,12 @@
    schedules removal from the map."
   [id]
   {:pre [(spawn? (vehicle-cell (vehicle id)))]}
-  (vehicle-state-change id :despawning)
-  (update-vehicle id vehicle-clear-exit)
-  (schedule #(unload-vehicle (vehicle id))
-            (offset (/ (vehicle->duration (vehicle id))
-                       2))))
+  (dosync 
+   (vehicle-state-change id :despawning)
+   (update-vehicle id vehicle-clear-exit)
+   (schedule #(unload-vehicle (vehicle id))
+             (offset (/ (vehicle->duration (vehicle id))
+                        2)))))
 
 (defn- schedule-state-change
   "Schedules a state change for the vehicle with the given id to the given state
@@ -159,16 +160,22 @@
   (when-not (:exit-direction (vehicle id))
     (start-exploding id)))
 
+(defn half-duration [vehicle-id]
+  (/ (vehicle->duration (vehicle vehicle-id))
+     2))
+
 (defmethod vehicle-transition-state
   [false :spawn]
   [id]
-  (start-despawning id))
+  (schedule #(start-despawning id)
+            (offset (half-duration id))))
 
 (defmethod vehicle-transition-state
   [true :spawn]
   [id]
   ;;TODO add penalty for despawning with cargo
-  (start-despawning id))
+  (schedule #(start-despawning id)
+            (offset (half-duration id))))
 
 (defn resource-hue [cell]
   (hue (:resource-type cell)))
@@ -234,7 +241,7 @@
 
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
-   state :despawning, no move is scheduled."
+   entered a spawn point, no move is scheduled."
   [id]
   (schedule (fn []
               (dosync
@@ -242,7 +249,7 @@
                  (unload-vehicle (vehicle id))
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))
-                   (when-not (despawning? id)
+                   (when-not (spawn? (vehicle-cell (vehicle id)))
                      (schedule-move id))))))
             (offset (vehicle->duration (vehicle id)))))
 
@@ -265,9 +272,8 @@
   (dosync
    (let [vehicle (load-vehicle-on-spawn c)]
      (if (:exit-direction vehicle)
-       (do (println "Spawn me! :(")
-           (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
-                                                           2)))
+       (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
+                                                       2))
        (start-exploding (:id vehicle)))
      (schedule-move (:id vehicle))
      vehicle)))

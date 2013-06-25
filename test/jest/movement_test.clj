@@ -147,9 +147,12 @@ a vehicle has moved in its preferred direction. It then keeps moving."
    (tick (dec (* 6 +truck-speed+))) ;vehicle should now be west of spawn, after
                                     ;having moved 5 cells
    (:coords (v/vehicle id)) => [4 5]
-   (tick 1) ;vehicle is on spawn, should start despawning
+   (v/despawning? id) => falsey
+   (tick 1) ;vehicle is on spawn, should still not despawn
    (:coords (v/vehicle id)) => [5 5]
-   (:state (v/vehicle id)) => :despawning
+   (v/despawning? id) => falsey
+   (tick (/ +truck-speed+ 2))     ;vehicle should start despawning
+   (v/despawning? id) => truthy
    (tick (/ +truck-speed+ 2))     ;vehicle should be gone now
    (v/vehicle id) => nil
    ))
@@ -254,12 +257,11 @@ the magnitude at the mixer should be the sum of the cargo counts"
  "A vehicle that enters a spawn point with cargo incurs a penalty."
  (b/build-supply (w/cell [6 5]) :red)
  (let [id (:id (m/spawn (w/cell [5 5])))]
-   (tick (* 5 +truck-speed+))
-   (tick (dec +truck-speed+)) ;vehicle should now be west of spawn, after having moved 5 cells
-   (:coords (v/vehicle id)) => [4 5]
-   (tick 1) ;vehicle is on spawn, should start despawning
+   (tick (* 6 +truck-speed+))
    (:coords (v/vehicle id)) => [5 5]
-   (:state (v/vehicle id)) => :despawning
+   (v/despawning? id) => falsey
+   (tick (/ +truck-speed+ 2))
+   (v/despawning? id) => truthy
    (tick (/ +truck-speed+ 2)) ;vehicle should be gone now
    (v/vehicle id) => nil))
 
@@ -463,6 +465,7 @@ clockwise order is selected"
             (b/build-spawn (w/cell [5 5]) :truck)
             (with-spawned-vehicle (truck [5 5])
               (:exit-direction (v/vehicle truck)) => nil
+              (v/exploding? truck) => falsey
               (tick (/ +truck-speed+ 2))
               (v/exploding? truck) => truthy
               (tick (/ +truck-speed+ 2))
