@@ -17,6 +17,7 @@
 (declare cell-building)
 (declare cell-road)
 
+
 (defn temp-lookup []
   (let [loader (comp
                 drawable/->Image
@@ -35,15 +36,13 @@
            }
           cached-stack (memoize drawable/->Stack)]
       (fn [c]
-         (let [roads (path/paths c :road)]
-                   (cached-stack
-                    (vec
-                     (doall
-                      (for [r roads]
-                        (do
-                          (junctions [(:direction r)
-                                      (:inout r)]))))))
-                   )))))
+        (let [roads (path/paths c :road)]
+          (cached-stack
+           (vec
+            (doall
+             (for [r roads]
+                 (junctions [(:direction r)
+                             (:inout r)]))))))))))
 
 
 (def world-bricklet (atom nil))
@@ -52,7 +51,7 @@
 (defn world-state->Grid
   "Builds a layer from the world state.
 cell-draw-fn is a function that returns a Drawable."
-  [cell-f tiles-f]
+  [cell-draw-fn]
 ;  {:post [(every? drawable/drawable? (vals (:grid %)))]}
   (drawable/->Grid
    (world/world-width)
@@ -60,7 +59,7 @@ cell-draw-fn is a function that returns a Drawable."
    (into {}
          (doall
           (for [c (world/all-cells)]
-            [(world/coords c) (tiles-f (cell-f c))])))))
+            [(world/coords c)  (cell-draw-fn c)])))))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
@@ -191,15 +190,14 @@ Returns an x-scale y-scale vector."
       (draw-vehicle color w h))))
 
 (defn world->drawable
-  [tile-f]
+  [bg-fn building-fn path-fn vehicle-fn]
   (drawable/->Stack
    [
 ;    (world-state->Grid cell-bg tile-f)
-    (world-state->Grid cell-building tile-f)
     ;(world-state->Grid cell-road tile-f)
-    (world-state->Grid vehicle-picker vehicle-f)
-    (world-state->Grid identity (temp-lookup))
-    (vehicles->Stack :truck (tile-f :rails-east))
+    (world-state->Grid path-fn)
+    (world-state->Grid vehicle-fn)
+    (world-state->Grid building-fn)
     ]))
 
 (defn cell-bg [c]
@@ -256,18 +254,22 @@ Returns an x-scale y-scale vector."
 
 (defn setup [tile-f]
   ;init een bricklet met tile-set
-  (reset! world-bricklet
-          (drawable/->Bricklet
-           (atom (reify drawable/Drawable
-                   (drawable/draw [this [w h]]
-                     (drawable/.draw
-                      (world->drawable
-                       tile-f)
-                      [w h]))))
-           (atom [])
-           :mouse-pressed input/on-down-handler
-           :mouse-released input/on-up-handler
-           :mouse-dragged input/on-move-handler)))
+  (let [path-fn (temp-lookup)]
+    (reset! world-bricklet
+            (drawable/->Bricklet
+             (atom (reify drawable/Drawable
+                     (drawable/draw [this [w h]]
+                       (drawable/.draw
+                        (world->drawable
+                         (comp tile-f cell-bg)
+                         (comp tile-f cell-building)
+                         path-fn
+                         (comp vehicle-f vehicle-picker))
+                        [w h]))))
+             (atom [])
+             :mouse-pressed input/on-down-handler
+             :mouse-released input/on-up-handler
+             :mouse-dragged input/on-move-handler))))
 
 (defn sketch! []
   (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))
