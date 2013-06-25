@@ -116,8 +116,4 @@
   (println "Started?" (started?))
   (pause!)
   (build-spawn (cell [4 2]) :truck)
-  (println "build spawn")
-;  (spawn (cell [4 2]))
-  (println "Spaned car")
-  (stop!)
   (sketch!))

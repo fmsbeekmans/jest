@@ -27,7 +27,6 @@
   "Maps a game time to real time."
   [game-time]
   {:pre [(number? game-time)]}
-  (println timer-data)
   (+ (first @timer-data) game-time))
 
 (defn- calculate-delay
@@ -70,7 +69,7 @@
   []
   (boolean @timer-data))
 
-(defn scheduler-reset! 
+(defn scheduler-reset!
   "Resets the scheduler to a stopped state, regardless of what it was in before"
   []
   (if (started?)
@@ -175,7 +174,6 @@
   be called if the scheduler has started. This function is safe to
   call from a transaction."
   [task time] {:pre [@timer-data]}
-  (println "schedule!")
   (send schedule-agent
         (fn [_]
           (swap! tasks

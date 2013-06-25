@@ -5,13 +5,10 @@
         [quil.core :only [mouse-x mouse-y]]))
 
 (defn- on-down-handler []
-  (println "down")
   (receive-down 1 [(mouse-x) (mouse-y)]))
 (defn- on-up-handler []
-  (println "up")
   (receive-up 1))
 (defn- on-move-handler []
-  (println "move")
   (receive-move 1 [(mouse-x) (mouse-y)]))
 
 (defn setup-quil-mouse-input []
