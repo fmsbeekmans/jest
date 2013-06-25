@@ -47,5 +47,5 @@
     ))
 
 (defn interaction-setup []
-  (set-input-handler! :on-move #(rough-staging-on-move %1 %2 %3)))
-  (set-input-handler! :on-down #(demo-on-down %1 %2))
+  (set-input-handler! :on-move rough-staging-on-move))
+  (set-input-handler! :on-down demo-on-down)

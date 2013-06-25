@@ -12,6 +12,6 @@
   (receive-move 1 [(mouse-x) (mouse-y)]))
 
 (defn setup-quil-mouse-input []
-  (set-input-handler! :on-down #(on-down-handler))
-  (set-input-handler! :on-up #(on-up-handler))
-  (set-input-handler! :on-move #(on-move-handler)))
+  (set-input-handler! :on-down on-down-handler)
+  (set-input-handler! :on-up on-up-handler)
+  (set-input-handler! :on-move on-move-handler))

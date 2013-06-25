@@ -54,7 +54,7 @@
   (loop [[px py] t1
          acc []]
     (let [sx (step px x)
-          sy (if (= sx 0)
+          sy (if (zero? sx)
                (step py y)
                0)
           next (map + [px py] [sx sy])]

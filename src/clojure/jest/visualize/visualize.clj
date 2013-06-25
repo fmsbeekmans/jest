@@ -115,24 +115,21 @@ Returns an x-scale y-scale vector."
   [v coords from to]
   (cond
    (vehicle/spawning? (:id v))
-   (do
-     (points/stroke (coords :center)
-                    (coords :to)))
+   (points/stroke (coords :center)
+                  (coords :to))
     (vehicle/moving? (:id v))
-    (do
-      (let [l1 (points/stroke (point-from-center (coords :center)
-                                                 (coords :borders)
-                                                 :north) ;;; from
-                              (coords :center))
-            l2 (points/stroke (coords :center) ; goede coord v/h
-                              (point-from-center (coords :center)
-                                                 (coords :borders)
-                                                 :east))] ;;; to
-        (points/stroke-comp [l1 l2])))
-   (vehicle/despawning? (:id v))
-   (do
-     (points/stroke (coords :center)
-                    (coords :to)))))
+    (let [l1 (points/stroke (point-from-center (coords :center)
+                                               (coords :borders)
+                                               :north) ;;; from
+                            (coords :center))
+          l2 (points/stroke (coords :center) ; goede coord v/h
+                            (point-from-center (coords :center)
+                                               (coords :borders)
+                                               :east))] ;;; to
+      (points/stroke-comp [l1 l2]))
+    (vehicle/despawning? (:id v))
+    (points/stroke (coords :center)
+                   (coords :to))))
 
 (defn vehicle->location
   [v]
