@@ -129,13 +129,18 @@
   (schedule #(dosync (vehicle-state-change id state))
             time))
 
+(defn half-duration [vehicle-id]
+  (/ (vehicle->duration (vehicle vehicle-id))
+     2))
+
 (defn start-exploding
-  "Modifies the state of the vehicle with the given id to :exploding, and
-   schedules removal from the map."
+  "Modifies the state of the vehicle with the given id to :exploding."
   [id]
-  (schedule-state-change id :exploding
-                         (offset (/ (vehicle->duration (vehicle id))
-                                    2))))
+  (vehicle-state-change id :exploding))
+
+(defn schedule-explode [id]
+  (schedule #(dosync (start-exploding id))
+            (offset (half-duration id))))
 
 (defn vehicle-transition-state-dispatch
   "Dispatch function for the vehicle-transition-state multimethod.
@@ -151,18 +156,8 @@
    Dispatch happens on [cargo? cell-type]."
   vehicle-transition-state-dispatch)
 
-;; default case, since we ended up here none of the special cases apply.
-;; this is a good place to schedule an explosion if there's no exit path.
-;; It is good because it doesn't conflict with a (de)spawn point which 
-;; does not need an exit path.
 (defmethod vehicle-transition-state :default
-  [id]
-  (when-not (:exit-direction (vehicle id))
-    (start-exploding id)))
-
-(defn half-duration [vehicle-id]
-  (/ (vehicle->duration (vehicle vehicle-id))
-     2))
+  [id])
 
 (defmethod vehicle-transition-state
   [false :spawn]
@@ -216,6 +211,11 @@
     ;;TODO this should also update some score
     (clear-cargo id)))
 
+(defn maybe-explode [id]
+  (when-not (or (:exit-direction (vehicle id))
+                (spawn? (vehicle-cell (vehicle id))))
+    (schedule-explode id)))
+
 ;;BIG FAT TODO update-preferrred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
 ;;which alters routing decisions. so do that last!
@@ -237,7 +237,8 @@
      (load-vehicle (to path) v)
      (update-vehicle id vehicle-enter)
      (vehicle-transition-state id)
-     (update-vehicle id update-preferred-path))))
+     (update-vehicle id update-preferred-path)
+     (maybe-explode id))))
 
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
@@ -274,6 +275,6 @@
      (if (:exit-direction vehicle)
        (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
                                                        2))
-       (start-exploding (:id vehicle)))
+       (schedule-explode (:id vehicle)))
      (schedule-move (:id vehicle))
      vehicle)))

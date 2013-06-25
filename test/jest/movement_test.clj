@@ -470,3 +470,14 @@ clockwise order is selected"
               (v/exploding? truck) => truthy
               (tick (/ +truck-speed+ 2))
               (v/vehicle truck) => nil))
+
+(world-fact [10 10]
+            "A vehicle for which no exit applies explodes even if there's a (non-spawn) building at that point"
+            (b/build-spawn (w/cell [5 5]) :truck)
+            (p/build-path (w/cell [5 5]) :east :road)
+            (b/build-supply (w/cell [6 5]) :supply)
+            (with-spawned-vehicle (truck [5 5])
+              (tick-move truck)
+              (v/exploding? truck) => falsey
+              (tick (/ +truck-speed+ 2))
+              (v/exploding? truck) => truthy))
