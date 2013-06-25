@@ -81,6 +81,23 @@
     [sketch]
     (decorate-sketch sketch true)))
 
+(let [get-frame (comp :target-obj meta)
+      decorate-sketch
+      (fn [sketch decorate]
+        (let [frame-atom (get-frame sketch)]
+          (println frame-atom)
+          (swap! frame-atom
+                 #(doto %
+                    (.dispose)
+                    (.setUndecorated (not decorate))
+                    (.setVisible true)))))]
+  (defn undecorated-sketch
+    [sketch]
+    (decorate-sketch sketch false))
+  (defn decorated-sketch
+    [sketch]
+    (decorate-sketch sketch true)))
+
 (defn user-setup []
   (scheduler-reset!)
   (setup-quil-mouse-input)

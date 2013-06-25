@@ -34,7 +34,7 @@
            [:west :in] (loader "12-west-in.png")
            [:north :in](loader "13-north-in.png")
            }
-          cached-stack (memoize drawable/->Stack)]
+          cached-stack drawable/->Stack]
       (fn [c]
         (let [roads (path/paths c :road)]
           (cached-stack
@@ -47,6 +47,20 @@
 
 (def world-bricklet (atom nil))
 (def world-sketch (atom nil))
+
+(def highlighted-cells (atom {}))
+
+(let [highlighted-cells (atom {})]
+  (defn highlight-cell
+    [pointer-id coords]
+    (swap! highlighted-cells
+           #(assoc % pointer-id
+                   (conj (vec (get % pointer-id)) coords))))
+  (defn remove-highlighted-cells [pointer-id]
+    (swap! highlighted-cells #(dissoc % pointer-id)))
+  (defn get-highlighted-cells []
+    @highlighted-cells))
+
 
 (defn world-state->Grid
   "Builds a layer from the world state.
@@ -235,12 +249,6 @@ Returns an x-scale y-scale vector."
     ;; temp
     (if-not (empty? (first out))
       (hyphenate-keywords :road (:direction (first out))))))
-
-(defn cell-rails [c]
-  (if (seq (filter (fn [[_ v]]
-                (= :rails (:type v))) (:paths c)))
-    (drawable/->Image (image/path->PImage (clojure.java.io/resource "rails.png")))
-    (drawable/->Nothing)))
 
 (defn world->sketch []
   (reify drawable/Drawable
