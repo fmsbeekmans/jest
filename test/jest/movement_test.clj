@@ -16,6 +16,10 @@
                (build-spawn-circle)
                ~@body))
 
+(defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
+  `(let [~vehicle (:id (m/spawn (w/cell ~spawn-location)))]
+     ~@body))
+
 (def +truck-speed+ (p/path->duration :road))
 (def +train-speed+ (p/path->duration :rails))
 (def +boat-speed+ (p/path->duration :canal))
@@ -95,13 +99,14 @@ path duration."
  (:state (m/spawn (w/cell [5 5]))) => :spawning)
 
 (spawn-fact
- "After spawning and half the path duration has passed,
+ "After spawning and the path duration has passed,
 a vehicle is in state :moving"
- (m/spawn (w/cell [5 5]))
- (tick (dec (/ +truck-speed+ 2)))
- (:state (first (:vehicles (w/cell [5 5])))) => :spawning
- (tick 1)
- (:state (first (:vehicles (w/cell [5 5])))) => :moving)
+ (with-spawned-vehicle [truck [5 5]]
+   (m/spawn (w/cell [5 5]))
+   (tick (dec +truck-speed+))
+   (:state (v/vehicle truck)) => :spawning
+   (tick 1)
+   (:state (v/vehicle truck)) => :moving))
 
 (world-fact [10 10]
   "After spawning a boat and waiting 20 ticks, the vehicle has moved"
@@ -148,12 +153,12 @@ a vehicle has moved in its preferred direction. It then keeps moving."
                                     ;having moved 5 cells
    (:coords (v/vehicle id)) => [4 5]
    (v/despawning? (v/vehicle id)) => falsey
-   (tick 1) ;vehicle is on spawn, should still not despawn
+   (tick 1) ;vehicle is on spawn, should start despawning
    (:coords (v/vehicle id)) => [5 5]
-   (v/despawning? (v/vehicle id)) => falsey
-   (tick (/ +truck-speed+ 2))     ;vehicle should start despawning
    (v/despawning? (v/vehicle id)) => truthy
-   (tick (/ +truck-speed+ 2))     ;vehicle should be gone now
+   (tick (dec +truck-speed+))
+   (v/vehicle id) => truthy
+   (tick 1)     ;vehicle should be gone now
    (v/vehicle id) => nil
    ))
 
@@ -259,10 +264,10 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (* 6 +truck-speed+))
    (:coords (v/vehicle id)) => [5 5]
-   (v/despawning? (v/vehicle id)) => falsey
-   (tick (/ +truck-speed+ 2))
    (v/despawning? (v/vehicle id)) => truthy
-   (tick (/ +truck-speed+ 2)) ;vehicle should be gone now
+   (tick (dec +truck-speed+))
+   (v/vehicle id) => truthy
+   (tick 1) ;vehicle should be gone now
    (v/vehicle id) => nil))
 
 (world-fact [2 2]
@@ -340,10 +345,6 @@ it only picks up as much as it can carry"
     => ..cargo-type..
   (v/vehicle-cell ..vehicle..)
     => {:building-type ..building-type..}))
-
-(defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
-  `(let [~vehicle (:id (m/spawn (w/cell ~spawn-location)))]
-     ~@body))
 
 (defn tick-move [vehicle-id]
   (tick (v/vehicle->duration (v/vehicle vehicle-id))))
@@ -455,9 +456,10 @@ clockwise order is selected"
               (tick-move truck)
               ;;truck is now in a cell with no valid exit
               (:exit-direction (v/vehicle truck)) => nil
-              (tick (/ +truck-speed+ 2))
               (v/exploding? (v/vehicle truck)) => truthy
-              (tick  (/ +truck-speed+ 2))
+              (tick (dec +truck-speed+))
+              (v/vehicle truck) => truthy
+              (tick)
               (v/vehicle truck) => nil))
 
 (world-fact [10 10]
@@ -465,10 +467,9 @@ clockwise order is selected"
             (b/build-spawn (w/cell [5 5]) :truck)
             (with-spawned-vehicle (truck [5 5])
               (:exit-direction (v/vehicle truck)) => nil
-              (v/exploding? truck) => falsey
-              (tick (/ +truck-speed+ 2))
+              (v/spawning? (v/vehicle truck)) => truthy
               (v/exploding? (v/vehicle truck)) => truthy
-              (tick (/ +truck-speed+ 2))
+              (tick +truck-speed+)
               (v/vehicle truck) => nil))
 
 (world-fact [10 10]
@@ -477,10 +478,15 @@ clockwise order is selected"
             (p/build-path (w/cell [5 5]) :east :road)
             (b/build-supply (w/cell [6 5]) :supply)
             (with-spawned-vehicle (truck [5 5])
-              (tick-move truck)
-              (v/exploding? truck) => falsey
-              (tick (/ +truck-speed+ 2))
-              (v/exploding? (v/vehicle truck)) => truthy))
+              (tick (dec +truck-speed+))
+              (v/exploding? (v/vehicle truck)) => falsey
+              (tick)
+              (v/exploding? (v/vehicle truck)) => truthy
+              (tick (dec +truck-speed+))
+              (v/vehicle truck) => truthy
+              (tick)
+              (v/vehicle truck) => nil
+))
 
 (spawn-fact "A vehicle sets all entry/exit times correctly"
             (with-spawned-vehicle (truck [5 5])

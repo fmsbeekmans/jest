@@ -95,7 +95,8 @@
 (defn spawning?
   "Returns true iff the vehicle with the given id is in the spawning state."
   [v]
-  (=state v :spawning))
+  (or (=state v :spawning)
+      (=state v :spawning-exploding)))
 
 (defn moving?
   "Returns true iff the vehicle with the given id is in the spawning state."
@@ -110,7 +111,8 @@
 (defn exploding?
   "returns true iff the vehicle with the given id is in the exploding state."
   [v]
-  (=state v :exploding))
+  (or (=state v :exploding)
+      (=state v :spawning-exploding)))
 
 (defn cargo?
   "Returns true iff the given vehicle has cargo"

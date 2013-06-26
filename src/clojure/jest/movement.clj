@@ -4,7 +4,7 @@
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
-                             exploding? map->Vehicle]]
+                             exploding? moving? map->Vehicle]]
         [jest.color :only [hue-difference <=delta? hue]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
@@ -84,7 +84,8 @@
 (defn update-preferred-path
   [v]
   (assoc v
-    :exit-direction (:direction (preferred-path v))))
+    :exit-direction (if (moving? v)
+                      (:direction (preferred-path v)))))
 
 (defn- select-exit
   "Returns a Vehicle record that is the given vehicle record with an exit time
@@ -110,37 +111,22 @@
   [v]
   (assoc v :exit-direction nil))
 
+(defn set-end-state [id state]
+  (dosync 
+   (vehicle-state-change id state)
+   (update-vehicle id vehicle-clear-exit)))
+
 (defn start-despawning
   "Modifies the state of the vehicle with the given id to :despawning, and
    schedules removal from the map."
   [id]
   {:pre [(spawn? (vehicle-cell (vehicle id)))]}
-  (dosync 
-   (vehicle-state-change id :despawning)
-   (update-vehicle id vehicle-clear-exit)
-   (schedule #(unload-vehicle (vehicle id))
-             (offset (/ (vehicle->duration (vehicle id))
-                        2)))))
-
-(defn- schedule-state-change
-  "Schedules a state change for the vehicle with the given id to the given state
-   at the given time."
-  [id state time]
-  (schedule #(dosync (vehicle-state-change id state))
-            time))
-
-(defn half-duration [vehicle-id]
-  (/ (vehicle->duration (vehicle vehicle-id))
-     2))
+  (set-end-state id :despawning))
 
 (defn start-exploding
   "Modifies the state of the vehicle with the given id to :exploding."
   [id]
-  (vehicle-state-change id :exploding))
-
-(defn schedule-explode [id]
-  (schedule #(dosync (start-exploding id))
-            (offset (half-duration id))))
+  (set-end-state id :exploding))
 
 (defn vehicle-transition-state-dispatch
   "Dispatch function for the vehicle-transition-state multimethod.
@@ -162,15 +148,13 @@
 (defmethod vehicle-transition-state
   [false :spawn]
   [id]
-  (schedule #(start-despawning id)
-            (offset (half-duration id))))
+  (start-despawning id))
 
 (defmethod vehicle-transition-state
   [true :spawn]
   [id]
   ;;TODO add penalty for despawning with cargo
-  (schedule #(start-despawning id)
-            (offset (half-duration id))))
+  (start-despawning id))
 
 (defn resource-hue [cell]
   (hue (:resource-type cell)))
@@ -214,7 +198,7 @@
 (defn maybe-explode [id]
   (when-not (or (:exit-direction (vehicle id))
                 (spawn? (vehicle-cell (vehicle id))))
-    (schedule-explode id)))
+    (start-exploding id)))
 
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
@@ -235,6 +219,7 @@
     (dosync
      (unload-vehicle v)
      (load-vehicle (to path) v)
+     (vehicle-state-change id :moving)
      (update-vehicle id (comp select-exit vehicle-enter))
      (vehicle-transition-state id)
      (update-vehicle id update-preferred-path)
@@ -246,12 +231,11 @@
   [id]
   (schedule (fn []
               (dosync
-               (if (exploding? (vehicle id))
+               (if (not (:exit-direction (vehicle id)))
                  (unload-vehicle (vehicle id))
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))
-                   (when-not (spawn? (vehicle-cell (vehicle id)))
-                     (schedule-move id))))))
+                   (schedule-move id)))))
             (offset (vehicle->duration (vehicle id)))))
 
 (defn- load-vehicle-on-spawn
@@ -259,12 +243,17 @@
   [c]
   {:pre [(spawn? c)]}
   (dosync
-   (load-vehicle c (select-exit (map->Vehicle
-                                 {:id (next-idc)
-                                  :type (vehicle-type c)
-                                  :coords (coords c)
-                                  :entry-time @game-time
-                                  :state :spawning})))))
+   (let [id (next-idc)]
+     (load-vehicle c (select-exit (map->Vehicle
+                                   {:id id
+                                    :type (vehicle-type c)
+                                    :coords (coords c)
+                                    :entry-time @game-time
+                                    :state :spawning})))
+
+     (when-not (:exit-direction (vehicle id))
+       (vehicle-state-change id :spawning-exploding))
+     (vehicle id))))
 
 (defn spawn
   "Spawns a vehicle on the given cell."
@@ -272,9 +261,5 @@
   {:pre [(spawn? c)]}
   (dosync
    (let [vehicle (load-vehicle-on-spawn c)]
-     (if (:exit-direction vehicle)
-       (schedule-state-change (:id vehicle) :moving (/ (vehicle->duration vehicle)
-                                                       2))
-       (schedule-explode (:id vehicle)))
      (schedule-move (:id vehicle))
      vehicle)))
