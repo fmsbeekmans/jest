@@ -103,7 +103,8 @@ cell-draw-fn is a function that returns a Drawable."
            (case (:state v)
              :moving (moving-vehicle v image)
              :spawning (drawable/->Nothing)
-             :despawning (drawable/->Nothing)))
+             :despawning (drawable/->Nothing)
+             :exploding (drawable/->Nothing)))
      (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
