@@ -9,6 +9,12 @@
 (defn pointer [id]
   (@pointers id))
 
+(defn all-pointers []
+  (seq @pointers))
+
+(defn reset-pointers! []
+  (reset! pointers {}))
+
 (def ^:private handlers (atom {}))
 
 (defmacro defhandler [type & args]
