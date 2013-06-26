@@ -9,16 +9,18 @@
 (defn pointer [id]
   (@pointers id))
 
-(defn- on-down-handler [id p])
-(defn- on-up-handler [id p])
-(defn- on-move-handler [id p1 p2])
+(def ^:private handlers (atom {}))
 
-(def handlers {:on-down #'on-down-handler
-               :on-up #'on-up-handler
-               :on-move #'on-move-handler})
+(defn- on-down-handler [id p]
+  ((:on-down handlers)) id p)
+(defn- on-up-handler [id p]
+  ((:on-up handlers)) id p)
+(defn- on-move-handler [id p1 p2]
+  ((:on-move handlers)) id p1 p2)
 
 (defn set-input-handler! [on fn]
-  (alter-var-root (handlers on) (constantly fn)))
+  {:pre [(#{:on-down :on-up :on-move} on)]}
+  (swap! handlers assoc on fn))
 
 (def tl [0.0 0.0])
 (def br [1.0 1.0])
