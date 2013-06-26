@@ -2,15 +2,17 @@
   "Functions to facilitate the visualisation of the world state."
   (:use jest.util)
 
-  (:require [brick.image :as image])
-  (:require [brick.drawable :as drawable])
-  (:require [jest.world :as world])
-  (:require [jest.movement :as movement])
-  (:require [jest.world.building :as building])
-  (:require [jest.visualize.points :as points])
-  (:require [jest.vehicle :as vehicle])
-  (:require [jest.world.path :as path])
-  (:require [jest.world.cell :as cell])
+  (:require [brick.image :as image]
+            [brick.drawable :as drawable]
+            [quil.core :as quil])
+  (:require [jest.world :as world]
+            [jest.movement :as movement]
+            [jest.world.building :as building]
+            [jest.vehicle :as vehicle]
+            [jest.world.path :as path]
+            [jest.world.cell :as cell])
+  (:require [jest.visualize.points :as points]
+            [jest.visualize.util :as util])
   (:require [jest.visualize.input :as input]))
 
 (declare cell-bg)
@@ -58,11 +60,17 @@ cell-draw-fn is a function that returns a Drawable."
    (into {}
          (doall
           (for [c (world/all-cells)]
-            [(world/coords c)  (cell-draw-fn c)])))))
+            [(world/coords c) (cell-draw-fn c)])))))
 
 (defn vehicle->location
   [v]
-)
+  (let [[x y] (points/point
+            (util/vehicle->stroke v)
+            (util/vehicle->progress v))]
+    (println [(/ x (quil/width))
+              (/ y (quil/height))])
+    [(/ x (quil/width))
+     (/ y (quil/height))]))
 
 (defn vehicles->Stack
   [vehicle-type image]
@@ -81,8 +89,8 @@ cell-draw-fn is a function that returns a Drawable."
 ;    (world-state->Grid cell-bg tile-f)
     ;(world-state->Grid cell-road tile-f)
     (world-state->Grid path-fn)
-    (world-state->Grid vehicle-fn)
     (world-state->Grid building-fn)
+    (vehicles->Stack :truck (vehicle-fn :rails-east))
     ]))
 
 (defn cell-bg [c]
@@ -129,7 +137,7 @@ cell-draw-fn is a function that returns a Drawable."
                          (comp tile-f cell-bg)
                          (comp tile-f cell-building)
                          path-fn
-                         (comp vehicle-f vehicle-picker))
+                         tile-f)
                         [w h]))))
              (atom [])
              :mouse-pressed input/on-down-handler
