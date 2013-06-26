@@ -481,3 +481,10 @@ clockwise order is selected"
               (v/exploding? truck) => falsey
               (tick (/ +truck-speed+ 2))
               (v/exploding? truck) => truthy))
+
+(spawn-fact "A vehicle sets all entry/exit times correctly"
+            (with-spawned-vehicle (truck [5 5])
+              (dotimes [i 7]
+                (:entry-time (v/vehicle truck)) => (* i +truck-speed+)
+                (:exit-time (v/vehicle truck)) => (* (inc i) +truck-speed+)
+                (tick-move truck))))

@@ -93,7 +93,7 @@
   [v]
   (assoc v
     :exit-time (+ (:entry-time v)
-                  (path->duration (vehicle->path (:type v))))
+                  (vehicle->duration v))
     :exit-direction (:direction (preferred-path v))))
 
 (defn- vehicle-enter
@@ -101,7 +101,7 @@
    entry direction attached to it. Both are based on the exit values for the
    given vehicle."
   [v]
-  (assoc (select-exit v)
+  (assoc v
     :entry-time (:exit-time v)
     :entry-direction (opposite-dirs (:exit-direction v))))
 
@@ -216,7 +216,7 @@
                 (spawn? (vehicle-cell (vehicle id))))
     (schedule-explode id)))
 
-;;BIG FAT TODO update-preferrred-path does double work now
+;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
 ;;which alters routing decisions. so do that last!
 (defn move-vehicle
@@ -235,7 +235,7 @@
     (dosync
      (unload-vehicle v)
      (load-vehicle (to path) v)
-     (update-vehicle id vehicle-enter)
+     (update-vehicle id (comp select-exit vehicle-enter))
      (vehicle-transition-state id)
      (update-vehicle id update-preferred-path)
      (maybe-explode id))))
