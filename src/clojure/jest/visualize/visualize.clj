@@ -17,7 +17,6 @@
 (declare cell-building)
 (declare cell-road)
 
-
 (defn temp-lookup []
   (let [loader (comp
                 drawable/->Image
@@ -61,11 +60,6 @@ cell-draw-fn is a function that returns a Drawable."
           (for [c (world/all-cells)]
             [(world/coords c)  (cell-draw-fn c)])))))
 
-(defn vehicle-scale
-  "What scale should a vehicle-tile be scaled by?
-Returns an x-scale y-scale vector."
-  []
-  (/ 1 (world/world-width)))
 
 (defn cell-borders
   [c]
