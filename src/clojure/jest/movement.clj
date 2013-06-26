@@ -108,7 +108,7 @@
 (defn- vehicle-clear-exit
   "Returns a Vehicle record with the exit information cleared."
   [v]
-  (assoc v :exit-time nil :exit-direction nil))
+  (assoc v :exit-direction nil))
 
 (defn start-despawning
   "Modifies the state of the vehicle with the given id to :despawning, and
