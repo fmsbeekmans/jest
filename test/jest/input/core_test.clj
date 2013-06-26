@@ -4,11 +4,66 @@
             [jest.visualize.visualize :as v]
             [jest.world :as w]))
 
-(fact "pixel->tile correctly calculates a tile based on a pixel"
-      (ic/pixel->tile 0 0) => [0 0]
-      (ic/pixel->tile 12 22) => [1 2]
-      (ic/pixel->tile 200 180) => [9 9]
-      (ic/pixel->tile -12 -15) => [0 0]
-      (against-background
-       (v/sketch-size) => [100 100]
-       (w/world-size) => [10 10]))
+(defmacro tiling-fact [doc & body]
+  `(fact ~doc
+         (ic/reset-input-handlers!)
+         ~@body
+         (ic/reset-input-handlers!)
+         (against-background
+          (v/sketch-size) => [100 100]
+          (w/world-size) => [10 10])))
+
+(tiling-fact "pixel->tile correctly calculates a tile based on a pixel"
+             (ic/pixel->tile 0 0) => [0 0]
+             (ic/pixel->tile 12 22) => [1 2]
+             (ic/pixel->tile 200 180) => [9 9]
+             (ic/pixel->tile -12 -15) => [0 0])
+
+(tiling-fact "when receive-down is called, the on-down handler is called"
+             (let [result (promise)
+                   on-down (fn [id p]
+                             (deliver result [ id p]))]
+               (ic/set-input-handler! :on-down on-down)
+               (ic/receive-down 1 [12 22])
+               @result => [1 [1 2]])) 
+
+(tiling-fact "when receive-up is called, the on-up handler is called"
+             (let [result (promise)
+                   on-up (fn [id p]
+                             (deliver result [ id p]))]
+               (ic/set-input-handler! :on-up on-up)
+               (ic/receive-down 1 [12 22])
+               (ic/receive-up 1)
+               @result => [1 [1 2]])) 
+
+(tiling-fact "when receive-move is called, the on-move handler is called only when the move would cross a tile border."
+             (let [result (atom [])
+                   on-move (fn [id p1 p2]
+                             (swap! result conj p2))]
+               (ic/set-input-handler! :on-move on-move)
+               (ic/receive-down 1 [12 22])
+               (ic/receive-move 1 [13 22])
+               @result => []
+               (ic/receive-move 1 [22 23])
+               @result => [[2 2]]
+               (ic/receive-move 1 [25 31])
+               (ic/receive-move 1 [23 43])
+               (ic/receive-move 1 [38 47])
+               @result => [[2 2] [2 3] [2 4] [3 4]])) 
+
+(tiling-fact "when receive-move is called with a pixel that is not in an
+adjacent cell, call the on-move callback repeatedly for adjacent cells."
+             (let [result (atom [])
+                   on-move (fn [id p1 p2]
+                             (swap! result conj p2))]
+               (ic/set-input-handler! :on-move on-move)
+               (ic/receive-down 1 [0 0])
+               (ic/receive-move 1 [72 53])
+
+               ;are all results adjacent?
+               (map #(Math/abs (apply + (map - %1 %2)))
+                    (conj (butlast @result) [0 0])
+                    @result) => (n-of 1 12)
+
+               ;is the last the desired tile?
+               (last @result) => [7 5]))
