@@ -7,8 +7,9 @@
            [com.sun.jna.platform.win32 WinUser WinDef$HWND WinDef$WPARAM WinDef$LPARAM BaseTSD$LONG_PTR WinDef$LRESULT WinNT$HANDLE]
            java.util.Date))
 
-(def nativeuser (Native/loadLibrary "user32" IUser))
-(def nativekernel (Native/loadLibrary "kernel32" IKernel))
+(defn setup-native [] 
+  (def nativeuser (Native/loadLibrary "user32" IUser))
+  (def nativekernel (Native/loadLibrary "kernel32" IKernel)))
 
 (defn get-awt-window []
   (.FindWindowA nativeuser "SunAwtToolkit" "theAwtToolkitWindow"))
@@ -155,8 +156,9 @@
 
 (defn teardown-wm-touch-input! []
   {:pre [@touch-input-state]}
-  (let [[ [getmessage-hook _]
-          [callwnd-hook _]] @touch-input-state]
+  (setup-native)
+  (let [[[getmessage-hook _]
+         [callwnd-hook _]] @touch-input-state]
     (invoke-void-method (fn []
                           (remove-hook! getmessage-hook)
                           (remove-hook! callwnd-hook))))
