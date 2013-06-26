@@ -78,7 +78,7 @@ cell-draw-fn is a function that returns a Drawable."
          rotation :rotation} (vehicle->location v)]
     (drawable/->Floating image
                          p'
-                         (vehicle-scale)
+                         (util/vehicle-scale)
                          rotation)))
 
 (defn vehicles->Stack
@@ -115,9 +115,9 @@ cell-draw-fn is a function that returns a Drawable."
       (hyphenate-keywords
        type
        ((case type
-         :spawn building/vehicle-type
-         :supply building/resource-type
-         :depot building/resource-type) c)))))
+          :spawn building/vehicle-type
+          :supply building/resource-type
+          :depot building/resource-type) c)))))
 
 (defn cell-road
   "Return the appropriate tile-key for roads in this cell."
