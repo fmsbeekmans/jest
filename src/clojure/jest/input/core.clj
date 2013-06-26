@@ -11,16 +11,23 @@
 
 (def ^:private handlers (atom {}))
 
-(defn- on-down-handler [id p]
-  ((:on-down handlers)) id p)
-(defn- on-up-handler [id p]
-  ((:on-up handlers)) id p)
-(defn- on-move-handler [id p1 p2]
-  ((:on-move handlers)) id p1 p2)
+(defmacro defhandler [type & args]
+  (let [fn-name (symbol (str (name type) "-handler"))]
+    `(defn- ~fn-name [~@args]
+       (let [fn# (~type @handlers)]
+         (if fn#
+           (fn# ~@args))))))
+
+(defhandler :on-down id p)
+(defhandler :on-up id p)
+(defhandler :on-move id p1 p2)
 
 (defn set-input-handler! [on fn]
   {:pre [(#{:on-down :on-up :on-move} on)]}
   (swap! handlers assoc on fn))
+
+(defn reset-input-handlers! []
+  (reset! handlers {}))
 
 (def tl [0.0 0.0])
 (def br [1.0 1.0])
