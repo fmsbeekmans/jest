@@ -6,9 +6,11 @@
 
 (defmacro tiling-fact [doc & body]
   `(fact ~doc
+         (ic/reset-pointers!)
          (ic/reset-input-handlers!)
          ~@body
          (ic/reset-input-handlers!)
+         (ic/reset-pointers!)
          (against-background
           (v/sketch-size) => [100 100]
           (w/world-size) => [10 10])))
@@ -18,6 +20,29 @@
              (ic/pixel->tile 12 22) => [1 2]
              (ic/pixel->tile 200 180) => [9 9]
              (ic/pixel->tile -12 -15) => [0 0])
+
+(tiling-fact "The pointer function returns a pointer"
+             (ic/receive-down 1 [12 15])
+             (ic/receive-down 2 [22 53])
+             (ic/receive-down 3 [56 78])
+             (ic/pointer 1) => [1 1]
+             (ic/pointer 2) => [2 5]
+             (ic/pointer 3) => [5 7]
+             (ic/pointer 4) => nil
+             (ic/receive-up 2)
+             (ic/pointer 2) => nil)
+
+(tiling-fact "The all-pointers function returns all known pointers"
+             (ic/all-pointers) => nil
+             (ic/receive-down 1 [23 45])
+             (ic/all-pointers) => (just [[1 [2 4]]])
+             (ic/receive-down 2 [56 67])
+             (ic/all-pointers) => (just [[1 [2 4]] [2 [5 6]]] :in-any-order)
+             (ic/receive-down 3 [66 67])
+             (ic/all-pointers) => (just [[1 [2 4]] [2 [5 6]] [3 [6 6]]] :in-any-order)
+             (ic/receive-up 2)
+             (ic/all-pointers) => (just [[1 [2 4]] [3 [6 6]]] :in-any-order))
+
 
 (tiling-fact "when receive-down is called, the on-down handler is called"
              (let [result (promise)
