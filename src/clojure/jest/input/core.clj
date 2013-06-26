@@ -32,7 +32,8 @@
         cell-size (map / map-size (world-size))
         ppos (map - [x y] tl)
         tpos (map (comp int /) ppos cell-size)
-        tpos (map min tpos (map dec (world-size)))]
+        tpos (map max [0 0]
+                  (map min tpos (map dec (world-size))))]
     tpos))
 
 (defmacro with-tile [[t c] & body]
