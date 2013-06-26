@@ -97,7 +97,6 @@ cell-draw-fn is a function that returns a Drawable."
   (drawable/->Stack
    [
 ;    (world-state->Grid cell-bg tile-f)
-;    (world-state->Grid cell-road tile-f)
     (world-state->Grid path-fn)
     (world-state->Grid building-fn)
     (vehicles->Stack :truck (vehicle-fn :rails-east))
@@ -115,10 +114,10 @@ cell-draw-fn is a function that returns a Drawable."
       :mixer
       (hyphenate-keywords
        type
-       (({:spawn building/vehicle-type
-          ;:mixer building/resource-color
-          :supply building/resource-type
-          :depot building/resource-type} type) c)))))
+       ((case type
+         :spawn building/vehicle-type
+         :supply building/resource-type
+         :depot building/resource-type) c)))))
 
 (defn cell-road
   "Return the appropriate tile-key for roads in this cell."
