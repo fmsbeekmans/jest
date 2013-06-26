@@ -147,12 +147,12 @@ a vehicle has moved in its preferred direction. It then keeps moving."
    (tick (dec (* 6 +truck-speed+))) ;vehicle should now be west of spawn, after
                                     ;having moved 5 cells
    (:coords (v/vehicle id)) => [4 5]
-   (v/despawning? id) => falsey
+   (v/despawning? (v/vehicle id)) => falsey
    (tick 1) ;vehicle is on spawn, should still not despawn
    (:coords (v/vehicle id)) => [5 5]
-   (v/despawning? id) => falsey
+   (v/despawning? (v/vehicle id)) => falsey
    (tick (/ +truck-speed+ 2))     ;vehicle should start despawning
-   (v/despawning? id) => truthy
+   (v/despawning? (v/vehicle id)) => truthy
    (tick (/ +truck-speed+ 2))     ;vehicle should be gone now
    (v/vehicle id) => nil
    ))
@@ -259,9 +259,9 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (* 6 +truck-speed+))
    (:coords (v/vehicle id)) => [5 5]
-   (v/despawning? id) => falsey
+   (v/despawning? (v/vehicle id)) => falsey
    (tick (/ +truck-speed+ 2))
-   (v/despawning? id) => truthy
+   (v/despawning? (v/vehicle id)) => truthy
    (tick (/ +truck-speed+ 2)) ;vehicle should be gone now
    (v/vehicle id) => nil))
 
@@ -456,7 +456,7 @@ clockwise order is selected"
               ;;truck is now in a cell with no valid exit
               (:exit-direction (v/vehicle truck)) => nil
               (tick (/ +truck-speed+ 2))
-              (v/exploding? truck) => truthy
+              (v/exploding? (v/vehicle truck)) => truthy
               (tick  (/ +truck-speed+ 2))
               (v/vehicle truck) => nil))
 
@@ -467,7 +467,7 @@ clockwise order is selected"
               (:exit-direction (v/vehicle truck)) => nil
               (v/exploding? truck) => falsey
               (tick (/ +truck-speed+ 2))
-              (v/exploding? truck) => truthy
+              (v/exploding? (v/vehicle truck)) => truthy
               (tick (/ +truck-speed+ 2))
               (v/vehicle truck) => nil))
 
@@ -480,7 +480,7 @@ clockwise order is selected"
               (tick-move truck)
               (v/exploding? truck) => falsey
               (tick (/ +truck-speed+ 2))
-              (v/exploding? truck) => truthy))
+              (v/exploding? (v/vehicle truck)) => truthy))
 
 (spawn-fact "A vehicle sets all entry/exit times correctly"
             (with-spawned-vehicle (truck [5 5])

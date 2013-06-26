@@ -246,7 +246,7 @@
   [id]
   (schedule (fn []
               (dosync
-               (if (exploding? id)
+               (if (exploding? (vehicle id))
                  (unload-vehicle (vehicle id))
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))

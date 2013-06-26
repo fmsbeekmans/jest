@@ -88,29 +88,29 @@
 
 (defn- =state
   "Compares the state of the vehicle with the given id to the given state."
-  [id state]
-  (= (:state (vehicle id))
+  [v state]
+  (= (:state v)
      state))
 
 (defn spawning?
   "Returns true iff the vehicle with the given id is in the spawning state."
-  [id]
-  (=state id :spawning))
+  [v]
+  (=state v :spawning))
 
 (defn moving?
   "Returns true iff the vehicle with the given id is in the spawning state."
-  [id]
-  (=state id :moving))
+  [v]
+  (=state v :moving))
 
 (defn despawning?
   "Returns true iff the vehicle with the given id is in the despawning state."
-  [id]
-  (=state id :despawning))
+  [v]
+  (=state v :despawning))
 
 (defn exploding?
   "returns true iff the vehicle with the given id is in the exploding state."
-  [id]
-  (=state id :exploding))
+  [v]
+  (=state v :exploding))
 
 (defn cargo?
   "Returns true iff the given vehicle has cargo"
