@@ -52,6 +52,11 @@
    :default (points/stroke-comp [(vehicle->stroke-to-mid v)
                                  (vehicle->stroke-from-mid v)])))
 
+(defn vehicle-scale
+  "What scale should a vehicle-tile be scaled by?
+Returns an x-scale y-scale vector."
+  []
+  (/ 1 (world/world-width)))
 
 (defn vehicle->progress [v]
   (let [duration (- (:exit-time v)
