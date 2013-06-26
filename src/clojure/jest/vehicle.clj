@@ -133,7 +133,8 @@
 (defn all-vehicles
   "Returns all vehicles in the game."
   ([]
-     (remove nil? (flatten (map (comp seq vehicles) (all-cells)))))
+     (dosync
+      (remove nil? (flatten (map (comp seq vehicles) (all-cells))))))
   ([p]
      (filter p (all-vehicles))))
 
