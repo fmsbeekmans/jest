@@ -62,6 +62,20 @@ cell-draw-fn is a function that returns a Drawable."
           (for [c (world/all-cells)]
             [(world/coords c) (cell-draw-fn c)])))))
 
+(defrecord VehicleTriangle [color]
+  drawable/Drawable
+  (draw [this [w h]]
+    (apply quil/fill (or (:color this)
+                         [255 255 255]))
+    (quil/stroke-weight 3)
+    (quil/triangle
+     (* w 0.35)
+     (* h 0.4)
+     (* w 0.35)
+     (* h 0.6)
+     (* w 0.6)
+     (* h 0.5))))
+
 (defn vehicle->location
   [v]
   (let [stroke (util/vehicle->stroke v)
@@ -76,7 +90,7 @@ cell-draw-fn is a function that returns a Drawable."
   [v image]
   (let [{p' :p'
          rotation :rotation} (vehicle->location v)]
-    (drawable/->Floating image
+    (drawable/->Floating (->VehicleTriangle [255 0 0]) ;image
                          p'
                          (util/vehicle-scale)
                          rotation)))
