@@ -64,22 +64,32 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn vehicle->location
   [v]
-  (let [[x y] (points/point
-            (util/vehicle->stroke v)
-            (util/vehicle->progress v))]
-    (println [(/ x (quil/width))
-              (/ y (quil/height))])
-    [(/ x (quil/width))
-     (/ y (quil/height))]))
+  (let [stroke (util/vehicle->stroke v)
+        p (util/vehicle->progress v)
+        [x y] (points/point
+               stroke p)]
+    {:p' [(/ x (quil/width))
+          (/ y (quil/height))]
+     :rotation (points/tangent stroke p [0 1])}))
+
+(defn moving-vehicle
+  [v image]
+  (let [{p' :p'
+         rotation :rotation} (vehicle->location v)]
+    (drawable/->Floating image
+                         p'
+                         (vehicle-scale)
+                         rotation)))
 
 (defn vehicles->Stack
   [vehicle-type image]
   (drawable/->Stack
    (vec
     (map (fn [v]
-           (drawable/->Floating image
-                                (vehicle->location v)
-                                (vehicle-scale) Math/PI))
+           (case (:state v)
+             :moving (moving-vehicle v image)
+             :spawning (drawable/->Nothing)
+             :despawning (drawable/->Nothing)))
      (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
@@ -87,7 +97,7 @@ cell-draw-fn is a function that returns a Drawable."
   (drawable/->Stack
    [
 ;    (world-state->Grid cell-bg tile-f)
-    ;(world-state->Grid cell-road tile-f)
+;    (world-state->Grid cell-road tile-f)
     (world-state->Grid path-fn)
     (world-state->Grid building-fn)
     (vehicles->Stack :truck (vehicle-fn :rails-east))
