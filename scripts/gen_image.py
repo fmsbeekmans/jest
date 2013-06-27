@@ -74,7 +74,7 @@ def create_mapping(i, s):
 
 def create_all():
     s = ""
-    f = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 32)
+    f = ImageFont.truetype("proggy.ttf", 24)
     for i,[g,n] in enumerate(glyphs):
         create_letter(i,g,f)
         s += create_mapping(i,n) + ","
