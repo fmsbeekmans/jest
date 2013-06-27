@@ -9,8 +9,9 @@
         jest.util
         jest.world.path
         jest.level
-
+        jest.input.highlight
         brick.drawable
+        brick.image
 
         jest.testutils
         jest.scheduler

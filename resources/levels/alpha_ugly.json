@@ -103,8 +103,8 @@
              "9":"supply-blue"
             },
          "spacing":0,
-         "tileheight":64,
-         "tilewidth":64,
+         "tileheight":48,
+         "tilewidth":48,
          "transparentcolor":"#ff00ff"
         }],
  "tilewidth":64,

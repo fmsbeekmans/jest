@@ -1,6 +1,8 @@
 (ns jest.input.core
   "Transforms device-agnostic input from pixel-based to tile-based."
   (:use [jest.visualize.visualize :only [sketch-size]]
+        [jest.input.highlight :only [highlight-cell remove-highlighted-cells
+                                     get-highlighted-cells]]
         [jest.world :only [world-size]]))
 
 (def ^:private pointers (atom {}))
@@ -38,10 +40,12 @@
 (defn receive-down [id p]
   (with-tile [t p]
     (swap! pointers assoc id t)
+    (highlight-cell id t)
     (on-down-handler id t)))
 
 (defn receive-up [id]
   (on-up-handler id (@pointers id))
+  (remove-highlighted-cells id)
   (swap! pointers dissoc id))
 
 (defn step [a b]
@@ -69,6 +73,7 @@
         (loop [prev prev
                [t & tnext] (interpolate prev t)]
           (swap! pointers assoc id t)
+          (highlight-cell id t)
           (on-move-handler id prev t)
           (if tnext
             (recur t tnext)))))))

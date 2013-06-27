@@ -48,7 +48,7 @@ def i_name(i, g):
     return "part-" + fmt % i + g + ".png"
 
 def create_letter(p,g):
-    i = Image.new("RGB", (64,64), "magenta")
+    i = Image.new("RGB", (48,48), "magenta")
     d = ImageDraw.Draw(i)
     mask=Image.new('L', i.size, color=255)
     alpha_draw=ImageDraw.Draw(mask)

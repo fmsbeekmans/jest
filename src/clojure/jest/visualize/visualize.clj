@@ -48,18 +48,6 @@
 (def world-bricklet (atom nil))
 (def world-sketch (atom nil))
 
-(def highlighted-cells (atom {}))
-
-(let [highlighted-cells (atom {})]
-  (defn highlight-cell
-    [pointer-id coords]
-    (swap! highlighted-cells
-           #(assoc % pointer-id
-                   (conj (vec (get % pointer-id)) coords))))
-  (defn remove-highlighted-cells [pointer-id]
-    (swap! highlighted-cells #(dissoc % pointer-id)))
-  (defn get-highlighted-cells []
-    @highlighted-cells))
 
 
 (defn world-state->Grid
@@ -204,7 +192,7 @@ Returns an x-scale y-scale vector."
   [bg-fn building-fn path-fn vehicle-fn]
   (drawable/->Stack
    [
-;    (world-state->Grid cell-bg tile-f)
+    (world-state->Grid bg-fn)
     ;(world-state->Grid cell-road tile-f)
     (world-state->Grid path-fn)
     (world-state->Grid vehicle-fn)
@@ -258,6 +246,7 @@ Returns an x-scale y-scale vector."
       (.draw (world->drawable) [w h]))))
 
 (defn setup [tile-f]
+  (println "setup")
   ;init een bricklet met tile-set
   (let [path-fn (temp-lookup)]
     (reset! world-bricklet
