@@ -64,26 +64,6 @@ cell-draw-fn is a function that returns a Drawable."
           (for [c (world/all-cells)]
             [(world/coords c) (cell-draw-fn c)])))))
 
-(defrecord VehicleTriangle [color]
-  drawable/Drawable
-  (draw [this [w h]]
-    (quil/frame-rate 60)
-    (quil/color-mode :hsb)
-    (let [color (if (:color this)
-                    [(* (:color this)
-                           (/ (* 2 Math/PI)) 255) 255 255]
-                    [255 0 255])]
-      (apply quil/fill color))
-    (quil/stroke-weight 3)
-    (quil/triangle
-     (* w 0.35)
-     (* h 0.4)
-     (* w 0.35)
-     (* h 0.6)
-     (* w 0.6)
-     (* h 0.5))
-    (quil/color-mode :rgb)))
-
 (defn vehicle->location
   [v]
   (let [stroke (util/vehicle->stroke v)
@@ -98,8 +78,7 @@ cell-draw-fn is a function that returns a Drawable."
   [v image]
   (let [{p' :p'
          rotation :rotation} (vehicle->location v)]
-    (println (vehicle/cargo-color v))
-    (drawable/->Floating (->VehicleTriangle (vehicle/cargo-color v)) ;image
+    (drawable/->Floating image
                          p'
                          (util/vehicle-scale)
                          rotation)))
@@ -159,7 +138,6 @@ cell-draw-fn is a function that returns a Drawable."
       (hyphenate-keywords :road (:direction (first out))))))
 
 (defn setup [tile-f]
-  (println "setup")
   ;init een bricklet met tile-set
   (let [path-fn (temp-lookup)]
     (reset! world-bricklet
