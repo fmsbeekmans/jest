@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import Image, ImageDraw, ImageFont, os, sys, math
+import Image, ImageDraw, ImageFont, os, sys, math, shutil
 
 glyphs = [
     ("g","grass"), #grass
@@ -47,17 +47,21 @@ def i_name(i, g):
     fmt = ("%0" + str(sane_fill) +"d")
     return "part-" + fmt % i + g + ".png"
 
-def create_letter(p,g):
-    i = Image.new("RGB", (48,48), "magenta")
-    d = ImageDraw.Draw(i)
-    mask=Image.new('L', i.size, color=255)
-    alpha_draw=ImageDraw.Draw(mask)
-    alpha_draw.rectangle(i.getbbox(), fill=0)
-    i.putalpha(mask)
-    f = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 32)
-    d.text((0,0),g, font=f, fill="black")
-    d.rectangle([30, 30, 33, 33],fill="blue")
-    i.save(open(i_name(p,g), "wb"), "PNG")
+def create_letter(p,g, f):
+    fname=i_name(p,g)
+    override_fname="override/" + fname
+    if os.path.isfile(override_fname):
+        shutil.copyfile(override_fname,fname)
+    else:
+        i = Image.new("RGB", (48,48), "magenta")
+        d = ImageDraw.Draw(i)
+        mask=Image.new('L', i.size, color=255)
+        alpha_draw=ImageDraw.Draw(mask)
+        alpha_draw.rectangle(i.getbbox(), fill=0)
+        i.putalpha(mask)
+        d.text((0,0),g, font=f, fill="black")
+        d.rectangle([30, 30, 33, 33],fill="blue")
+        i.save(open(fname, "wb"), "PNG")
 
 def wrap_q(s):
     return "\"" + s + "\""
@@ -70,8 +74,9 @@ def create_mapping(i, s):
 
 def create_all():
     s = ""
+    f = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 32)
     for i,[g,n] in enumerate(glyphs):
-        create_letter(i,g)
+        create_letter(i,g,f)
         s += create_mapping(i,n) + ","
     return s
 
