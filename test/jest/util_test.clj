@@ -108,3 +108,11 @@ the input maps is empty"
     (:numbers grouped) => in-seq
     (:even grouped) => '(0 2 4)
     (:odd grouped) => '(1 3)))
+
+(fact "The hue difference between 0.1*pi and pi is 0.9*pi"
+      (util/angle-difference (* 0.1 Math/PI) Math/PI)
+      => (roughly (* 0.9 Math/PI) 0.01))
+
+(fact "The hue difference between 0.1*pi and 1.9*pi is 0.2*pi"
+      (util/angle-difference (* 0.1 Math/PI) (* 1.9 Math/PI))
+      => (roughly (* 0.2 Math/PI) 0.01))
