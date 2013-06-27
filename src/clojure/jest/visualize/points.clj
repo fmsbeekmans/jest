@@ -157,9 +157,13 @@ stroke itself."
   [s p]
   (let [{offset :offset
          p' :progress
-         sub-stroke :stroke} (sub-stroke s p)]
-    (sub-stroke (/ (- p offset)
-                   p'))))
+         sub-stroke :stroke} (sub-stroke s p)
+         p'' (/ (- p offset)
+                   p')]
+    (sub-stroke (cond
+                 (> p'' 1) 1
+                 (< p'' 0) 0
+                 :default p''))))
 
 (defmethod length :composed
   [ss]

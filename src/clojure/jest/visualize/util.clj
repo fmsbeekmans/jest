@@ -63,7 +63,7 @@ Returns an x-scale y-scale vector."
                     (:entry-time v))
         elapsed (- @scheduler/game-time
                    (:entry-time v))]
-    (cond (> elapsed duration) 1
-          (< elapsed 0) 0
+    (cond (>= elapsed duration) 1
+          (<= elapsed 0) 0
           :default (/ elapsed
                       duration))))
