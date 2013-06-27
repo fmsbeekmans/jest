@@ -35,7 +35,7 @@
            [:west :in] (loader "12-west-in.png")
            [:north :in](loader "13-north-in.png")
            }
-          cached-stack (memoize drawable/->Stack)]
+          cached-stack drawable/->Stack]
       (fn [c]
         (let [roads (path/paths c :road)]
           (cached-stack
@@ -48,6 +48,8 @@
 
 (def world-bricklet (atom nil))
 (def world-sketch (atom nil))
+
+
 
 (defn world-state->Grid
   "Builds a layer from the world state.
@@ -111,7 +113,7 @@ cell-draw-fn is a function that returns a Drawable."
   [bg-fn building-fn path-fn vehicle-fn]
   (drawable/->Stack
    [
-;    (world-state->Grid cell-bg tile-f)
+    (world-state->Grid bg-fn)
     (world-state->Grid path-fn)
     (world-state->Grid building-fn)
     (vehicles->Stack :truck (vehicle-fn :rails-east))
@@ -150,6 +152,7 @@ cell-draw-fn is a function that returns a Drawable."
       (hyphenate-keywords :road (:direction (first out))))))
 
 (defn setup [tile-f]
+  (println "setup")
   ;init een bricklet met tile-set
   (let [path-fn (temp-lookup)]
     (reset! world-bricklet
