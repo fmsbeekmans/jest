@@ -1,4 +1,5 @@
-(ns jest.color)
+(ns jest.color
+  (:require [jest.util :as util]))
 
 (defn- hue->vector
   "Given a hue (represented as a radian), return a direction vector on the color
@@ -39,14 +40,6 @@
 (defmethod hue clojure.lang.Keyword [color-name]
   (colors color-name))
 
-(defn hue-difference
-  "Returns the difference between twho hues."
-  [h1 h2]
-  (let [diff (Math/abs (- h1 h2))]
-    (if (>= diff Math/PI)
-      (Math/abs (- (* 2 Math/PI) (- h1) h2))
-      diff)))
-
 (def ^:private +delta+ (/ Math/PI 8))
 
 (defn <=delta?
@@ -59,7 +52,7 @@
   "Returns true iff the hue difference between h1 and h2 is less than or equal
    to the delta."
   [h1 h2]
-  (<=delta? (hue-difference h1 h2)))
+  (<=delta? (util/angle-difference h1 h2)))
 
 (defn contains-hue?
   "Returns true if one of the colors in the collection matches the given."

@@ -73,6 +73,14 @@
         (map (fn [[group p]]
                [group (filter p s)]) group-ps)))
 
+(defn angle-difference
+  "Returns the difference between twho hues."
+  [h1 h2]
+  (let [diff (Math/abs (- h1 h2))]
+    (if (>= diff Math/PI)
+      (Math/abs (- (* 2 Math/PI) (- h1) h2))
+      diff)))
+
 (comment (defmacro let-on
            [target fns & body]
            (let-vec

@@ -5,13 +5,14 @@
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
                              exploding? moving? map->Vehicle]]
-        [jest.color :only [hue-difference <=delta? hue]]
+        [jest.color :only [<=delta? hue]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
                                 opposite-dirs path path-type to]]
         [jest.world.building :only [spawn? vehicle-type resource-color
                                     resource-count reduce-resource mix-colors]]
-        [jest.scheduler :only [schedule offset game-time]]))
+        [jest.scheduler :only [schedule offset game-time]])
+  (:require [jest.util :as util]))
 
 (defonce ^:private idc (atom 0))
 
@@ -31,7 +32,7 @@
    route score is better."
   [color path]
   (if color
-    (let [hue-diffs  (map (partial hue-difference color)
+    (let [hue-diffs  (map (partial util/angle-difference color)
                           (:routes path))]
       (if (seq hue-diffs)
         (apply min hue-diffs)))))
@@ -189,7 +190,7 @@
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
-  (when (< (hue-difference (cargo-color (vehicle id))
+  (when (< (util/angle-difference (cargo-color (vehicle id))
                           (resource-hue (vehicle-cell (vehicle id))))
            (/ Math/PI 8))
     ;;TODO this should also update some score

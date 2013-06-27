@@ -5,8 +5,7 @@
         [jest.world.path :only [in-paths out-paths from to path-type
                                 vehicle->path path->duration path
                                 opposite-dirs]]
-        [jest.scheduler :only [game-time schedule offset]]
-        [jest.color :only [hue average-hue hue-difference]]))
+        [jest.scheduler :only [game-time schedule offset]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction
                     exit-time exit-direction cargo state])
