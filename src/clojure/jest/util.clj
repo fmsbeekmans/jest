@@ -74,7 +74,7 @@
                [group (filter p s)]) group-ps)))
 
 (defn angle-difference
-  "Returns the difference between twho hues."
+  "Returns the difference between two hues."
   [h1 h2]
   (let [diff (Math/abs (- h1 h2))]
     (if (>= diff Math/PI)
