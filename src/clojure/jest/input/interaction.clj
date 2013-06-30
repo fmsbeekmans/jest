@@ -8,9 +8,9 @@
             [jest.movement :refer [spawn preferred-path]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
-(def inv-directions (clojure.set/map-invert directions))
+(def ^:private inv-directions (clojure.set/map-invert directions))
 
-(defn demo-on-down [id pos]
+(defn on-down [id pos]
   (if (spawn? (direction (cell pos) :south))
     (spawn (direction (cell pos) :south))
     (case pos
@@ -20,7 +20,7 @@
         (pause!))
       nil)))
 
-(defn maybe-build-route [c dir]
+(defn- maybe-build-route [c dir]
   (if-let [v (first (vehicles c))]
     (when (cargo? v)
       (doseq [p (paths-with-route c (cargo-color v))]
@@ -32,7 +32,7 @@
                          #(assoc %
                             :exit-direction (:direction  (preferred-path %)))))))))
 
-(defn rough-staging-on-move [id pos1 pos2]
+(defn on-move [id pos1 pos2]
   (let [c1 (cell pos1)
         c2 (cell pos2)
         direction (inv-directions (map - pos2 pos1))]
@@ -47,5 +47,5 @@
     ))
 
 (defn interaction-setup []
-  (set-input-handler! :on-move rough-staging-on-move)
-  (set-input-handler! :on-down demo-on-down))
+  (set-input-handler! :on-move on-move)
+  (set-input-handler! :on-down on-down))
