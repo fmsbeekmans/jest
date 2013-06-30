@@ -1,12 +1,12 @@
 (ns jest.input.interaction
-  (:use [jest.input.core :only [set-input-handler!]]
-        [jest.world :only [directions direction cell]]
-        [jest.world.building :only [spawn?]]
-        [jest.world.path :only [path in-path? build-path unbuild-path in-paths]]
-        [jest.world.route :only [paths-with-route build-route unbuild-route]]
-        [jest.vehicle :only [vehicles cargo? cargo-color update-vehicle]]
-        [jest.movement :only [spawn preferred-path]]
-        [jest.scheduler :only [paused? resume! pause!]]))
+  (:require [jest.input.core :refer [set-input-handler!]]
+            [jest.world :refer [directions direction cell]]
+            [jest.world.building :refer [spawn?]]
+            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths]]
+            [jest.world.route :refer [paths-with-route build-route unbuild-route]]
+            [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
+            [jest.movement :refer [spawn preferred-path]]
+            [jest.scheduler :refer [paused? resume! pause!]]))
 
 (def inv-directions (clojure.set/map-invert directions))
 
