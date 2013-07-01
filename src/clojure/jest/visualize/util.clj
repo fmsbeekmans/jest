@@ -49,7 +49,7 @@
    (vehicle/despawning? v) (vehicle->stroke-from-mid v)
    (vehicle/exploding? v) (vehicle->stroke-from-mid v)
    (vehicle/moving? v) (points/stroke-comp [(vehicle->stroke-to-mid v)
-                                          (vehicle->stroke-from-mid v)])))
+                                            (vehicle->stroke-from-mid v)])))
 
 (def vehicle->stroke (memoize vehicle->stroke'))
 

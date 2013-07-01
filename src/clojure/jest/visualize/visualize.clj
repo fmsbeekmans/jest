@@ -93,6 +93,26 @@ cell-draw-fn is a function that returns a Drawable."
           (/ y (quil/height))]
      :rotation (points/tangent stroke p [0 1])}))
 
+(defrecord Dot
+  [v]
+  drawable/Drawable
+  (draw [this [w h]]
+    (let [raw-color (vehicle/cargo-color (:v this))
+          color (if raw-color
+                  [(int (* (/ raw-color
+                              (* 2 Math/PI))
+                           256)) 255 255]
+                  [255 0 255])]
+      (println color)
+      (quil/color-mode :hsb)
+      (apply quil/fill color)
+      (quil/ellipse
+       (* 0. h)
+       (* 0.5 w)
+       (* 0.5 h)
+       (* 0.1 w))
+      (quil/color-mode :rgb))))
+
 (defn moving-vehicle
   [v image]
   (let [{p' :p'
