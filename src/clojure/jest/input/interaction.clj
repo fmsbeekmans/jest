@@ -33,6 +33,7 @@
         (build-route c dir (cargo-color v))
         (dosync
          (doseq [vehicle (vehicles c)]
+           ;;TODO there should be a helper function for this in movement.
            (update-vehicle (:id vehicle)
                            #(assoc %
                               :exit-direction (:direction  (preferred-path %))))))))))
