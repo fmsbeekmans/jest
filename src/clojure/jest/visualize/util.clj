@@ -85,7 +85,7 @@ Returns an x-scale y-scale vector."
   (defn undecorate-sketch
     [sketch]
     (sketch-decorator sketch false))
-  (defn get-frame-atom-offset
+  (defn get-frame-offset
     [sketch]
     (let [frame @(get-frame-atom sketch)]
       [(.getX frame)
