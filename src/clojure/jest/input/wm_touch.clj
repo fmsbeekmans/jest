@@ -132,6 +132,7 @@
               y (int (/ (.y input) 100))
               id (.dwID input)
               event-type (decode-dwflags (.dwFlags input))]
+          (println 'x x 'y y 'id id)
           (case event-type
             :up (receive-up id)
             :down (receive-down id [x y])
@@ -146,6 +147,7 @@
 (defn setup-wm-touch-input! []
   {:pre [(not @touch-input-state)
          @world-sketch]}
+  (setup-native)
   (reset! touch-input-state
           (invoke-void-method (fn []
                                 (let [handle (get-quil-sketch-handle)
@@ -156,7 +158,6 @@
 
 (defn teardown-wm-touch-input! []
   {:pre [@touch-input-state]}
-  (setup-native)
   (let [[[getmessage-hook _]
          [callwnd-hook _]] @touch-input-state]
     (invoke-void-method (fn []
