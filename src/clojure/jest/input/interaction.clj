@@ -2,7 +2,7 @@
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell]]
             [jest.world.building :refer [spawn?]]
-            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs]]
+            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
             [jest.movement :refer [spawn preferred-path]]
@@ -22,15 +22,19 @@
 
 (defn- maybe-build-route [c dir]
   (if-let [v (first (vehicles c))]
-    (when (cargo? v)
-      (doseq [p (paths-with-route c (cargo-color v))]
-        (unbuild-route c (:direction p) (cargo-color v)))
-      (build-route c dir (cargo-color v))
-      (dosync
-       (doseq [vehicle (vehicles c)]
-         (update-vehicle (:id vehicle)
-                         #(assoc %
-                            :exit-direction (:direction  (preferred-path %)))))))))
+    (let [vehicle-type (:type v)]
+      (when (and (cargo? v)
+                 (= (path-type (path c dir))
+                    (vehicle->path (:type v))))
+        (doseq [p (filter #(= (vehicle->path (:type v)) (path-type %))
+                          (paths-with-route c (cargo-color v)))]
+          (unbuild-route c (:direction p) (cargo-color v)))
+        (build-route c dir (cargo-color v))
+        (dosync
+         (doseq [vehicle (vehicles c)]
+           (update-vehicle (:id vehicle)
+                           #(assoc %
+                              :exit-direction (:direction  (preferred-path %))))))))))
 
 (defn on-move [id pos1 pos2]
   (let [c1 (cell pos1)
