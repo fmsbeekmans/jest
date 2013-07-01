@@ -68,3 +68,31 @@ Returns an x-scale y-scale vector."
           (<= elapsed 0) 0
           :default (/ elapsed
                       duration))))
+
+(let [get-frame-atom (comp :target-obj meta)
+      sketch-decorator
+      (fn [sketch decorate]
+        (let [frame-atom (get-frame-atom sketch)]
+          (println frame-atom)
+          (swap! frame-atom
+                 #(doto %
+                    (.dispose)
+                    (.setUndecorated (not decorate))
+                    (.setVisible true)))))]
+  (defn decorate-sketch
+    [sketch]
+    (sketch-decorator sketch true))
+  (defn undecorate-sketch
+    [sketch]
+    (sketch-decorator sketch false))
+  (defn get-frame-atom-offset
+    [sketch]
+    (let [frame @(get-frame-atom sketch)]
+      [(.getX frame)
+       (.getY frame)]))
+  (defn get-pane-offset
+    [sketch]
+    (let [frame @(get-frame-atom sketch)
+          root-pane (.getRootPane frame)]
+      [(.getX root-pane)
+       (.getY root-pane)])))

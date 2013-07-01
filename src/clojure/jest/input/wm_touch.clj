@@ -1,6 +1,7 @@
 (ns jest.input.wm-touch
-  (:use [jest.input.core :only [receive-down receive-up receive-move]]
-        [jest.visualize.visualize :only [world-sketch]])
+  (:require [jest.input.core :refer [receive-down receive-up receive-move]]
+            [jest.visualize.visualize :refer [world-sketch]]
+            [jest.visualize.util :refer [get-frame-offset get-pane-offset]])
   (:import IUser IKernel IAWTCallback Hooks$IGetMsgProc Hooks$ICallWndProc TouchInput
            [com.sun.jna Native Pointer Callback]
            [com.sun.jna.win32 StdCallLibrary StdCallLibrary$StdCallCallback]
@@ -130,6 +131,11 @@
         (let [input (aget inputs i)
               x (int (/ (.x input) 100))
               y (int (/ (.y input) 100))
+              [x y] (map -
+                         [x y]
+                         (map +
+                              (get-frame-offset @world-sketch)
+                              (get-pane-offset @world-sketch)))
               id (.dwID input)
               event-type (decode-dwflags (.dwFlags input))]
           (println 'x x 'y y 'id id)
