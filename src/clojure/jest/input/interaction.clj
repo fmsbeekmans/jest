@@ -1,6 +1,6 @@
 (ns jest.input.interaction
   (:require [jest.input.core :refer [set-input-handler!]]
-            [jest.world :refer [directions direction cell]]
+            [jest.world :refer [directions direction cell direction-exists?]]
             [jest.world.building :refer [spawn?]]
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
@@ -11,7 +11,8 @@
 (def ^:private inv-directions (clojure.set/map-invert directions))
 
 (defn on-down [id pos]
-  (if (spawn? (direction (cell pos) :south))
+  (if (and (direction-exists? (cell pos) :south)
+           (spawn? (direction (cell pos) :south)))
     (spawn (direction (cell pos) :south))
     (case pos
       [0 0]
