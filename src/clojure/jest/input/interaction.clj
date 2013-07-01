@@ -2,7 +2,7 @@
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell]]
             [jest.world.building :refer [spawn?]]
-            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths]]
+            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
             [jest.movement :refer [spawn preferred-path]]
@@ -46,6 +46,79 @@
         (build-path c1 direction :road)))
     ))
 
+(def pointer-track ( atom {}))
+
+(defn track-pointer [id type tile direction on-same on-empty]
+  (println 'type type)
+  (let [[path-type count] (@pointer-track id)]
+    (swap! pointer-track assoc id
+           (if path-type
+             [(cond (= type path-type)
+                    (on-same)
+                    
+                    (nil? type)
+                    (on-empty)
+                    
+                    :default
+                    :invalid)
+              (inc count) tile direction]
+             [(if type
+                (on-same)
+                (on-empty)) 1 tile direction]))))
+
+(defn untrack-pointer [id]
+  (swap! pointer-track dissoc id))
+
+(defn pointer-track-type [id]
+  (first (@pointer-track id)))
+
+(defn pointer-track-tile [id]
+  ((@pointer-track id) 2))
+
+(defn pointer-track-direction [id]
+  ((@pointer-track id) 3))
+
+(let [paths [:road :rails :canal]]
+  (defn path-type-sort [p1 p2]
+    (< (.indexOf paths p1)
+       (.indexOf paths p2))))
+
+(defn on-move [id pos1 pos2]
+  (let [c1 (cell pos1)
+        c2 (cell pos2)
+        direction (inv-directions (map - pos2 pos1))
+        path (path c1 direction)
+        type (path-type path)]
+    (track-pointer id type pos1 direction
+                   (fn on-same []
+                     (println 'same)
+                     (when (in-path? path)
+                       (println 'unbuild direction)
+                       (unbuild-path c1 direction))
+                     type)
+                   (fn on-empty []
+                     (println 'empty)
+                     (if-let [in-paths (seq (in-paths c1))]
+                       (do  (println 'in-paths in-paths)
+                            (let [type (or (pointer-track-type id)
+                                           (first (sort path-type-sort
+                                                        (map path-type
+                                                             in-paths))))]
+                              (println 'type type 'direction direction)
+                              (build-path c1 direction
+                                          type)
+                              type))
+                       :invalid)))))
+
+(defn on-up [id _]
+  (let [[type count tile direction] (@pointer-track id)]
+    (if (and count
+             (= count 1)
+             (not= type :invalid))
+      (maybe-build-route (cell tile) direction)))
+  (untrack-pointer id))
+
 (defn interaction-setup []
   (set-input-handler! :on-move on-move)
-  (set-input-handler! :on-down on-down))
+  (set-input-handler! :on-down on-down)
+  (set-input-handler! :on-up on-up))
