@@ -160,41 +160,56 @@
 (defn resource-hue [cell]
   (hue (:resource-type cell)))
 
+(defn half-duration [v]
+  (/ (vehicle->duration v) 2))
+
+(defn schedule-half-duration [v f]
+  (schedule #(dosync (f))
+            (+ (:entry-time v)
+               (/ (vehicle->duration v) 2))))
+
 (defmethod vehicle-transition-state
   [false :supply]
   [id]
-  (set-cargo id
-             (resource-hue (vehicle-cell (vehicle id)))
-             (cargo-capacity (:type (vehicle id)))))
+  (schedule-half-duration (vehicle id)
+                          #(set-cargo id
+                                      (resource-hue (vehicle-cell (vehicle id)))
+                                      (cargo-capacity (:type (vehicle id))))))
 
 (defmethod vehicle-transition-state
   [false :mixer]
   [id]
-  (dosync
-   (let [color (resource-color (vehicle-cell (vehicle id)))
-         pickup-count (min (resource-count (vehicle-cell (vehicle id)))
-                           (cargo-capacity (:type (vehicle id))))]
-     (reduce-resource (vehicle-cell (vehicle id)) pickup-count)
-     (set-cargo id color pickup-count))))
+  (schedule-half-duration (vehicle id)
+                          #(let [color (resource-color (vehicle-cell
+                                                        (vehicle id)))
+                                 pickup-count (min (resource-count
+                                                    (vehicle-cell (vehicle id)))
+                                                   (cargo-capacity
+                                                    (:type (vehicle id))))]
+                             (reduce-resource (vehicle-cell (vehicle id))
+                                              pickup-count)
+                             (set-cargo id color pickup-count))))
 
 
 (defmethod vehicle-transition-state
   [true :mixer]
   [id]
-  (dosync
-   (mix-colors (vehicle-cell (vehicle id))
-               (cargo-color (vehicle id))
-               (cargo-count (vehicle id)))
-   (clear-cargo id)))
+  (schedule-half-duration (vehicle id)
+                          (fn []
+                            (mix-colors (vehicle-cell (vehicle id))
+                                        (cargo-color (vehicle id))
+                                        (cargo-count (vehicle id)))
+                            (clear-cargo id))))
 
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
-  (when (< (util/angle-difference (cargo-color (vehicle id))
-                          (resource-hue (vehicle-cell (vehicle id))))
-           (/ Math/PI 8))
-    ;;TODO this should also update some score
-    (clear-cargo id)))
+  (schedule-half-duration (vehicle id)
+                          #(when (< (util/angle-difference (cargo-color (vehicle id))
+                                                           (resource-hue (vehicle-cell (vehicle id))))
+                                    (/ Math/PI 8))
+                             ;;TODO this should also update some score
+                             (clear-cargo id))))
 
 (defn maybe-explode [id]
   (when-not (or (:exit-direction (vehicle id))
