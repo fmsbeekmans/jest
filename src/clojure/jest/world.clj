@@ -9,29 +9,36 @@
   world
   (atom {}))
 
-(defonce ^:private world-size (atom {}))
-
-(defn reset-world
-  "Forcefully resets the world to value v."
-  [v]
-  (reset! world v))
+(defonce ^:private world-size' (atom {}))
 
 (let [max-wrapper
       (fn [& args]
         (if (seq args)
           (apply max args)
           -1))]
-  (defn world-width
+  (defn calculate-world-width
     "Returns the width of the loaded world."
     []
     (inc
      (apply max-wrapper (map first (keys @world)))))
 
-  (defn world-height
+  (defn calculate-world-height
     "Returns the height of the loaded world."
     []
     (inc
      (apply max-wrapper (map second (keys @world))))))
+
+(defn reset-world
+  "Forcefully resets the world to value v."
+  [v]
+  (reset! world v)
+  (reset! world-size' [(calculate-world-width) (calculate-world-height)]))
+
+(defn world-width []
+  (first @world-size'))
+
+(defn world-height []
+  (second @world-size'))
 
 (defn world-size
   "Returns the size of the loaded world as a [width height] tuple"
