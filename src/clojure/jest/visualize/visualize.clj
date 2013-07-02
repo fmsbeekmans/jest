@@ -77,10 +77,10 @@ cell-draw-fn is a function that returns a Drawable."
       (quil/color-mode :hsb)
       (apply quil/fill color)
       (quil/ellipse
-       (* 0. h)
-       (* 0.5 w)
-       (* 0.5 h)
-       (* 0.1 w))
+       (* 0.35 h)
+       (* 0.35 w)
+       (* 0.3 h)
+       (* 0.3 w))
       (quil/color-mode :rgb))))
 
 (defn vehicle->location
@@ -130,7 +130,7 @@ cell-draw-fn is a function that returns a Drawable."
     (map (fn [v]
            (case (:state v)
              :moving (moving-vehicle v image)
-             :spawning (drawable/->Nothing)
+             :spawning (drawable/->Border (drawable/->Nothing) 0.1 0.1)
              :despawning (drawable/->Nothing)
              :exploding (drawable/->Nothing)))
      (vehicle/all-vehicles vehicle/truck?)))))
@@ -182,15 +182,15 @@ cell-draw-fn is a function that returns a Drawable."
   (let [path-fn (temp-lookup)]
     (reset! world-bricklet
             (drawable/->Bricklet
-             (atom (reify drawable/Drawable
-                     (drawable/draw [this [w h]]
-                       (drawable/.draw
-                        (world->drawable
-                         (comp tile-f cell-bg)
-                         (comp tile-f cell-building)
-                         path-fn
-                         tile-f)
-                        [w h]))))
+             (atom (drawable/->Border (reify drawable/Drawable
+                                        (draw [this [w h]]
+                                          (drawable/.draw
+                                           (world->drawable
+                                            (comp tile-f cell-bg)
+                                            (comp tile-f cell-building)
+                                            path-fn
+                                            tile-f)
+                                           [w h]))) 0.1 0.1))
              (atom [])
              :renderer :java2d
              :size [800 600]
