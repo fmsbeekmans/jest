@@ -237,7 +237,7 @@
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))
                    (schedule-move id)))))
-            (offset (vehicle->duration (vehicle id)))))
+            (:exit-time (vehicle id))))
 
 (defn- load-vehicle-on-spawn
   "Loads a vehicle on a spawn point, setting all initial state."
