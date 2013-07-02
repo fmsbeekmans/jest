@@ -59,7 +59,10 @@
   (let [[path-type count] (@pointer-track id)]
     (swap! pointer-track assoc id
            (if path-type
-             [(cond (= type path-type)
+             [(cond (= :invalid path-type)
+                    :invalid
+
+                    (= type path-type)
                     (on-same)
                     
                     (nil? type)
