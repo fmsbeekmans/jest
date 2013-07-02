@@ -45,12 +45,11 @@
 (defn vehicle->stroke
   [v]
   (cond
-   (and (:entry-direction v)
-        (not (:exit-direction v))) (vehicle->stroke-to-mid v)
-   (and (:exit-direction v)
-        (not (:entry-direction v))) (vehicle->stroke-from-mid v)
-   :default (points/stroke-comp [(vehicle->stroke-to-mid v)
-                                 (vehicle->stroke-from-mid v)])))
+   (vehicle/spawning? v) (vehicle->stroke-to-mid v)
+   (vehicle/despawning? v) (vehicle->stroke-from-mid v)
+   (vehicle/exploding? v) (vehicle->stroke-from-mid v)
+   (vehicle/moving?) (points/stroke-comp [(vehicle->stroke-to-mid v)
+                                          (vehicle->stroke-from-mid v)])))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
