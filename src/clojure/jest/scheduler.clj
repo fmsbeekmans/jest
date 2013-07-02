@@ -6,6 +6,9 @@
 (defonce ^:private thread-pool (atom nil))
 (defonce ^:private tasks (atom {}))
 
+(defn get-thread-pool ^java.util.concurrent.ScheduledExecutorService []
+  @thread-pool)
+
 ;; An agent is used here because anything sent to an agent from within a
 ;; transaction will only run if the transaction succeeds, and will only run once
 (def ^:private schedule-agent (agent nil))
@@ -32,7 +35,7 @@
 (defn- calculate-delay
   "Calculates the difference between the given game time and the current real
    time."
-  [game-time]
+  ^long [game-time]
   (- (calculate-real-time game-time) (time-millis)))
 
 (def ^{:doc "A derefable variable specifying the current game time, in
@@ -59,7 +62,7 @@
   [@timer-data @thread-pool]}
   (io!
    (reset! timer-data nil)
-   (.shutdownNow @thread-pool)
+   (.shutdownNow (get-thread-pool))
    (reset! thread-pool nil)
    (reset! tasks nil))
   nil)
@@ -83,7 +86,7 @@
 
 (defn- unschedule-wrapper
   "Wraps a function to remove itself from the task list after running."
-  [task time]
+  ^Runnable [task time]
   (fn []
     (task)
     (swap! tasks
@@ -97,7 +100,7 @@
 (defn- register-with-scheduler
   "Registers a function with the Java scheduler."
   [task time]
-  (.schedule @thread-pool
+  (.schedule (get-thread-pool)
              (unschedule-wrapper task time)
              (calculate-delay time)
              TimeUnit/MILLISECONDS))
@@ -119,7 +122,7 @@
   []
   {:pre [(paused?)]}
   (swap! tasks
-         (collect-task-map (fn [_ [task future]]
+         (collect-task-map (fn [_ [task ^java.util.concurrent.Future future]]
                              (.cancel future false)
                              [task nil]))))
 
