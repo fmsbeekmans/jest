@@ -1,3 +1,5 @@
+(set! *warn-on-reflection* true)
+
 (ns user
   (:use clojure.repl
         clojure.pprint
@@ -21,8 +23,6 @@
         jest.input.interaction
         jest.vehicle
         jest.world.route))
-
-(set! *warn-on-reflection* true)
 
 (defn build-level []
   (initialize-world 32 20)
