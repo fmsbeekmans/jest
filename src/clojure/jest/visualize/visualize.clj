@@ -172,6 +172,8 @@ cell-draw-fn is a function that returns a Drawable."
                          tile-f)
                         [w h]))))
              (atom [])
+             :renderer :java2d
+             :size [800 600]
              :mouse-pressed input/on-down-handler
              :mouse-released input/on-up-handler
              :mouse-dragged input/on-move-handler))))
