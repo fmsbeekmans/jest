@@ -22,6 +22,8 @@
         jest.vehicle
         jest.world.route))
 
+(set! *warn-on-reflection* true)
+
 (defn build-level []
   (initialize-world 32 20)
   (build-spawn (cell [1 1]) :truck)
