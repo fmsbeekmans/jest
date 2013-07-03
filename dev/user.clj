@@ -73,7 +73,7 @@
   (setup-quil-mouse-input)
   (interaction-setup)
   (load-level "levels/alpha_ugly.json")
-  (build-level)
+  (build-another-level)
 
   (start!)
   (println "Started?" (started?))
