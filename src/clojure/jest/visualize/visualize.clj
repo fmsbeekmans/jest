@@ -12,7 +12,8 @@
             [jest.world.path :as path]
             [jest.world.cell :as cell])
   (:require [jest.visualize.points :as points]
-            [jest.visualize.util :as util])
+            [jest.visualize.util :as util]
+            [jest.color :as color])
   (:require [jest.visualize.input :as input]))
 
 (declare cell-bg)
@@ -84,23 +85,17 @@ cell-draw-fn is a function that returns a Drawable."
       (quil/color-mode :rgb))))
 
 (defrecord Rect
-  [v]
+  [color]
   drawable/Drawable
   (draw [this [w h]]
-    (let [raw-color (vehicle/cargo-color (:v this))
-          color (if raw-color
-                  [(int (* (/ raw-color
-                              (* 2 Math/PI))
-                           256)) 255 255]
-                  [255 0 255])]
-      (quil/color-mode :hsb)
-      (apply quil/fill color)
-      (quil/rect
-       (* 0.1 w)
-       (* 0.1 h)
-       (* 0.3 w)
-       (* 0.3 h))
-      (quil/color-mode :rgb))))
+    (quil/color-mode :hsb)
+    (apply quil/fill (:color this))
+    (quil/rect
+     (* 0.6 w)
+     (* 0.1 h)
+     (* 0.2 w)
+     (* 0.2 h))
+    (quil/color-mode :rgb)))
 
 (defn vehicle->location
   [v]
@@ -189,9 +184,14 @@ cell-draw-fn is a function that returns a Drawable."
       :spawn (tile-fn
               (hyphenate-keywords :spawn (building/vehicle-type c)))
       :mixer (tile-fn :mixer)
-      :supply (tile-fn :snow)
+      :supply (drawable/->Stack [(tile-fn :snow)
+                                 (->Rect
+                                  (color/hue->hsb
+                                   (building/resource-type c)))])
       :depot (drawable/->Stack [(tile-fn :dirt)
-                                (->Rect [0 255 255])]))
+                                (->Rect
+                                 (color/hue->hsb
+                                  (building/resource-type c)))]))
     (tile-fn nil)))
 
 (defn cell-road
