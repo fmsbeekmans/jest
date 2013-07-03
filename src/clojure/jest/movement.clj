@@ -321,5 +321,4 @@ This function should be called from within a transaction."
       (update-vehicle-exit id))
     
     (doseq [{:keys [id exit-direction] :as v} outgoing]
-      (println 'outgoingfaasd id exit-direction)
       (start-exploding id))))
