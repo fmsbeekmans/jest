@@ -143,7 +143,7 @@ cell-draw-fn is a function that returns a Drawable."
     (map (fn [v]
            (cond
             (vehicle/moving? v) (moving-vehicle v image)
-            (vehicle/spawning? v) (drawable/->Border (drawable/->Nothing) 0.1 0.1)
+            (vehicle/spawning? v) (drawable/->Nothing)
             (vehicle/despawning? v) (drawable/->Nothing)
             (vehicle/exploding? v) (drawable/->Nothing)))
      (vehicle/all-vehicles vehicle/truck?)))))
@@ -218,7 +218,7 @@ cell-draw-fn is a function that returns a Drawable."
                                           (drawable/.draw
                                            (world->drawable
                                             tile-fn)
-                                           [w h]))) 0.1 0.1))
+                                           [w h]))) 0.3 0.123))
              (atom [])
              :renderer :java2d
              :size [800 600]

@@ -13,7 +13,9 @@
          (ic/reset-pointers!)
          (against-background
           (v/sketch-size) => [100 100]
-          (w/world-size) => [10 10])))
+          (w/world-size) => [10 10]
+          (ic/tl) => [0 0]
+          (ic/br) => [1 1])))
 
 (tiling-fact "pixel->tile correctly calculates a tile based on a pixel"
              (ic/pixel->tile 0 0) => [0 0]
