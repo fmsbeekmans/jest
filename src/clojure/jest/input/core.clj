@@ -35,8 +35,8 @@
 (defn reset-input-handlers! []
   (reset! handlers {}))
 
-(def tl [0.0 0.0])
-(def br [1.0 1.0])
+(def tl [0.1 0.1])
+(def br [0.9 0.9])
 
 (defn pixel->tile [x y]
   (let [tl (map * tl (sketch-size))
