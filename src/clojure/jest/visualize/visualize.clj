@@ -47,8 +47,8 @@
                              (:inout r)]))))))))))
 
 
-(def world-bricklet (atom nil))
-(def world-sketch (atom nil))
+(defonce world-bricklet (atom nil))
+(defonce world-sketch (atom nil))
 
 
 
@@ -91,10 +91,10 @@ cell-draw-fn is a function that returns a Drawable."
     (quil/color-mode :hsb)
     (apply quil/fill (:color this))
     (quil/rect
-     (* 0.6 w)
-     (* 0.1 h)
-     (* 0.2 w)
-     (* 0.2 h))
+     (* 0 w)
+     (* 0.2 h)
+     (* 0.4 w)
+     (* 0.4 h))
     (quil/color-mode :rgb)))
 
 (defn vehicle->location
@@ -117,14 +117,13 @@ cell-draw-fn is a function that returns a Drawable."
                               (* 2 Math/PI))
                            256)) 255 255]
                   [255 0 255])]
-      (println color)
       (quil/color-mode :hsb)
       (apply quil/fill color)
       (quil/ellipse
-       (* 0. h)
-       (* 0.5 w)
        (* 0.5 h)
-       (* 0.1 w))
+       (* 0.5 w)
+       (* 0.2 h)
+       (* 0.2 w))
       (quil/color-mode :rgb))))
 
 (defn moving-vehicle
@@ -184,14 +183,14 @@ cell-draw-fn is a function that returns a Drawable."
       :spawn (tile-fn
               (hyphenate-keywords :spawn (building/vehicle-type c)))
       :mixer (tile-fn :mixer)
-      :supply (drawable/->Stack [(tile-fn :snow)
-                                 (->Rect
+      :supply (drawable/->Stack [(->Rect
                                   (color/hue->hsb
-                                   (building/resource-type c)))])
-      :depot (drawable/->Stack [(tile-fn :dirt)
-                                (->Rect
+                                   (building/resource-type c)))
+                                 (tile-fn :snow)])
+      :depot (drawable/->Stack [(->Rect
                                  (color/hue->hsb
-                                  (building/resource-type c)))]))
+                                  (building/resource-type c)))
+                                (tile-fn :dirt)]))
     (tile-fn nil)))
 
 (defn cell-road
