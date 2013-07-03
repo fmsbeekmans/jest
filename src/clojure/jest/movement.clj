@@ -1,6 +1,6 @@
 (ns jest.movement
   "Vehicle movement actions. This includes picking up and dropping off cargo."
-  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color
+  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color vehicles
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
@@ -8,7 +8,8 @@
         [jest.color :only [<=delta? hue]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
-                                opposite-dirs path path-type to]]
+                                opposite-dirs path path-type to
+                                out-path?]]
         [jest.world.building :only [spawn? vehicle-type resource-color
                                     resource-count reduce-resource mix-colors]]
         [jest.scheduler :only [schedule offset game-time]])
@@ -113,7 +114,7 @@
   (assoc v :exit-direction nil))
 
 (defn set-end-state [id state]
-  (dosync 
+  (dosync
    (vehicle-state-change id state)
    (update-vehicle id vehicle-clear-exit)))
 
@@ -216,6 +217,10 @@
                 (spawn? (vehicle-cell (vehicle id))))
     (start-exploding id)))
 
+(defn update-vehicle-exit [id]
+  (update-vehicle id update-preferred-path)
+  (maybe-explode id))
+
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
 ;;which alters routing decisions. so do that last!
@@ -238,8 +243,7 @@
      (vehicle-state-change id :moving)
      (update-vehicle id (comp select-exit vehicle-enter))
      (vehicle-transition-state id)
-     (update-vehicle id update-preferred-path)
-     (maybe-explode id))))
+     (update-vehicle-exit id))))
 
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
@@ -279,3 +283,37 @@
    (let [vehicle (load-vehicle-on-spawn c)]
      (schedule-move (:id vehicle))
      vehicle)))
+
+(defn vehicle-state-in-cell [v]
+  (let [halfpoint (+ (:entry-time v)
+                     (/ (vehicle->duration v) 2))]
+    (if (<= @game-time halfpoint)
+      :incoming
+      :outgoing)))
+
+(defn incoming? [v]
+  (= (vehicle-state-in-cell v) :incoming))
+
+(defn outgoing? [v]
+  (= (vehicle-state-in-cell v) :outgoing))
+
+(defn valid-out-direction? [v dir]
+  (let [path (path (vehicle-cell v) dir)]
+    (and path
+         (out-path? path)
+         (= (:type path) (vehicle->path (:type v))))))
+
+(defn update-vehicles-for-cell-changes
+  "Ensures all vehicles on a particular cell are in a consistent state with the
+paths and routes on this cell. If no exit exists for this path anymore, explode.
+This function should be called from within a transaction."
+  [c]
+  (let [vs (vehicles c)
+        incoming (filter incoming? vs)
+        outgoing (filter outgoing? vs)]
+    (doseq [{:keys [id]} incoming]
+      (update-vehicle-exit id))
+    
+    (doseq [{:keys [id exit-direction] :as v} outgoing]
+      (println 'outgoingfaasd id exit-direction)
+      (start-exploding id))))

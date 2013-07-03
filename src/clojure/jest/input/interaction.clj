@@ -5,7 +5,7 @@
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
-            [jest.movement :refer [spawn preferred-path]]
+            [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
 (def ^:private inv-directions (clojure.set/map-invert directions))
@@ -22,21 +22,17 @@
       nil)))
 
 (defn- maybe-build-route [c dir]
-  (if-let [v (first (vehicles c))]
-    (let [vehicle-type (:type v)]
-      (when (and (cargo? v)
-                 (= (path-type (path c dir))
-                    (vehicle->path (:type v))))
-        (doseq [p (filter #(= (vehicle->path (:type v)) (path-type %))
-                          (paths-with-route c (cargo-color v)))]
-          (unbuild-route c (:direction p) (cargo-color v)))
-        (build-route c dir (cargo-color v))
-        (dosync
-         (doseq [vehicle (vehicles c)]
-           ;;TODO there should be a helper function for this in movement.
-           (update-vehicle (:id vehicle)
-                           #(assoc %
-                              :exit-direction (:direction  (preferred-path %))))))))))
+  (dosync
+   (if-let [v (first (vehicles c))]
+     (let [vehicle-type (:type v)]
+       (when (and (cargo? v)
+                  (= (path-type (path c dir))
+                     (vehicle->path (:type v))))
+         (doseq [p (filter #(= (vehicle->path (:type v)) (path-type %))
+                           (paths-with-route c (cargo-color v)))]
+           (unbuild-route c (:direction p) (cargo-color v)))
+         (build-route c dir (cargo-color v))
+         (update-vehicles-for-cell-changes c))))))
 
 (defn on-move [id pos1 pos2]
   (let [c1 (cell pos1)
@@ -55,7 +51,6 @@
 (def pointer-track ( atom {}))
 
 (defn track-pointer [id type tile direction on-same on-empty]
-  (println 'type type)
   (let [[path-type count] (@pointer-track id)]
     (swap! pointer-track assoc id
            (if path-type
@@ -93,31 +88,29 @@
        (.indexOf paths p2))))
 
 (defn on-move [id pos1 pos2]
-  (let [c1 (cell pos1)
-        c2 (cell pos2)
-        direction (inv-directions (map - pos2 pos1))
-        path (path c1 direction)
-        type (path-type path)]
-    (track-pointer id type pos1 direction
-                   (fn on-same []
-                     (println 'same)
-                     (when (in-path? path)
-                       (println 'unbuild direction)
-                       (unbuild-path c1 direction))
-                     type)
-                   (fn on-empty []
-                     (println 'empty)
-                     (if-let [in-paths (seq (in-paths c1))]
-                       (do  (println 'in-paths in-paths)
-                            (let [type (or (pointer-track-type id)
-                                           (first (sort path-type-sort
-                                                        (map path-type
-                                                             in-paths))))]
-                              (println 'type type 'direction direction)
-                              (build-path c1 direction
-                                          type)
-                              type))
-                       :invalid)))))
+  (dosync 
+   (let [c1 (cell pos1)
+         c2 (cell pos2)
+         direction (inv-directions (map - pos2 pos1))
+         path (path c1 direction)
+         type (path-type path)]
+     (track-pointer id type pos1 direction
+                    (fn on-same []
+                      (when (in-path? path)
+                        (unbuild-path c1 direction)
+                        (update-vehicles-for-cell-changes c2))
+                      type)
+                    (fn on-empty []
+                      (if-let [in-paths (seq (in-paths c1))]
+                        (let [type (or (pointer-track-type id)
+                                       (first (sort path-type-sort
+                                                    (map path-type
+                                                         in-paths))))]
+                          (build-path c1 direction
+                                      type)
+                          (update-vehicles-for-cell-changes c1)
+                          type)
+                        :invalid))))))
 
 (defn on-up [id _]
   (let [[type count tile direction] (@pointer-track id)]
