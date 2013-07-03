@@ -77,10 +77,29 @@ cell-draw-fn is a function that returns a Drawable."
       (quil/color-mode :hsb)
       (apply quil/fill color)
       (quil/ellipse
-       (* 0.35 h)
-       (* 0.35 w)
+       (* 0.5 h)
+       (* 0.5 w)
        (* 0.3 h)
        (* 0.3 w))
+      (quil/color-mode :rgb))))
+
+(defrecord Rect
+  [v]
+  drawable/Drawable
+  (draw [this [w h]]
+    (let [raw-color (vehicle/cargo-color (:v this))
+          color (if raw-color
+                  [(int (* (/ raw-color
+                              (* 2 Math/PI))
+                           256)) 255 255]
+                  [255 0 255])]
+      (quil/color-mode :hsb)
+      (apply quil/fill color)
+      (quil/rect
+       (* 0.1 w)
+       (* 0.1 h)
+       (* 0.3 w)
+       (* 0.3 h))
       (quil/color-mode :rgb))))
 
 (defn vehicle->location
@@ -128,39 +147,52 @@ cell-draw-fn is a function that returns a Drawable."
   (drawable/->Stack
    (vec
     (map (fn [v]
-           (case (:state v)
-             :moving (moving-vehicle v image)
-             :spawning (drawable/->Border (drawable/->Nothing) 0.1 0.1)
-             :despawning (drawable/->Nothing)
-             :exploding (drawable/->Nothing)))
+           (cond
+            (vehicle/moving? v) (moving-vehicle v image)
+            (vehicle/spawning? v) (drawable/->Border (drawable/->Nothing) 0.1 0.1)
+            (vehicle/despawning? v) (drawable/->Nothing)
+            (vehicle/exploding? v) (drawable/->Nothing)))
      (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
-  [bg-fn building-fn path-fn vehicle-fn]
+  [tile-fn]
   (drawable/->Stack
    [
-    (world-state->Grid bg-fn)
-    (world-state->Grid path-fn)
-    (world-state->Grid building-fn)
-    (vehicles->Stack :truck (vehicle-fn :truck))
+    (world-state->Grid (comp tile-fn cell-bg))
+    (world-state->Grid (temp-lookup))
+    (vehicles->Stack :truck (tile-fn :truck))
+    (world-state->Grid (partial cell-building tile-fn))
     ]))
 
 (defn cell-bg [c]
   "What is the background tile-key for this cell?"
   (:background c))
 
+(comment (defn cell-building
+           "Which building tile-key fits this cell?"
+           [tile-fn c]
+           (if-let [type (building/building-type c)]
+             (if (= type :mixer)
+               :mixer
+               (hyphenate-keywords
+                type
+                ((case type
+                   :spawn building/vehicle-type
+                   :supply building/resource-type
+                   :depot building/resource-type) c))))))
+
 (defn cell-building
   "Which building tile-key fits this cell?"
-  [c]
+  [tile-fn c]
   (if-let [type (building/building-type c)]
-    (if (= type :mixer)
-      :mixer
-      (hyphenate-keywords
-       type
-       ((case type
-          :spawn building/vehicle-type
-          :supply building/resource-type
-          :depot building/resource-type) c)))))
+    (case type
+      :spawn (tile-fn
+              (hyphenate-keywords :spawn (building/vehicle-type c)))
+      :mixer (tile-fn :mixer)
+      :supply (tile-fn :snow)
+      :depot (drawable/->Stack [(tile-fn :dirt)
+                                (->Rect [0 255 255])]))
+    (tile-fn nil)))
 
 (defn cell-road
   "Return the appropriate tile-key for roads in this cell."
@@ -177,7 +209,7 @@ cell-draw-fn is a function that returns a Drawable."
     (if-not (empty? (first out))
       (hyphenate-keywords :road (:direction (first out))))))
 
-(defn setup [tile-f]
+(defn setup [tile-fn]
   ;init een bricklet met tile-set
   (let [path-fn (temp-lookup)]
     (reset! world-bricklet
@@ -186,10 +218,7 @@ cell-draw-fn is a function that returns a Drawable."
                                         (draw [this [w h]]
                                           (drawable/.draw
                                            (world->drawable
-                                            (comp tile-f cell-bg)
-                                            (comp tile-f cell-building)
-                                            path-fn
-                                            tile-f)
+                                            tile-fn)
                                            [w h]))) 0.1 0.1))
              (atom [])
              :renderer :java2d
