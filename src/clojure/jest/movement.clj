@@ -32,11 +32,17 @@
    the given path. If there are no routes, route-score returns nil. A lower
    route score is better."
   [color path]
-  (if color
-    (let [hue-diffs  (map (partial util/angle-difference color)
-                          (:routes path))]
-      (if (seq hue-diffs)
-        (apply min hue-diffs)))))
+  (cond color
+        (let [hue-diffs  (map (partial util/angle-difference color)
+                              (remove nil? (:routes path)))]
+          (if (seq hue-diffs)
+            (apply min hue-diffs)))
+
+        (contains? (:routes path) nil)
+        0
+
+        :default
+        nil))
 
 (defn- dir-sort-fn
   "Sorter function for paths. Returns true if p1 should go before p2, false

@@ -25,10 +25,9 @@
   (dosync
    (if-let [v (first (vehicles c))]
      (let [vehicle-type (:type v)]
-       (when (and (cargo? v)
-                  (= (path-type (path c dir))
-                     (vehicle->path (:type v))))
-         (doseq [p (filter #(= (vehicle->path (:type v)) (path-type %))
+       (when (= (path-type (path c dir))
+                (vehicle->path vehicle-type))
+         (doseq [p (filter #(= (vehicle->path vehicle-type) (path-type %))
                            (paths-with-route c (cargo-color v)))]
            (unbuild-route c (:direction p) (cargo-color v)))
          (build-route c dir (cargo-color v))

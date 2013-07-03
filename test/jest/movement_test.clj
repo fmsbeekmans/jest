@@ -2,12 +2,12 @@
   (:use midje.sweet
         jest.testutils
         jest.color)
-  (:require [jest.world :as w]
-            [jest.world.building :as b]
-            [jest.world.path :as p]
+  (:require [jest.world :as w :refer [cell]]
+            [jest.world.building :as b :refer [build-spawn build-supply build-depot build-mixer]]
+            [jest.world.path :as p :refer [build-path]]
             [jest.world.cell :as c]
-            [jest.world.route :as r]
-            [jest.vehicle :as v]
+            [jest.world.route :as r :refer [build-route]]
+            [jest.vehicle :as v :refer [vehicle]]
             [jest.movement :as m]))
 
 (defn tick-move [vehicle-id]
@@ -455,6 +455,42 @@ clockwise order is selected"
     (:coords (v/vehicle truck)) => [6 6]))
 
 (world-fact [10 10]
+            "When a nil route is added, vehicles without cargo should prefer this"
+            (build-spawn (cell [5 4]) :truck)
+            (build-path (cell [5 4]) :south :road)
+            (doto (cell [5 5])
+              (build-path :south :road)
+              (build-path :east :road)
+              (build-route :south nil))
+
+            (with-spawned-vehicle [truck [5 4]]
+              (tick-move truck)
+              (:exit-direction (vehicle truck)) => :south))
+
+(world-fact [10 10]
+            "When a nil route is added, this shouldn't affect cargo-ed vehicles."
+            (build-spawn (cell [5 4]) :truck)
+            (build-path (cell [5 4]) :south :road)
+            (build-path (cell [5 5]) :south :road)
+            (build-supply (cell [5 5]) :red)
+            (doto (cell [5 6])
+              (build-path :south :road)
+              (build-path :east :road)
+              (build-route :south nil))
+
+            (with-spawned-vehicle [truck [5 4]]
+              (tick-move truck)
+              (tick-move truck)
+              (:exit-direction (vehicle truck)) => :east)
+
+            (build-route (cell [5 6]) :south (hue :red))
+            (with-spawned-vehicle [truck [5 4]]
+              (tick-move truck)
+              (tick-move truck)
+              (:exit-direction (vehicle truck)) => :south))
+
+
+(world-fact [10 10]
             "A vehicle for which no exit applies explodes and despawns"
             (b/build-spawn (w/cell [5 5]) :truck)
             (p/build-path (w/cell [5 5]) :east :road)
@@ -500,3 +536,4 @@ clockwise order is selected"
                 (:entry-time (v/vehicle truck)) => (* i +truck-speed+)
                 (:exit-time (v/vehicle truck)) => (* (inc i) +truck-speed+)
                 (tick-move truck))))
+

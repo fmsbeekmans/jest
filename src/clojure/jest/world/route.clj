@@ -3,14 +3,14 @@
   roads, rails and canals."
   (:use [jest.world :only [alter-cell]]
         [jest.world.path :only [paths]]
-        [jest.color :only [contains-hue?]]))
+        [jest.color :only [contains-hue? hue-matches?]]))
 
 (defn- add-route
   "Adds a route for resources of the specified color to an
   existing path"
   [path color]
   {:pre [path
-         (not (contains-hue? (:routes path) color))]}
+         (not (contains-hue? (remove nil? (:routes path)) color))]}
   (assoc path :routes
          (set (conj (:routes path) color))))
 
@@ -19,9 +19,14 @@
   existing path"
   [path color]
   {:pre [path
-         (contains-hue? (:routes path) color)]}
+         (or (nil? color)
+             (contains-hue? (:routes path) color))]}
   (update-in path [:routes]
-             #(disj % color)))
+             (fn [routes]
+               (set (remove (if (nil? color)
+                              nil?
+                              #(hue-matches? % color))
+                            routes)))))
 
 
 (defn build-route
@@ -44,4 +49,7 @@
     [d (:type p) (:routes p)]))
 
 (defn paths-with-route [c color]
-  (filter #(contains-hue? (:routes %) color) (paths c)))
+  (filter (if (nil? color)
+            #(contains? (:routes %) nil)
+            #(contains-hue? (:routes %) color))
+          (paths c)))
