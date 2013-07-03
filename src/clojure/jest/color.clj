@@ -27,8 +27,17 @@
   "Given either an amount of integer degrees or a keyword, return a color."
   type)
 
-(defmethod hue Number [deg]
-  (Math/toRadians deg))
+(defmethod hue Integer [deg]
+  (mod (Math/toRadians deg) (* 2 Math/PI)))
+
+(defmethod hue Long [deg]
+  (mod (Math/toRadians deg) (* 2 Math/PI)))
+
+(defmethod hue Double [rad]
+  (mod rad (* 2 Math/PI)))
+
+(defmethod hue Float [rad]
+  (mod rad (* 2 Math/PI)))
 
 (def colors
   ^{:doc "Returns a hue for the given color keyword."}
@@ -59,3 +68,16 @@
   [coll h]
   (boolean (seq (filter (partial hue-matches? h)
                         coll))))
+
+(defn hue->int
+  [h]
+  (int (mod (* 255 (/ (hue h) (* 2 Math/PI)))
+            255)))
+
+(defn hue->hsb
+  ([hue]
+     (hue->hsb hue [255 0 255]))
+  ([hue alt]
+     (if hue
+       [(hue->int hue) 255 255]
+       alt)))
