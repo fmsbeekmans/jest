@@ -1,6 +1,7 @@
 (ns jest.input.core
   "Transforms device-agnostic input from pixel-based to tile-based."
-  (:use [jest.visualize.visualize :only [sketch-size]]
+  (:use [jest.visualize.visualize :only [sketch-size
+                                         world-bricklet]]
         [jest.input.highlight :only [highlight-cell remove-highlighted-cells
                                      get-highlighted-cells]]
         [jest.world :only [world-size]]))
@@ -9,28 +10,50 @@
 (defn pointer [id]
   (@pointers id))
 
-(defn- on-down-handler [id p])
-(defn- on-up-handler [id p])
-(defn- on-move-handler [id p1 p2])
+(defn all-pointers []
+  (seq @pointers))
 
-(def handlers {:on-down #'on-down-handler
-               :on-up #'on-up-handler
-               :on-move #'on-move-handler})
+(defn reset-pointers! []
+  (reset! pointers {}))
+
+(def ^:private handlers (atom {}))
+
+(defmacro defhandler [type & args]
+  (let [fn-name (symbol (str (name type) "-handler"))]
+    `(defn- ~fn-name [~@args]
+       (let [fn# (~type @handlers)]
+         (if fn#
+           (fn# ~@args))))))
+
+(defhandler :on-down id p)
+(defhandler :on-up id p)
+(defhandler :on-move id p1 p2)
 
 (defn set-input-handler! [on fn]
-  (alter-var-root (handlers on) (constantly fn)))
+  {:pre [(#{:on-down :on-up :on-move} on)]}
+  (swap! handlers assoc on fn))
 
-(def tl [0.0 0.0])
-(def br [1.0 1.0])
+(defn reset-input-handlers! []
+  (reset! handlers {}))
+
+(defn tl []
+  ((juxt :border-w :border-h)
+   @(:target-drawable @world-bricklet)))
+
+(defn br []
+  (map (partial - 1)
+       ((juxt :border-w :border-h)
+        @(:target-drawable @world-bricklet))))
 
 (defn pixel->tile [x y]
-  (let [tl (map * tl (sketch-size))
-        br (map * br (sketch-size))
+  (let [tl (map * (tl) (sketch-size))
+        br (map * (br) (sketch-size))
         map-size (map - br tl)
         cell-size (map / map-size (world-size))
         ppos (map - [x y] tl)
         tpos (map (comp int /) ppos cell-size)
-        tpos (map min tpos (map dec (world-size)))]
+        tpos (map max [0 0]
+                  (map min tpos (map dec (world-size))))]
     tpos))
 
 (defmacro with-tile [[t c] & body]

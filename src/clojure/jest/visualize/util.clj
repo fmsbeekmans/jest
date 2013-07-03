@@ -42,15 +42,16 @@
     (points/stroke (points :center)
                    (points (:exit-direction v)))))
 
-(defn vehicle->stroke
+(defn vehicle->stroke'
   [v]
   (cond
-   (and (:entry-direction v)
-        (not (:exit-direction v))) (vehicle->stroke-to-mid v)
-   (and (:exit-direction v)
-        (not (:entry-direction v))) (vehicle->stroke-from-mid v)
-   :default (points/stroke-comp [(vehicle->stroke-to-mid v)
-                                 (vehicle->stroke-from-mid v)])))
+   (vehicle/spawning? v) (vehicle->stroke-to-mid v)
+   (vehicle/despawning? v) (vehicle->stroke-from-mid v)
+   (vehicle/exploding? v) (vehicle->stroke-from-mid v)
+   (vehicle/moving? v) (points/stroke-comp [(vehicle->stroke-to-mid v)
+                                            (vehicle->stroke-from-mid v)])))
+
+(def vehicle->stroke (memoize vehicle->stroke'))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
@@ -67,3 +68,31 @@ Returns an x-scale y-scale vector."
           (<= elapsed 0) 0
           :default (/ elapsed
                       duration))))
+
+(let [get-frame-atom (comp :target-obj meta)
+      sketch-decorator
+      (fn [sketch decorate]
+        (let [frame-atom (get-frame-atom sketch)]
+          (println frame-atom)
+          (swap! frame-atom
+                 #(doto %
+                    (.dispose)
+                    (.setUndecorated (not decorate))
+                    (.setVisible true)))))]
+  (defn decorate-sketch
+    [sketch]
+    (sketch-decorator sketch true))
+  (defn undecorate-sketch
+    [sketch]
+    (sketch-decorator sketch false))
+  (defn get-frame-offset
+    [sketch]
+    (let [frame @(get-frame-atom sketch)]
+      [(.getX frame)
+       (.getY frame)]))
+  (defn get-pane-offset
+    [sketch]
+    (let [frame @(get-frame-atom sketch)
+          root-pane (.getRootPane frame)]
+      [(.getX root-pane)
+       (.getY root-pane)])))

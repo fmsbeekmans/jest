@@ -4,8 +4,7 @@
         [jest.world.building :only [vehicle-type spawn?]]
         [jest.world.path :only [in-paths out-paths from to path-type
                                 vehicle->path path->duration path
-                                opposite-dirs]]
-        [jest.scheduler :only [game-time schedule offset]]))
+                                opposite-dirs]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction
                     exit-time exit-direction cargo state])
@@ -40,11 +39,18 @@
   [v]
   (cell (:coords v)))
 
+(def ^:private id->vehicle (ref {}))
+
+(defn- add-to-vehicle-map [v]
+  (alter id->vehicle assoc (:id v) v))
+
+(defn- remove-from-vehicle-map [v]
+  (alter id->vehicle dissoc (:id v)))
+
 (defn vehicle
   "Returns the vehicle with the given id, or nil if there isn't any."
   ([id]
-     (first (remove nil? (map #(vehicle % id)
-                              (all-cells)))))
+     (id->vehicle id))
   ([c id]
      (first (filter #(= id (:id %))
                     (:vehicles c)))))
@@ -58,7 +64,9 @@
         nv (apply f v args)]
     (alter-cell (vehicle-cell v)
                 update-in [:vehicles] #(conj (disj % v)
-                                             nv))))
+                                             nv))
+    (add-to-vehicle-map nv)
+    nv))
 
 (defn vehicle-state-change
   "Updates the vehicle with the given id to the given state.
@@ -73,15 +81,18 @@
   (let [v (assoc v :coords (coords c))]
     (alter-cell c
                 update-in [:vehicles] conj v)
+    (add-to-vehicle-map v)
     v))
 
+;;TODO: inconsistent. load-vehicle does not have a dosync, unload-vehicle does.
 (defn unload-vehicle
   "Unloads the given vehicle"
   [v]
   {:pre [(some (partial = v) (vehicles (vehicle-cell v)))]}
   (dosync
    (alter-cell (vehicle-cell v)
-               update-in [:vehicles] disj v))
+               update-in [:vehicles] disj v)
+   (remove-from-vehicle-map v))
   (assoc v :coords nil))
 
 
@@ -159,5 +170,3 @@
   (if (map? t?)
     (= :train (:type t?))
     false))
-
-

@@ -80,8 +80,8 @@ traversing such a path"}
          (alter-var-root #'path->duration assoc ~path-type ~duration))))
 
 (defpath :road :truck 2000)
-(defpath :rails :train 5)
-(defpath :canal :boat 20)
+(defpath :rails :train 5000)
+(defpath :canal :boat 20000)
 
 (defn path
   "Returns the path in the given direction, or nil if there is none."

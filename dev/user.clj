@@ -1,8 +1,11 @@
+;(set! *warn-on-reflection* true)
+
 (ns user
   (:use clojure.repl
         clojure.pprint
         jest.world.cell
         jest.visualize.visualize
+        jest.visualize.util
         jest.world
         jest.world.building
         jest.movement
@@ -23,7 +26,7 @@
         jest.world.route))
 
 (defn build-level []
-  (initialize-world 8 8)
+  (initialize-world 16 10)
   (build-spawn (cell [1 1]) :truck)
   (build-path (cell [1 1]) :south :road)
   (build-supply (cell [1 2]) :blue)
@@ -65,49 +68,16 @@
   (build-path (cell [3 3]) :south :road)
   (build-path (cell [3 4]) :south :road))
 
-(let [get-frame (comp :target-obj meta)
-      decorate-sketch
-      (fn [sketch decorate]
-        (let [frame-atom (get-frame sketch)]
-          (println frame-atom)
-          (swap! frame-atom
-                 #(doto %
-                    (.dispose)
-                    (.setUndecorated (not decorate))
-                    (.setVisible true)))))]
-  (defn undecorated-sketch
-    [sketch]
-    (decorate-sketch sketch false))
-  (defn decorated-sketch
-    [sketch]
-    (decorate-sketch sketch true)))
-
-(let [get-frame (comp :target-obj meta)
-      decorate-sketch
-      (fn [sketch decorate]
-        (let [frame-atom (get-frame sketch)]
-          (println frame-atom)
-          (swap! frame-atom
-                 #(doto %
-                    (.dispose)
-                    (.setUndecorated (not decorate))
-                    (.setVisible true)))))]
-  (defn undecorated-sketch
-    [sketch]
-    (decorate-sketch sketch false))
-  (defn decorated-sketch
-    [sketch]
-    (decorate-sketch sketch true)))
-
 (defn user-setup []
   (scheduler-reset!)
   (setup-quil-mouse-input)
   (interaction-setup)
   (load-level "levels/alpha_ugly.json")
-  (build-level)
+  (build-another-level)
 
   (start!)
   (println "Started?" (started?))
   (pause!)
   (build-spawn (cell [4 2]) :truck)
   (sketch!))
+

@@ -12,7 +12,8 @@
             [jest.world.path :as path]
             [jest.world.cell :as cell])
   (:require [jest.visualize.points :as points]
-            [jest.visualize.util :as util])
+            [jest.visualize.util :as util]
+            [jest.color :as color])
   (:require [jest.visualize.input :as input]))
 
 (declare cell-bg)
@@ -46,8 +47,8 @@
                              (:inout r)]))))))))))
 
 
-(def world-bricklet (atom nil))
-(def world-sketch (atom nil))
+(defonce world-bricklet (atom nil))
+(defonce world-sketch (atom nil))
 
 
 
@@ -64,6 +65,38 @@ cell-draw-fn is a function that returns a Drawable."
           (for [c (world/all-cells)]
             [(world/coords c) (cell-draw-fn c)])))))
 
+(defrecord Dot
+  [v]
+  drawable/Drawable
+  (draw [this [w h]]
+    (let [raw-color (vehicle/cargo-color (:v this))
+          color (if raw-color
+                  [(int (* (/ raw-color
+                              (* 2 Math/PI))
+                           256)) 255 255]
+                  [255 0 255])]
+      (quil/color-mode :hsb)
+      (apply quil/fill color)
+      (quil/ellipse
+       (* 0.5 h)
+       (* 0.5 w)
+       (* 0.3 h)
+       (* 0.3 w))
+      (quil/color-mode :rgb))))
+
+(defrecord Rect
+  [color]
+  drawable/Drawable
+  (draw [this [w h]]
+    (quil/color-mode :hsb)
+    (apply quil/fill (:color this))
+    (quil/rect
+     (* 0 w)
+     (* 0.2 h)
+     (* 0.4 w)
+     (* 0.4 h))
+    (quil/color-mode :rgb)))
+
 (defn vehicle->location
   [v]
   (let [stroke (util/vehicle->stroke v)
@@ -74,11 +107,31 @@ cell-draw-fn is a function that returns a Drawable."
           (/ y (quil/height))]
      :rotation (points/tangent stroke p [0 1])}))
 
+(defrecord Dot
+  [v]
+  drawable/Drawable
+  (draw [this [w h]]
+    (let [raw-color (vehicle/cargo-color (:v this))
+          color (if raw-color
+                  [(int (* (/ raw-color
+                              (* 2 Math/PI))
+                           256)) 255 255]
+                  [255 0 255])]
+      (quil/color-mode :hsb)
+      (apply quil/fill color)
+      (quil/ellipse
+       (* 0.5 h)
+       (* 0.5 w)
+       (* 0.2 h)
+       (* 0.2 w))
+      (quil/color-mode :rgb))))
+
 (defn moving-vehicle
   [v image]
   (let [{p' :p'
          rotation :rotation} (vehicle->location v)]
-    (drawable/->Floating image
+    (drawable/->Floating (drawable/->Stack [image
+                                            (->Dot v)])
                          p'
                          (util/vehicle-scale)
                          rotation)))
@@ -88,15 +141,15 @@ cell-draw-fn is a function that returns a Drawable."
   (drawable/->Stack
    (vec
     (map (fn [v]
-           (case (:state v)
-             :moving (moving-vehicle v image)
-             :spawning (drawable/->Nothing)
-             :despawning (drawable/->Nothing)
-             :exploding (drawable/->Nothing)))
+           (cond
+            (vehicle/moving? v) (moving-vehicle v image)
+            (vehicle/spawning? v) (drawable/->Nothing)
+            (vehicle/despawning? v) (drawable/->Nothing)
+            (vehicle/exploding? v) (drawable/->Nothing)))
      (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
-  [bg-fn building-fn path-fn vehicle-fn]
+  [tile-fn]
   (drawable/->Stack
    [
     (world-state->Grid bg-fn)
@@ -111,16 +164,24 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn cell-building
   "Which building tile-key fits this cell?"
-  [c]
+  [tile-fn c]
   (if-let [type (building/building-type c)]
-    (if (= type :mixer)
-      :mixer
-      (hyphenate-keywords
-       type
-       ((case type
-          :spawn building/vehicle-type
-          :supply building/resource-type
-          :depot building/resource-type) c)))))
+    (case type
+      :spawn (tile-fn
+              (hyphenate-keywords :spawn (building/vehicle-type c)))
+      :mixer (drawable/->Stack [(->Rect
+                                  (color/hue->hsb
+                                   (building/resource-color c)))
+                                 (tile-fn :mixer)])
+      :supply (drawable/->Stack [(->Rect
+                                  (color/hue->hsb
+                                   (building/resource-type c)))
+                                 (tile-fn :snow)])
+      :depot (drawable/->Stack [(->Rect
+                                 (color/hue->hsb
+                                  (building/resource-type c)))
+                                (tile-fn :dirt)]))
+    (tile-fn nil)))
 
 (defn cell-road
   "Return the appropriate tile-key for roads in this cell."
@@ -137,21 +198,20 @@ cell-draw-fn is a function that returns a Drawable."
     (if-not (empty? (first out))
       (hyphenate-keywords :road (:direction (first out))))))
 
-(defn setup [tile-f]
+(defn setup [tile-fn]
   ;init een bricklet met tile-set
   (let [path-fn (temp-lookup)]
     (reset! world-bricklet
             (drawable/->Bricklet
-             (atom (reify drawable/Drawable
-                     (drawable/draw [this [w h]]
-                       (drawable/.draw
-                        (world->drawable
-                         (comp tile-f cell-bg)
-                         (comp tile-f cell-building)
-                         path-fn
-                         tile-f)
-                        [w h]))))
+             (atom (drawable/->Border (reify drawable/Drawable
+                                        (draw [this [w h]]
+                                          (drawable/.draw
+                                           (world->drawable
+                                            tile-fn)
+                                           [w h]))) 0.3 0.123))
              (atom [])
+             :renderer :java2d
+             :size [800 600]
              :mouse-pressed input/on-down-handler
              :mouse-released input/on-up-handler
              :mouse-dragged input/on-move-handler))))

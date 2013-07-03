@@ -3,34 +3,42 @@
   (:use [jest.util :only [maybe-deref]]))
 
 (defonce
-  #^{:dynamic true
-     :private true
+  #^{:private true
      :doc "Binding containing the world state as an atom containing a
           map from [x y] coordinates to cells."}
-  *world*
+  world
   (atom {}))
 
-(defn reset-world
-  "Forcefully resets the world to value v."
-  [v]
-  (reset! *world* v))
+(defonce ^:private world-size' (atom {}))
 
 (let [max-wrapper
       (fn [& args]
         (if (seq args)
           (apply max args)
           -1))]
-  (defn world-width
+  (defn calculate-world-width
     "Returns the width of the loaded world."
     []
     (inc
-     (apply max-wrapper (map first (keys @*world*)))))
+     (apply max-wrapper (map first (keys @world)))))
 
-  (defn world-height
+  (defn calculate-world-height
     "Returns the height of the loaded world."
     []
     (inc
-     (apply max-wrapper (map second (keys @*world*))))))
+     (apply max-wrapper (map second (keys @world))))))
+
+(defn reset-world
+  "Forcefully resets the world to value v."
+  [v]
+  (reset! world v)
+  (reset! world-size' [(calculate-world-width) (calculate-world-height)]))
+
+(defn world-width []
+  (first @world-size'))
+
+(defn world-height []
+  (second @world-size'))
 
 (defn world-size
   "Returns the size of the loaded world as a [width height] tuple"
@@ -40,13 +48,13 @@
 (defmacro with-temp-world
   "For testing purposes, rebind the world state to an empty map."
   [& body]
-  `(binding [*world* (atom {})]
+  `(with-redefs [world (atom {})]
      ~@body))
 
 (defn- cell-ref
   "Returns the cell ref for the given coordinate"
   [[x y]]
-  (@*world* [x y]))
+  (@world [x y]))
 
 (defn cell
   "Returns the cell on the given coordinates"
@@ -85,11 +93,11 @@
 (defn all-cells
   "Returns a list of all cells, optionally filtered by a predicate"
   ([]
-     (map (comp deref second) @*world*))
+     (map (comp deref second) @world))
   ([pred]
      (filter pred (all-cells))))
 
 (defn alter-cell
   "Alters a cell through it's ref. Must be called within a transaction."
   ([c f & args]
-     (apply alter (@*world* (coords c)) f args)))
+     (apply alter (@world (coords c)) f args)))

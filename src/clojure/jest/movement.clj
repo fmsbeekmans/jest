@@ -1,6 +1,6 @@
 (ns jest.movement
   "Vehicle movement actions. This includes picking up and dropping off cargo."
-  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color
+  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color vehicles
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
@@ -8,7 +8,8 @@
         [jest.color :only [<=delta? hue]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
-                                opposite-dirs path path-type to]]
+                                opposite-dirs path path-type to
+                                out-path?]]
         [jest.world.building :only [spawn? vehicle-type resource-color
                                     resource-count reduce-resource mix-colors]]
         [jest.scheduler :only [schedule offset game-time]])
@@ -31,11 +32,17 @@
    the given path. If there are no routes, route-score returns nil. A lower
    route score is better."
   [color path]
-  (if color
-    (let [hue-diffs  (map (partial util/angle-difference color)
-                          (:routes path))]
-      (if (seq hue-diffs)
-        (apply min hue-diffs)))))
+  (cond color
+        (let [hue-diffs  (map (partial util/angle-difference color)
+                              (remove nil? (:routes path)))]
+          (if (seq hue-diffs)
+            (apply min hue-diffs)))
+
+        (contains? (:routes path) nil)
+        0
+
+        :default
+        nil))
 
 (defn- dir-sort-fn
   "Sorter function for paths. Returns true if p1 should go before p2, false
@@ -113,7 +120,7 @@
   (assoc v :exit-direction nil))
 
 (defn set-end-state [id state]
-  (dosync 
+  (dosync
    (vehicle-state-change id state)
    (update-vehicle id vehicle-clear-exit)))
 
@@ -160,46 +167,65 @@
 (defn resource-hue [cell]
   (hue (:resource-type cell)))
 
+(defn half-duration [v]
+  (/ (vehicle->duration v) 2))
+
+(defn schedule-half-duration [v f]
+  (schedule #(dosync (f))
+            (+ (:entry-time v)
+               (/ (vehicle->duration v) 2))))
+
 (defmethod vehicle-transition-state
   [false :supply]
   [id]
-  (set-cargo id
-             (resource-hue (vehicle-cell (vehicle id)))
-             (cargo-capacity (:type (vehicle id)))))
+  (schedule-half-duration (vehicle id)
+                          #(set-cargo id
+                                      (resource-hue (vehicle-cell (vehicle id)))
+                                      (cargo-capacity (:type (vehicle id))))))
 
 (defmethod vehicle-transition-state
   [false :mixer]
   [id]
-  (dosync
-   (let [color (resource-color (vehicle-cell (vehicle id)))
-         pickup-count (min (resource-count (vehicle-cell (vehicle id)))
-                           (cargo-capacity (:type (vehicle id))))]
-     (reduce-resource (vehicle-cell (vehicle id)) pickup-count)
-     (set-cargo id color pickup-count))))
+  (schedule-half-duration (vehicle id)
+                          #(let [color (resource-color (vehicle-cell
+                                                        (vehicle id)))
+                                 pickup-count (min (resource-count
+                                                    (vehicle-cell (vehicle id)))
+                                                   (cargo-capacity
+                                                    (:type (vehicle id))))]
+                             (reduce-resource (vehicle-cell (vehicle id))
+                                              pickup-count)
+                             (set-cargo id color pickup-count))))
 
 
 (defmethod vehicle-transition-state
   [true :mixer]
   [id]
-  (dosync
-   (mix-colors (vehicle-cell (vehicle id))
-               (cargo-color (vehicle id))
-               (cargo-count (vehicle id)))
-   (clear-cargo id)))
+  (schedule-half-duration (vehicle id)
+                          (fn []
+                            (mix-colors (vehicle-cell (vehicle id))
+                                        (cargo-color (vehicle id))
+                                        (cargo-count (vehicle id)))
+                            (clear-cargo id))))
 
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
-  (when (< (util/angle-difference (cargo-color (vehicle id))
-                          (resource-hue (vehicle-cell (vehicle id))))
-           (/ Math/PI 8))
-    ;;TODO this should also update some score
-    (clear-cargo id)))
+  (schedule-half-duration (vehicle id)
+                          #(when (< (util/angle-difference (cargo-color (vehicle id))
+                                                           (resource-hue (vehicle-cell (vehicle id))))
+                                    (/ Math/PI 8))
+                             ;;TODO this should also update some score
+                             (clear-cargo id))))
 
 (defn maybe-explode [id]
   (when-not (or (:exit-direction (vehicle id))
                 (spawn? (vehicle-cell (vehicle id))))
     (start-exploding id)))
+
+(defn update-vehicle-exit [id]
+  (update-vehicle id update-preferred-path)
+  (maybe-explode id))
 
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
@@ -223,8 +249,7 @@
      (vehicle-state-change id :moving)
      (update-vehicle id (comp select-exit vehicle-enter))
      (vehicle-transition-state id)
-     (update-vehicle id update-preferred-path)
-     (maybe-explode id))))
+     (update-vehicle-exit id))))
 
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
@@ -237,7 +262,7 @@
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))
                    (schedule-move id)))))
-            (offset (vehicle->duration (vehicle id)))))
+            (:exit-time (vehicle id))))
 
 (defn- load-vehicle-on-spawn
   "Loads a vehicle on a spawn point, setting all initial state."
@@ -264,3 +289,36 @@
    (let [vehicle (load-vehicle-on-spawn c)]
      (schedule-move (:id vehicle))
      vehicle)))
+
+(defn vehicle-state-in-cell [v]
+  (let [halfpoint (+ (:entry-time v)
+                     (/ (vehicle->duration v) 2))]
+    (if (<= @game-time halfpoint)
+      :incoming
+      :outgoing)))
+
+(defn incoming? [v]
+  (= (vehicle-state-in-cell v) :incoming))
+
+(defn outgoing? [v]
+  (= (vehicle-state-in-cell v) :outgoing))
+
+(defn valid-out-direction? [v dir]
+  (let [path (path (vehicle-cell v) dir)]
+    (and path
+         (out-path? path)
+         (= (:type path) (vehicle->path (:type v))))))
+
+(defn update-vehicles-for-cell-changes
+  "Ensures all vehicles on a particular cell are in a consistent state with the
+paths and routes on this cell. If no exit exists for this path anymore, explode.
+This function should be called from within a transaction."
+  [c]
+  (let [vs (vehicles c)
+        incoming (filter incoming? vs)
+        outgoing (filter outgoing? vs)]
+    (doseq [{:keys [id]} incoming]
+      (update-vehicle-exit id))
+    
+    (doseq [{:keys [id exit-direction] :as v} outgoing]
+      (start-exploding id))))
