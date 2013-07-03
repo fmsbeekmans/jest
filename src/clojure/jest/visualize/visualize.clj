@@ -101,8 +101,8 @@ cell-draw-fn is a function that returns a Drawable."
    [
     (world-state->Grid bg-fn)
     (world-state->Grid path-fn)
-    (world-state->Grid building-fn)
     (vehicles->Stack :truck (vehicle-fn :truck))
+    (world-state->Grid building-fn)
     ]))
 
 (defn cell-bg [c]
