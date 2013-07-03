@@ -1,4 +1,4 @@
-(set! *warn-on-reflection* true)
+;(set! *warn-on-reflection* true)
 
 (ns user
   (:use clojure.repl
@@ -26,7 +26,7 @@
         jest.world.route))
 
 (defn build-level []
-  (initialize-world 32 20)
+  (initialize-world 16 10)
   (build-spawn (cell [1 1]) :truck)
   (build-path (cell [1 1]) :south :road)
   (build-supply (cell [1 2]) :blue)
