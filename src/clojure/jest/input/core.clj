@@ -1,6 +1,7 @@
 (ns jest.input.core
   "Transforms device-agnostic input from pixel-based to tile-based."
-  (:use [jest.visualize.visualize :only [sketch-size]]
+  (:use [jest.visualize.visualize :only [sketch-size
+                                         world-bricklet]]
         [jest.input.highlight :only [highlight-cell remove-highlighted-cells
                                      get-highlighted-cells]]
         [jest.world :only [world-size]]))
@@ -35,12 +36,18 @@
 (defn reset-input-handlers! []
   (reset! handlers {}))
 
-(def tl [0.1 0.1])
-(def br [0.9 0.9])
+(defn tl []
+  ((juxt :border-w :border-h)
+   @(:target-drawable @world-bricklet)))
+
+(defn br []
+  (map (partial - 1)
+       ((juxt :border-w :border-h)
+        @(:target-drawable @world-bricklet))))
 
 (defn pixel->tile [x y]
-  (let [tl (map * tl (sketch-size))
-        br (map * br (sketch-size))
+  (let [tl (map * (tl) (sketch-size))
+        br (map * (br) (sketch-size))
         map-size (map - br tl)
         cell-size (map / map-size (world-size))
         ppos (map - [x y] tl)
