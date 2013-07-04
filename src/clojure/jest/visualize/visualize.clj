@@ -22,6 +22,25 @@
 (declare cell-building)
 (declare cell-road)
 
+
+(defn arrow [cx cy angle]
+  (drawable/->Floating
+   (reify drawable/Drawable
+     (draw [this [w h]]
+       (quil/with-translation [(* w 5/8)
+                               (/ h 2)]
+         (quil/push-style)
+         (quil/stroke 255)
+         (quil/smooth)
+         (let [len (/ w 4)
+               fat (/ h 12)]
+           (quil/stroke-weight (/ len 6))
+           (quil/line 0 0 len 0)
+           (quil/line len 0 (- len fat) (quil/ceil (- fat)))
+           (quil/line len 0 (- len fat) (quil/ceil fat)))
+         (quil/pop-style))))
+   [cx cy] 1 angle))
+
 (def direction-order {:north 1 ;;first
                         :west 2
                         :south 3
@@ -70,6 +89,17 @@
            [[:north _] [:west _] [:south _] [:east _]] :cross
            :else nil)))
 
+(defn paths-to-arrows [c]
+  (let [*pi (partial * Math/PI)
+        dir-to-radian  {:north (*pi 3/2)
+                        :east (*pi 0)
+                        :south (*pi 1/2)
+                        :west (*pi 1)}
+        out-p (path/out-paths c)]
+    (drawable/->Stack
+     (vec (map (partial arrow 0.5 0.5)
+               (map dir-to-radian (set (map :direction out-p))))))))
+
 (defn nice-lookup []
   (let [loader (comp
                 drawable/->Image
@@ -112,34 +142,14 @@
         (let [roads (path/paths c :road)
               n (drawable/->Nothing)]
           ;;(println  c)
-          (get junctions (match-roads roads) n)
+          (drawable/->Stack
+           [ (get junctions (match-roads roads) n)
+             (paths-to-arrows c)])
           )))))
 
-      (defn temp-lookup []
-        (let [loader (comp
-                      drawable/->Image
-                image/path->PImage
-                clojure.java.io/resource
-                (partial str "demo/"))]
-    (let [junctions
-          {[:east :out] (loader "00-east-out.png")
-           [:south :out](loader "01-south-out.png")
-           [:west :out] (loader "02-west-out.png")
-           [:north :out](loader "03-north-out.png")
-           [:east :in] (loader "10-east-in.png")
-           [:south :in](loader "11-south-in.png")
-           [:west :in] (loader "12-west-in.png")
-           [:north :in](loader "13-north-in.png")
-           }
-          cached-stack drawable/->Stack]
-      (fn [c]
-        (let [roads (path/paths c :road)]
-          (cached-stack
-           (vec
-            (doall
-             (for [r roads]
-                 (junctions [(:direction r)
-                             (:inout r)]))))))))))
+
+
+
 
 
 (defonce world-bricklet (atom nil))
@@ -173,8 +183,8 @@ cell-draw-fn is a function that returns a Drawable."
       (quil/color-mode :hsb)
       (apply quil/fill color)
       (quil/ellipse
-       (* 0.5 h)
-       (* 0.5 w)
+       (* 0.35 h)
+       (* 0.35 w)
        (* 0.3 h)
        (* 0.3 w))
       (quil/color-mode :rgb))))
