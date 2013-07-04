@@ -149,13 +149,13 @@ cell-draw-fn is a function that returns a Drawable."
      (vehicle/all-vehicles vehicle/truck?)))))
 
 (defn world->drawable
-  [tile-fn]
+  [tile-fn path-fn]
   (drawable/->Stack
    [
-    (world-state->Grid bg-fn)
+    (world-state->Grid (comp tile-fn cell-bg))
     (world-state->Grid path-fn)
-    (vehicles->Stack :truck (vehicle-fn :truck))
-    (world-state->Grid building-fn)
+    (vehicles->Stack :truck (tile-fn :truck))
+    (world-state->Grid (partial cell-building tile-fn))
     ]))
 
 (defn cell-bg [c]
@@ -207,7 +207,8 @@ cell-draw-fn is a function that returns a Drawable."
                                         (draw [this [w h]]
                                           (drawable/.draw
                                            (world->drawable
-                                            tile-fn)
+                                            tile-fn
+                                            path-fn)
                                            [w h]))) 0.3 0.123))
              (atom [])
              :renderer :java2d
