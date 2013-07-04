@@ -13,6 +13,7 @@
                  [com.taoensso/timbre "2.1.2"]
                  [jest/brick "0.1.1-SNAPSHOT"]
                  [quil/quil "1.6.0"]
+                 [org.clojure/core.match "0.2.0-rc3"]
                  [net.java.dev.jna/jna "3.5.2"]
                  [net.java.dev.jna/platform "3.5.2"]]
   :repositories {"pievolution" "http://pievolution.org/maven-repo/"}
