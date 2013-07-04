@@ -60,7 +60,7 @@ def create_letter(p,g, f):
         alpha_draw.rectangle(i.getbbox(), fill=0)
         i.putalpha(mask)
         d.text((0,0),g, font=f, fill="black")
-        d.rectangle([30, 30, 33, 33],fill="blue")
+        #d.rectangle([30, 30, 33, 33],fill="blue")
         i.save(open(fname, "wb"), "PNG")
 
 def wrap_q(s):

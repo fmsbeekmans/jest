@@ -1,6 +1,8 @@
 (ns jest.visualize.visualize
   "Functions to facilitate the visualisation of the world state."
   (:use jest.util)
+  (:use [clojure.core.match :only (match)])
+
 
   (:require [brick.image :as image]
             [brick.drawable :as drawable]
@@ -20,9 +22,102 @@
 (declare cell-building)
 (declare cell-road)
 
-(defn temp-lookup []
+(def direction-order {:north 1 ;;first
+                        :west 2
+                        :south 3
+                        :east 4})
+
+(defn match-roads [roads]
+  (let [sorted-roads (sort-by (comp direction-order :direction) roads)
+        road-tuples (map (juxt :direction :inout) sorted-roads)]
+    (match (vec road-tuples)
+           [[:north :out]] :road-n
+           [[:west :out]] :road-w
+           [[:south :out]] :road-s
+           [[:east :out]] :road-e
+           [[:north :in]] :road-s
+           [[:west :in]] :road-e
+           [[:south :in]] :road-n
+           [[:east :in]] :road-w
+
+           [[_ :in] [_ :in]] :road-blocked
+           ;; double
+           [[:north :in] [:west :out]] :turn-nw
+           [[:north :in] [:south :out]] :road-s
+           [[:north :in] [:east :out]] :turn-ne
+
+           [[:north :out] [:west :in]] :turn-nw
+           [[:north :out] [:south :in]] :road-n
+           [[:north :out] [:east :in]] :turn-ne
+
+           [[:west :in] [:south :out]] :turn-sw
+           [[:west :in] [:east :out]] :road-e
+
+           [[:west :out] [:south :in]] :turn-sw
+           [[:west :out] [:east :in]] :road-w
+
+           [[:south :in] [:east :out]] :turn-se
+
+           [[:south :out] [:east :in]] :turn-se
+
+           ;; triple
+           [[:north _] [:west _] [:south _]] :cross-t-e
+           [[:north _] [:south _] [:east _]] :cross-t-w
+           [[:north _] [:west _] [:east _]] :cross-t-s
+           [[:west _] [:south _] [:east _]] :cross-t-n
+
+           ;; quatro
+           [[:north _] [:west _] [:south _] [:east _]] :cross
+           :else nil)))
+
+(defn nice-lookup []
   (let [loader (comp
                 drawable/->Image
+                image/path->PImage
+                clojure.java.io/resource
+                (partial str "junction/road/"))]
+    (let [rn (loader "road-n.png")
+          rw (loader "road-w.png")
+          rs (loader "road-s.png")
+          re (loader "road-e.png")
+          rb (drawable/->Nothing)
+
+          tnw (loader "turn-nw.png")
+          tne (loader "turn-ne.png")
+          tse (loader "turn-se.png")
+          tsw (loader "turn-sw.png")
+
+                ctn (loader "cross-t-n.png")
+          ctw (loader "cross-t-w.png")
+          cts (loader "cross-t-s.png")
+          cte (loader "cross-t-e.png")
+
+          cross (loader "cross.png")
+          junctions
+          {:road-n rn
+           :road-w rw
+           :road-s rs
+           :road-e re
+           :road-blocked rb
+           :turn-nw tnw
+           :turn-ne tne
+           :turn-se tse
+           :turn-sw tsw
+           :cross-t-n ctn
+           :cross-t-w ctw
+           :cross-t-s cts
+           :cross-t-e cte
+           :cross cross}]
+      (fn [c]
+        (let [roads (path/paths c :road)
+              n (drawable/->Nothing)]
+          ;;(println  c)
+          (get junctions (match-roads roads) n)
+          )))))
+
+      (defn temp-lookup []
+        (let [loader (comp
+                      drawable/->Image
                 image/path->PImage
                 clojure.java.io/resource
                 (partial str "demo/"))]
@@ -152,7 +247,7 @@ cell-draw-fn is a function that returns a Drawable."
   [tile-fn path-fn]
   (drawable/->Stack
    [
-    (world-state->Grid (comp tile-fn cell-bg))
+    (world-state->Grid (comp tile-fn (constantly :grass)))
     (world-state->Grid path-fn)
     (vehicles->Stack :truck (tile-fn :truck))
     (world-state->Grid (partial cell-building tile-fn))
@@ -176,7 +271,7 @@ cell-draw-fn is a function that returns a Drawable."
       :supply (drawable/->Stack [(->Rect
                                   (color/hue->hsb
                                    (building/resource-type c)))
-                                 (tile-fn :snow)])
+                                 (tile-fn :supply-red)])
       :depot (drawable/->Stack [(->Rect
                                  (color/hue->hsb
                                   (building/resource-type c)))
@@ -200,7 +295,7 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn setup [tile-fn]
   ;init een bricklet met tile-set
-  (let [path-fn (temp-lookup)]
+  (let [path-fn (nice-lookup)]
     (reset! world-bricklet
             (drawable/->Bricklet
              (atom (drawable/->Border (reify drawable/Drawable
