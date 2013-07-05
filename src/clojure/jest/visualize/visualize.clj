@@ -22,24 +22,42 @@
 (declare cell-building)
 (declare cell-road)
 
+(defn replace-fn [p v]
+  (fn [x]
+    (if (p x) v x)))
 
-(defn arrow [cx cy angle]
-  (drawable/->Floating
-   (reify drawable/Drawable
-     (draw [this [w h]]
-       (quil/with-translation [(* w 5/8)
-                               (/ h 2)]
-         (quil/push-style)
-         (quil/stroke 255)
-         (quil/smooth)
-         (let [len (/ w 4)
-               fat (/ h 12)]
-           (quil/stroke-weight (/ len 6))
-           (quil/line 0 0 len 0)
-           (quil/line len 0 (- len fat) (quil/ceil (- fat)))
-           (quil/line len 0 (- len fat) (quil/ceil fat)))
-         (quil/pop-style))))
-   [cx cy] 1 angle))
+(defn arrow [cx cy angle colors]
+  (let [amount (count colors)]
+    (drawable/->Floating
+     (reify drawable/Drawable
+       (draw [this [w h]]
+         (quil/with-translation [(* w 5/8)
+                                 (/ h 2)]
+           (quil/push-style)
+           (quil/stroke 255)
+           ;;(quil/smooth)
+           (let [len (/ w 4)
+                 fat (/ h 12)]
+             (quil/stroke-weight (/ len 12))
+             (quil/line 0 0 len 0)
+             (quil/line len 0 (- len fat) (quil/ceil (- fat)))
+             (quil/line len 0 (- len fat) (quil/ceil fat))
+             (quil/color-mode :hsb)
+             (loop [ls (drawable/ranges (max amount fat) len)
+                    cs colors]
+               (if (and (seq ls) (seq cs))
+                 (let [[offset l] (first ls)
+                       endp (+ offset l)
+                       c (first cs)]
+                   (apply quil/stroke (color/hue->hsb c))
+                   (quil/line offset 0 (- endp fat) (quil/ceil (- fat)))
+                   (quil/line offset 0 (- endp fat) (quil/ceil fat))
+                   (recur (rest ls)
+                          (rest cs)))))
+             (quil/color-mode :rgb))
+
+           (quil/pop-style))))
+     [cx cy] 1 angle)))
 
 (def direction-order {:north 1 ;;first
                         :west 2
@@ -89,16 +107,20 @@
            [[:north _] [:west _] [:south _] [:east _]] :cross
            :else nil)))
 
-(defn paths-to-arrows [c]
-  (let [*pi (partial * Math/PI)
-        dir-to-radian  {:north (*pi 3/2)
-                        :east (*pi 0)
-                        :south (*pi 1/2)
-                        :west (*pi 1)}
-        out-p (path/out-paths c)]
-    (drawable/->Stack
-     (vec (map (partial arrow 0.5 0.5)
-               (map dir-to-radian (set (map :direction out-p))))))))
+(let [cardinal-arrow (memoize (partial arrow 0.5 0.5))]
+  (defn paths-to-arrows [c]
+    (let [*pi (partial * Math/PI)
+          dir-to-radian  {:north (*pi 3/2)
+                          :east (*pi 0)
+                          :south (*pi 1/2)
+                          :west (*pi 1)}
+          out-p (path/out-paths c)]
+      (drawable/->Stack
+       (vec (map
+             cardinal-arrow
+             (map dir-to-radian
+                  (set (map :direction out-p)))
+             (map :routes out-p)))))))
 
 (defn nice-lookup []
   (let [loader (comp
@@ -141,11 +163,7 @@
       (fn [c]
         (let [roads (path/paths c :road)
               n (drawable/->Nothing)]
-          ;;(println  c)
-          (drawable/->Stack
-           [ (get junctions (match-roads roads) n)
-             (paths-to-arrows c)])
-          )))))
+           (get junctions (match-roads roads) n))))))
 
 
 
@@ -260,6 +278,7 @@ cell-draw-fn is a function that returns a Drawable."
     (world-state->Grid (comp tile-fn (constantly :grass)))
     (world-state->Grid path-fn)
     (vehicles->Stack :truck (tile-fn :truck))
+    (world-state->Grid paths-to-arrows)
     (world-state->Grid (partial cell-building tile-fn))
     ]))
 
@@ -314,7 +333,7 @@ cell-draw-fn is a function that returns a Drawable."
                                            (world->drawable
                                             tile-fn
                                             path-fn)
-                                           [w h]))) 0.3 0.123))
+                                           [w h]))) 0 0))
              (atom [])
              :renderer :java2d
              :size [800 600]

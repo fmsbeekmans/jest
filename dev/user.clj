@@ -13,6 +13,7 @@
         jest.world.path
         jest.level
         jest.input.highlight
+        jest.color
         brick.drawable
         brick.image
 
@@ -26,7 +27,7 @@
         jest.world.route))
 
 (defn build-level []
-  (initialize-world 16 10)
+  (initialize-world 20 14)
   (build-spawn (cell [1 1]) :truck)
   (build-path (cell [1 1]) :south :road)
   (build-supply (cell [1 2]) :blue)
@@ -80,4 +81,3 @@
   (pause!)
   (build-spawn (cell [4 2]) :truck)
   (sketch!))
-
