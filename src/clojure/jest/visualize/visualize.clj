@@ -119,7 +119,7 @@
        (vec (map
              cardinal-arrow
              (map dir-to-radian
-                  (set (map :direction out-p)))
+                  (map :direction out-p))
              (map :routes out-p)))))))
 
 (defn nice-lookup []
