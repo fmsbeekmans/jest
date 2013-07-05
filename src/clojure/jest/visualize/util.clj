@@ -42,16 +42,16 @@
     (points/stroke (points :center)
                    (points (:exit-direction v)))))
 
-(defn vehicle->stroke'
-  [v]
-  (cond
-   (vehicle/spawning? v) (vehicle->stroke-to-mid v)
-   (vehicle/despawning? v) (vehicle->stroke-from-mid v)
-   (vehicle/exploding? v) (vehicle->stroke-from-mid v)
-   (vehicle/moving? v) (points/stroke-comp [(vehicle->stroke-to-mid v)
-                                            (vehicle->stroke-from-mid v)])))
-
-(def vehicle->stroke (memoize vehicle->stroke'))
+(def vehicle->stroke
+  (memoize
+   (fn [v s]
+     (cond
+      (vehicle/spawning? v) (vehicle->stroke-to-mid v)
+      (vehicle/despawning? v) (vehicle->stroke-from-mid v)
+      (vehicle/exploding? v) (vehicle->stroke-from-mid v)
+      (vehicle/moving? v) (points/stroke-comp
+                           [(vehicle->stroke-to-mid v)
+                            (vehicle->stroke-from-mid v)])))))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
