@@ -10,7 +10,8 @@
 
 (def scoring
   {:deliver [90 10]
-   :explode [-50 10]})
+   :explode [-50 10]
+   :despawn-with-cargo [-20 10]})
 
 (defn get-scoring [event]
   (get scoring event [0 0]))
