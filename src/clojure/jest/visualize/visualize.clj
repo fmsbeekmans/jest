@@ -204,7 +204,8 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn vehicle->location
   [v]
-  (let [stroke (util/vehicle->stroke v)
+  (let [stroke (util/vehicle->stroke v [(quil/width)
+                                        (quil/height)])
         p (util/vehicle->progress v)
         [x y] (points/point
                stroke p)]
