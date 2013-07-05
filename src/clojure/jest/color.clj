@@ -23,6 +23,14 @@
   (vector->hue (apply map +
                       (map hue->vector hs))))
 
+(defn hue-snap
+  ([h n]
+     (let [divisor (/ (* 2 Math/PI) n)]
+       (* divisor (int (+ (/ h divisor)
+                          0.5)))))
+  ([h]
+     (hue-snap h 32)))
+
 (defmulti hue
   "Given either an amount of integer degrees or a keyword, return a color."
   type)
@@ -84,3 +92,4 @@
      (if hue
        [(hue->int hue) 255 255]
        alt)))
+
