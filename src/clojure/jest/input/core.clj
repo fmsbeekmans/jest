@@ -37,13 +37,19 @@
   (reset! handlers {}))
 
 (defn tl []
-  ((juxt :border-w :border-h)
-   @(:target-drawable @world-bricklet)))
+  (if (= (class @(:target-drawable @world-bricklet))
+         brick.drawable.Border)
+    ((juxt :border-w :border-h)
+     @(:target-drawable @world-bricklet))
+    [0 0]))
 
 (defn br []
-  (map (partial - 1)
-       ((juxt :border-w :border-h)
-        @(:target-drawable @world-bricklet))))
+  (if (= (class @(:target-drawable @world-bricklet))
+         brick.drawable.Border)
+    (map (partial - 1)
+         ((juxt :border-w :border-h)
+          @(:target-drawable @world-bricklet)))
+    [1 1]))
 
 (defn pixel->tile [x y]
   (let [tl (map * (tl) (sketch-size))
