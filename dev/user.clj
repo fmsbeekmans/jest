@@ -23,6 +23,7 @@
         jest.scheduler
 
         jest.input.quil
+        jest.input.wm-touch
         jest.input.core
         jest.input.interaction
         jest.vehicle
@@ -71,16 +72,24 @@
   (build-path (cell [3 3]) :south :road)
   (build-path (cell [3 4]) :south :road))
 
-(defn user-setup []
+(defn common-setup []
   (scheduler-reset!)
   (reset-score)
-  (setup-quil-mouse-input)
   (interaction-setup)
   (load-level "levels/alpha_ugly.json")
   (build-another-level)
 
-  (start!)
-  (println "Started?" (started?))
-  (pause!)
   (build-spawn (cell [4 2]) :truck)
+  (start!)
+  (pause!)
+)
+
+(defn user-setup []
+  (common-setup)
+  (setup-quil-mouse-input)
   (sketch!))
+
+(defn user-setup-touch []
+  (common-setup)
+  (sketch!)
+  (ensure-wm-touch-input-setup!))
