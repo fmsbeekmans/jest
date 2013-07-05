@@ -4,6 +4,7 @@
         [jest.world.cell :only [with-initialized-temp-world]]
         [jest.world.path :only [build-path complete-paths]]
         [jest.world.building :only [build-spawn]]
+        [jest.score :only [reset-score]]
         midje.sweet))
 
 
@@ -17,6 +18,7 @@
 
 (defmacro world-fact [[sx sy] fact-text & body]
   `(with-initialized-temp-world [~sx ~sy]
+     (reset-score)
      (with-mock-scheduler
        (fact ~fact-text ~@body))))
 
