@@ -14,6 +14,8 @@
         jest.level
         jest.input.highlight
         jest.color
+        jest.score
+
         brick.drawable
         brick.image
 
@@ -71,6 +73,7 @@
 
 (defn user-setup []
   (scheduler-reset!)
+  (reset-score)
   (setup-quil-mouse-input)
   (interaction-setup)
   (load-level "levels/alpha_ugly.json")
