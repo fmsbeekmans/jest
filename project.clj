@@ -23,8 +23,8 @@
                              [lein-bikeshed "0.1.3"]
                              [jonase/eastwood "0.0.2"]
                              [lein-kibit "0.0.8"]]
-                   :dependencies [[midje "1.5.1"]]
-                   :source-paths ["dev/"]}}
+                   :dependencies [[midje "1.5.1"]]}
+             :user {:source-paths ["user/"]}}
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths ["resources/"]
