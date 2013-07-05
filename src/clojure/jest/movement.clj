@@ -12,7 +12,8 @@
                                 out-path?]]
         [jest.world.building :only [spawn? vehicle-type resource-color
                                     resource-count reduce-resource mix-colors]]
-        [jest.scheduler :only [schedule offset game-time]])
+        [jest.scheduler :only [schedule offset game-time]]
+        [jest.score :only [score-vehicle]])
   (:require [jest.util :as util]))
 
 (defonce ^:private idc (atom 0))
@@ -134,7 +135,8 @@
 (defn start-exploding
   "Modifies the state of the vehicle with the given id to :exploding."
   [id]
-  (set-end-state id :exploding))
+  (set-end-state id :exploding)
+  (score-vehicle :explode (vehicle id)))
 
 (defn vehicle-transition-state-dispatch
   "Dispatch function for the vehicle-transition-state multimethod.
@@ -161,6 +163,7 @@
 (defmethod vehicle-transition-state
   [true :spawn]
   [id]
+  (score-vehicle :despawn-with-cargo (vehicle id))
   ;;TODO add penalty for despawning with cargo
   (start-despawning id))
 
@@ -216,6 +219,7 @@
                                                            (resource-hue (vehicle-cell (vehicle id))))
                                     (/ Math/PI 8))
                              ;;TODO this should also update some score
+                             (score-vehicle :deliver (vehicle id))
                              (clear-cargo id))))
 
 (defn maybe-explode [id]
@@ -278,6 +282,7 @@
                                     :state :spawning})))
 
      (when-not (:exit-direction (vehicle id))
+       (score-vehicle :explode (vehicle id))
        (vehicle-state-change id :spawning-exploding))
      (vehicle id))))
 
