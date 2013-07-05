@@ -4,7 +4,7 @@
 
 (fact "The average of red and green is yellow"
       (c/average-hue (c/hue :red) (c/hue :green))
-      => (roughly (c/hue :yellow) 0.01))
+      => (roughly (c/hue :yellow) 0.1))
 
 (fact "hue->int translates a hue to a 255-normalized int"
   (c/hue->int 360) => 0

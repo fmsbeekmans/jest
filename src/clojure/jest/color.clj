@@ -35,17 +35,12 @@
   "Given either an amount of integer degrees or a keyword, return a color."
   type)
 
-(defmethod hue Integer [deg]
-  (mod (Math/toRadians deg) (* 2 Math/PI)))
-
 (defmethod hue Long [deg]
-  (mod (Math/toRadians deg) (* 2 Math/PI)))
+  (hue-snap (mod (Math/toRadians deg) (* 2 Math/PI))))
 
 (defmethod hue Double [rad]
-  (mod rad (* 2 Math/PI)))
+  (hue-snap (mod rad (* 2 Math/PI))))
 
-(defmethod hue Float [rad]
-  (mod rad (* 2 Math/PI)))
 
 (def colors
   ^{:doc "Returns a hue for the given color keyword."}
@@ -57,7 +52,7 @@
 (defmethod hue clojure.lang.Keyword [color-name]
   (colors color-name))
 
-(def ^:private +delta+ (/ Math/PI 8))
+(def ^:private +delta+ 0.0001)
 
 (defn <=delta?
   "Returns true iff the given value is less or equal to the hue delta, which is
@@ -72,7 +67,8 @@
   (if (or (nil? h1)
           (nil? h2))
     (= h1 h2)
-    (<=delta? (util/angle-difference h1 h2))))
+    (<=delta? (Math/abs (- (hue-snap h1)
+                           (hue-snap h2))))))
 
 (defn contains-hue?
   "Returns true if one of the colors in the collection matches the given."

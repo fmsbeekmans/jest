@@ -10,7 +10,7 @@
   existing path"
   [path color]
   {:pre [path
-         (not (contains-hue? (remove nil? (:routes path)) color))]}
+         (not (contains-hue? (:routes path) color))]}
   (assoc path :routes
          (set (conj (:routes path) color))))
 
@@ -19,13 +19,10 @@
   existing path"
   [path color]
   {:pre [path
-         (or (nil? color)
-             (contains-hue? (:routes path) color))]}
+         (contains-hue? (:routes path) color)]}
   (update-in path [:routes]
              (fn [routes]
-               (set (remove (if (nil? color)
-                              nil?
-                              #(hue-matches? % color))
+               (set (remove #(hue-matches? % color)
                             routes)))))
 
 
@@ -49,7 +46,5 @@
     [d (:type p) (:routes p)]))
 
 (defn paths-with-route [c color]
-  (filter (if (nil? color)
-            #(contains? (:routes %) nil)
-            #(contains-hue? (:routes %) color))
+  (filter #(contains-hue? (:routes %) color)
           (paths c)))

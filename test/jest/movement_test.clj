@@ -178,7 +178,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
                                     ; should have nothing
    (v/cargo? (v/vehicle id)) => false
    (tick 1) ; moved into the supply
-   (v/cargo-color (v/vehicle id)) => (roughly (hue :red) 0.01)))
+   (v/cargo-color (v/vehicle id)) => (roughly (hue :red) 0.1)))
 
 (spawn-fact
  "A vehicle that passes through a depot without having cargo does nothing."
@@ -220,10 +220,10 @@ off the cargo"
    (v/cargo-color  (v/vehicle id)) => (roughly (hue :green) 0.1)
    (tick 1)
    (v/cargo-color (v/vehicle id)) => nil
-   (:resource (w/cell [6 6])) => (just [(roughly (hue :green) 0.01) 1])
+   (:resource (w/cell [6 6])) => (just [(roughly (hue :green) 0.1) 1])
    (tick +truck-speed+)
    (v/cargo-color (v/vehicle id)) => nil
-   (:resource (w/cell [6 6])) => (just [(roughly (hue :green) 0.01) 1])
+   (:resource (w/cell [6 6])) => (just [(roughly (hue :green) 0.1) 1])
    ))
 
 (world-fact [10 10]
@@ -242,7 +242,7 @@ off the cargo"
  (m/spawn (w/cell [5 5]))
  (m/spawn (w/cell [7 3]))
  (tick (* 2.5 +truck-speed+))
- (:resource (w/cell [7 5])) => (just [(roughly (hue :yellow) 0.01) 2])
+ (:resource (w/cell [7 5])) => (just [(roughly (hue :yellow) 0.1) 2])
  )
 
 (world-fact [10 10]
@@ -263,7 +263,7 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (m/spawn (w/cell [7 3]))
  (tick (* 2.5 +truck-speed+))
  (:resource (w/cell [7 5]))
-   => (just [(roughly (hue :yellow) 0.01) (* 2 (v/cargo-capacity :truck))]))
+   => (just [(roughly (hue :yellow) 0.1) (* 2 (v/cargo-capacity :truck))]))
 
 (spawn-fact
  "A vehicle that enters a spawn point with cargo incurs a penalty."
