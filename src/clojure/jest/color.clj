@@ -61,7 +61,10 @@
   "Returns true iff the hue difference between h1 and h2 is less than or equal
    to the delta."
   [h1 h2]
-  (<=delta? (util/angle-difference h1 h2)))
+  (if (or (nil? h1)
+          (nil? h2))
+    (= h1 h2)
+    (<=delta? (util/angle-difference h1 h2))))
 
 (defn contains-hue?
   "Returns true if one of the colors in the collection matches the given."
