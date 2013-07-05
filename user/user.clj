@@ -85,8 +85,8 @@
 )
 
 (defn user-setup []
-  (common-setup)
   (setup-quil-mouse-input)
+  (common-setup)
   (sketch!))
 
 (defn user-setup-touch []
