@@ -107,7 +107,7 @@ interval and as value a map of offset, howmuch stroke comes before this
 starts in absolute? progress, relative, how long is this sub-stroke? and the
 stroke itself."
   [ss]
-  {:pre [(strokes-connected? ss)]}
+;  {:pre [(strokes-connected? ss)]}
   (let [total-length (apply + (map length ss))]
     (loop [sum 0
            ss' ss
@@ -147,7 +147,7 @@ stroke itself."
 (defn stroke-comp
   "Compose strokes in order, return a front-end that let's them behave as one."
   [ss]
-  {:pre [(strokes-connected? ss)]}
+;  {:pre [(strokes-connected? ss)]}
   (with-meta
     ss
     {:stroke-type :composed
