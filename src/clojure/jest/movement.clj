@@ -325,5 +325,6 @@ This function should be called from within a transaction."
     (doseq [{:keys [id]} incoming]
       (update-vehicle-exit id))
     
-    (doseq [{:keys [id exit-direction] :as v} outgoing]
-      (start-exploding id))))
+    (doseq [{:keys [id type exit-direction] :as v} outgoing]
+      (when-not (= (vehicle->path type) (:type (path (vehicle-cell v) exit-direction)))
+        (start-exploding id)))))
