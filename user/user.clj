@@ -5,6 +5,7 @@
         clojure.pprint
         jest.world.cell
         jest.visualize.visualize
+        jest.visualize.resource
         jest.visualize.util
         jest.world
         jest.world.building
@@ -42,8 +43,8 @@
   (build-path (cell [2 2]) :south :road)
   (build-path (cell [2 3]) :east :road)
 
-  (build-depot (cell [4 3]) :red)
-  (build-depot (cell [4 4]) :blue)
+  (build-depot (cell [4 3]) :red 1000)
+  (build-depot (cell [4 4]) :blue 1000)
 
   (build-spawn (cell [5 2]) :truck))
 
@@ -57,7 +58,7 @@
   (build-supply (cell [2 2]) :green)
   (build-mixer (cell [3 3]))
   (build-spawn (cell [4 3]) :truck)
-  (build-depot (cell [3 4]) :yellow)
+  (build-depot (cell [3 4]) :yellow 1000)
   (build-spawn (cell [3 5]) :truck)
 
   (build-path (cell [1 1]) :south :road)

@@ -72,9 +72,9 @@
          "properties":
             {
              "1":"grass",
-             "10":"depot-red",
-             "11":"depot-green",
-             "12":"depot-blue",
+             "10":"depot-red-1000",
+             "11":"depot-green-1000",
+             "12":"depot-blue-1000",
              "13":"road-west",
              "14":"road-east",
              "15":"road-south",

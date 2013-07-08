@@ -100,8 +100,10 @@
 
 (defbuilding spawn :vehicle-type)
 (defbuilding supply :resource-type)
-(defbuilding depot :resource-type)
+(defbuilding depot :resource-type :quotum)
 (defbuilding mixer)
+
+(def resource-soft-cap 500)
 
 (defn resource-type
   "Returns the type of resource handled on this supply or depot."
@@ -117,6 +119,11 @@
   {:pre [(spawn? c)]}
   (:vehicle-type c))
 
+;; functions for depots
+(defn dropoff-resource
+  [cell amount]
+  {:pre [(depot? cell)]}
+  (update-in cell [:amount] (fnil + 0) amount))
 
 ;; functions for mixers
 (defn resource-color

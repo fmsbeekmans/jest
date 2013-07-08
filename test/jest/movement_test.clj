@@ -64,7 +64,7 @@
                               y (range 3)
                               i (range 10)]
                           (m/spawn (w/cell [x y]))))]
-    
+
     (v/all-vehicles v/truck?) => (just (filter v/truck? vehicles) :in-any-order)
     (count (v/all-vehicles v/truck?)) => 20))
 
@@ -127,7 +127,7 @@ a vehicle is in state :moving"
     (:coords (v/vehicle id)) => [6 5]))
 
 (world-fact [10 10]
-  "After spawning a train and waiting the right amount of ticks, the vehicle 
+  "After spawning a train and waiting the right amount of ticks, the vehicle
 has moved"
   (b/build-spawn (w/cell [5 5]) :train)
   (p/build-path (w/cell [5 5]) :east :rails)
@@ -174,7 +174,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
  (let [resource (hue :red)
        id (:id (m/spawn (w/cell [5 5])))]
    (b/build-supply (w/cell [6 6]) :red)
-   (tick (dec (* 2.5 +truck-speed+))) ; just before entering cell 6 6, 
+   (tick (dec (* 2.5 +truck-speed+))) ; just before entering cell 6 6,
                                     ; should have nothing
    (v/cargo? (v/vehicle id)) => false
    (tick 1) ; moved into the supply
@@ -182,7 +182,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
 
 (spawn-fact
  "A vehicle that passes through a depot without having cargo does nothing."
- (b/build-depot (w/cell [6 6]) :red)
+ (b/build-depot (w/cell [6 6]) :red 1000)
  (tick 20)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (v/cargo? (v/vehicle id))) => false)
@@ -192,7 +192,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
  "A vehicle that passes through a depot after passing
 through a supply with the same resource drops its resource."
  (b/build-supply (w/cell [6 6]) :green)
- (b/build-depot (w/cell [4 6]) :green)
+ (b/build-depot (w/cell [4 6]) :green 1000)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (dec (* 4.5 +truck-speed+))) ; should have cargo
    (v/cargo-color (v/vehicle id)) => (roughly (hue :green) 0.1)
@@ -203,7 +203,7 @@ through a supply with the same resource drops its resource."
  "A vehicle that passes through a depot after passing through
 a supply with another resource drops its resource."
  (b/build-supply (w/cell [6 6]) :green)
- (b/build-depot (w/cell [4 6]) :red)
+ (b/build-depot (w/cell [4 6]) :red 1000)
  (let [id (:id (m/spawn (w/cell [5 5])))]
    (tick (dec (* 4 +truck-speed+))) ; should have cargo
    (v/cargo-color (v/vehicle id)) => (roughly (hue :green) 0.1)
@@ -536,4 +536,3 @@ clockwise order is selected"
                 (:entry-time (v/vehicle truck)) => (* i +truck-speed+)
                 (:exit-time (v/vehicle truck)) => (* (inc i) +truck-speed+)
                 (tick-move truck))))
-

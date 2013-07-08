@@ -44,7 +44,7 @@
 
 (world-fact [10 10]
             "Depots can be built"
-            (building/build-depot (cell [3 3]) :blue)
+            (building/build-depot (cell [3 3]) :blue 1000)
             (building/building-type (cell [3 3])) => :depot
             (building/resource-type (cell [3 3])) => :blue)
 
@@ -68,7 +68,7 @@
 
 (world-fact [10 10]
             "Depots can be destroyed"
-            (building/build-depot (cell [3 3]) :magenta)
+            (building/build-depot (cell [3 3]) :magenta 1000)
             (building/unbuild-depot (cell [3 3]))
             (building/building-type (cell [3 3])) => nil)
 
@@ -84,7 +84,7 @@
   (doseq [c (map cell mixers)]
     (building/build-mixer c))
   (doseq [c (map cell depots)]
-    (building/build-depot c :blue))
+    (building/build-depot c :blue 1000))
 
   (fact "Spawns can be found on a map."
     (set (map coords (building/all-spawns))) => spawns)

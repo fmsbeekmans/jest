@@ -15,6 +15,7 @@
             [jest.world.cell :as cell])
   (:require [jest.visualize.points :as points]
             [jest.visualize.util :as util]
+            [jest.visualize.resource :as resource]
             [jest.color :as color])
   (:require [jest.visualize.input :as input]))
 
@@ -188,24 +189,6 @@ cell-draw-fn is a function that returns a Drawable."
           (for [c (world/all-cells)]
             [(world/coords c) (cell-draw-fn c)])))))
 
-(defrecord Dot
-  [v]
-  drawable/Drawable
-  (draw [this [w h]]
-    (let [raw-color (vehicle/cargo-color (:v this))
-          color (if raw-color
-                  [(int (* (/ raw-color
-                              (* 2 Math/PI))
-                           256)) 255 255]
-                  [255 0 255])]
-      (quil/color-mode :hsb)
-      (apply quil/fill color)
-      (quil/ellipse
-       (* 0.35 h)
-       (* 0.35 w)
-       (* 0.3 h)
-       (* 0.3 w))
-      (quil/color-mode :rgb))))
 
 (defrecord Rect
   [color]
@@ -231,34 +214,19 @@ cell-draw-fn is a function that returns a Drawable."
           (/ y (quil/height))]
      :rotation (points/tangent stroke p [0 1])}))
 
-(defrecord Dot
-  [v]
-  drawable/Drawable
-  (draw [this [w h]]
-    (let [raw-color (vehicle/cargo-color (:v this))
-          color (if raw-color
-                  [(int (* (/ raw-color
-                              (* 2 Math/PI))
-                           256)) 255 255]
-                  [255 0 255])]
-      (quil/color-mode :hsb)
-      (apply quil/fill color)
-      (quil/ellipse
-       (* 0.5 h)
-       (* 0.5 w)
-       (* 0.2 h)
-       (* 0.2 w))
-      (quil/color-mode :rgb))))
-
 (defn moving-vehicle
   [v image]
   (let [{p' :p'
          rotation :rotation} (vehicle->location v)]
-    (drawable/->Floating (drawable/->Stack [image
-                                            (->Dot v)])
-                         p'
-                         (util/vehicle-scale)
-                         rotation)))
+    (drawable/->Stack [(drawable/->Floating image
+                                            p'
+                                            (util/vehicle-scale)
+                                            rotation)
+                       (drawable/->Floating (resource/drawable-from-resource-rate
+                                             (resource/vehicle-resource-rate v))
+                                            p'
+                                            (util/vehicle-scale)
+                                            0)])))
 
 (defn vehicles->Stack
   [vehicle-type image]
@@ -267,6 +235,7 @@ cell-draw-fn is a function that returns a Drawable."
     (map (fn [v]
            (cond
             (vehicle/moving? v) (moving-vehicle v image)
+            ;(vehicle/moving? v) (moving-vehicle-resource v)
             (vehicle/spawning? v) (drawable/->Nothing)
             (vehicle/despawning? v) (drawable/->Nothing)
             (vehicle/exploding? v) (drawable/->Nothing)))

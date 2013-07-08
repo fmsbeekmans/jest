@@ -233,6 +233,7 @@
                                                (hue (:resource-type (vehicle-cell (vehicle id)))))
                              ;;TODO this should also update some score
                              (score-vehicle :deliver (vehicle id))
+
                              (clear-cargo id)
                              (update-vehicle-exit id))))
 
@@ -329,7 +330,7 @@ This function should be called from within a transaction."
         outgoing (filter outgoing? vs)]
     (doseq [{:keys [id]} incoming]
       (update-vehicle-exit id))
-    
+
     (doseq [{:keys [id type exit-direction] :as v} outgoing]
       (when-not (= (vehicle->path type) (:type (path (vehicle-cell v) exit-direction)))
         (start-exploding id)))))
