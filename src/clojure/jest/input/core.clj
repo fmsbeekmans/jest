@@ -4,7 +4,9 @@
                                          world-bricklet]]
         [jest.input.highlight :only [highlight-cell remove-highlighted-cells
                                      get-highlighted-cells]]
-        [jest.world :only [world-size]]))
+        [jest.world :only [world-size]])
+  (:use [brick.drawable :only [square-borders-size]]
+        [quil.core :only [width height]]))
 
 (def ^:private pointers (atom {}))
 (defn pointer [id]
@@ -36,22 +38,25 @@
 (defn reset-input-handlers! []
   (reset! handlers {}))
 
-(defn tl []
-  (if (= (class @(:target-drawable @world-bricklet))
-         brick.drawable.Border)
-    ((juxt :border-w :border-h)
-     @(:target-drawable @world-bricklet))
-    [0 0]))
+(defn tl
+  []
+  (try
+    (square-borders-size
+     (sketch-size)
+     (world-size)
+     [0 0])
+    (catch Exception e
+      (println (pr-str e))
+      [0 0])))
 
-(defn br []
-  (if (= (class @(:target-drawable @world-bricklet))
-         brick.drawable.Border)
-    (map (partial - 1)
-         ((juxt :border-w :border-h)
-          @(:target-drawable @world-bricklet)))
-    [1 1]))
+(defn br
+  []
+  (map
+   (partial - 1)
+   (tl)))
 
-(defn pixel->tile [x y]
+(defn pixel->tile
+  [x y]
   (let [tl (map * (tl) (sketch-size))
         br (map * (br) (sketch-size))
         map-size (map - br tl)

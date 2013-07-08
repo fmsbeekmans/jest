@@ -109,7 +109,6 @@ path duration."
  "After spawning and the path duration has passed,
 a vehicle is in state :moving"
  (with-spawned-vehicle [truck [5 5]]
-   (m/spawn (w/cell [5 5]))
    (tick (dec +truck-speed+))
    (:state (v/vehicle truck)) => :spawning
    (tick 1)

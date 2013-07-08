@@ -166,11 +166,6 @@
               n (drawable/->Nothing)]
            (get junctions (match-roads roads) n))))))
 
-
-
-
-
-
 (defonce world-bricklet (atom nil))
 (defonce world-sketch (atom nil))
 
@@ -181,7 +176,7 @@
 cell-draw-fn is a function that returns a Drawable."
   [cell-draw-fn]
 ;  {:post [(every? drawable/drawable? (vals (:grid %)))]}
-  (drawable/->Grid
+  (drawable/->SquareTiledGrid
    (world/world-width)
    (world/world-height)
    (into {}
@@ -230,16 +225,20 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn vehicles->Stack
   [vehicle-type image]
-  (drawable/->Stack
-   (vec
-    (map (fn [v]
-           (cond
-            (vehicle/moving? v) (moving-vehicle v image)
-            ;(vehicle/moving? v) (moving-vehicle-resource v)
-            (vehicle/spawning? v) (drawable/->Nothing)
-            (vehicle/despawning? v) (drawable/->Nothing)
-            (vehicle/exploding? v) (drawable/->Nothing)))
-     (vehicle/all-vehicles vehicle/truck?)))))
+  (apply drawable/->Border
+         (drawable/->Stack
+          (vec
+           (map (fn [v]
+                  (cond
+                   (vehicle/moving? v) (moving-vehicle v image)
+                   (vehicle/spawning? v) (drawable/->Nothing)
+                   (vehicle/despawning? v) (drawable/->Nothing)
+                   (vehicle/exploding? v) (drawable/->Nothing)))
+                (vehicle/all-vehicles vehicle/truck?))))
+             (drawable/square-borders-size
+              (sketch-size)
+              (world/world-size)
+              [0 0])))
 
 (defn world->drawable
   [tile-fn path-fn]
@@ -248,7 +247,7 @@ cell-draw-fn is a function that returns a Drawable."
     (world-state->Grid (comp tile-fn (constantly :grass)))
     (world-state->Grid path-fn)
     (vehicles->Stack :truck (tile-fn :truck))
-    (world-state->Grid paths-to-arrows)
+;    (world-state->Grid paths-to-arrows)
     (world-state->Grid (partial cell-building tile-fn))
     ]))
 
@@ -297,13 +296,14 @@ cell-draw-fn is a function that returns a Drawable."
   (let [path-fn (nice-lookup)]
     (reset! world-bricklet
             (drawable/->Bricklet
-             (atom (drawable/->Border (reify drawable/Drawable
-                                        (draw [this [w h]]
-                                          (drawable/.draw
-                                           (world->drawable
-                                            tile-fn
-                                            path-fn)
-                                           [w h]))) 0 0))
+             (atom
+              (reify drawable/Drawable
+                (draw [this [w h]]
+                  (drawable/.draw
+                   (world->drawable
+                    tile-fn
+                    path-fn)
+                   [w h]))))
              (atom [])
              :renderer :java2d
              :size [800 600]
