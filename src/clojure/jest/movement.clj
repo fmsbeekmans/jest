@@ -5,13 +5,14 @@
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
                              exploding? moving? map->Vehicle]]
-        [jest.color :only [<=delta? hue]]
+        [jest.color :only [<=delta? hue hue-matches?]]
         [jest.world :only [alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
                                 opposite-dirs path path-type to
                                 out-path?]]
         [jest.world.building :only [spawn? vehicle-type resource-color
-                                    resource-count reduce-resource mix-colors]]
+                                    resource-count reduce-resource mix-colors
+                                    supply? mixer? depot?]]
         [jest.scheduler :only [schedule offset game-time]]
         [jest.score :only [score-vehicle]])
   (:require [jest.util :as util]))
@@ -178,13 +179,24 @@
             (+ (:entry-time v)
                (/ (vehicle->duration v) 2))))
 
+(defn maybe-explode [id]
+  (when-not (or (:exit-direction (vehicle id))
+                (spawn? (vehicle-cell (vehicle id))))
+    (start-exploding id)))
+
+(defn update-vehicle-exit [id]
+  (update-vehicle id update-preferred-path)
+  (maybe-explode id))
+
 (defmethod vehicle-transition-state
   [false :supply]
   [id]
   (schedule-half-duration (vehicle id)
-                          #(set-cargo id
-                                      (resource-hue (vehicle-cell (vehicle id)))
-                                      (cargo-capacity (:type (vehicle id))))))
+                          (fn []
+                            (set-cargo id
+                                       (resource-hue (vehicle-cell (vehicle id)))
+                                       (cargo-capacity (:type (vehicle id))))
+                            (update-vehicle-exit id))))
 
 (defmethod vehicle-transition-state
   [false :mixer]
@@ -198,7 +210,8 @@
                                                     (:type (vehicle id))))]
                              (reduce-resource (vehicle-cell (vehicle id))
                                               pickup-count)
-                             (set-cargo id color pickup-count))))
+                             (set-cargo id color pickup-count)
+                             (update-vehicle-exit id))))
 
 
 (defmethod vehicle-transition-state
@@ -209,27 +222,19 @@
                             (mix-colors (vehicle-cell (vehicle id))
                                         (cargo-color (vehicle id))
                                         (cargo-count (vehicle id)))
-                            (clear-cargo id))))
+                            (clear-cargo id)
+                            (update-vehicle-exit id))))
 
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
   (schedule-half-duration (vehicle id)
-                          #(when (< (util/angle-difference (cargo-color (vehicle id))
-                                                           (resource-hue (vehicle-cell (vehicle id))))
-                                    (/ Math/PI 8))
+                          #(when (hue-matches? (cargo-color (vehicle id))
+                                               (hue (:resource-type (vehicle-cell (vehicle id)))))
                              ;;TODO this should also update some score
                              (score-vehicle :deliver (vehicle id))
-                             (clear-cargo id))))
-
-(defn maybe-explode [id]
-  (when-not (or (:exit-direction (vehicle id))
-                (spawn? (vehicle-cell (vehicle id))))
-    (start-exploding id)))
-
-(defn update-vehicle-exit [id]
-  (update-vehicle id update-preferred-path)
-  (maybe-explode id))
+                             (clear-cargo id)
+                             (update-vehicle-exit id))))
 
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
@@ -328,3 +333,13 @@ This function should be called from within a transaction."
     (doseq [{:keys [id type exit-direction] :as v} outgoing]
       (when-not (= (vehicle->path type) (:type (path (vehicle-cell v) exit-direction)))
         (start-exploding id)))))
+
+(defn pickup-color [v]
+  (let [c (vehicle-cell v)]
+    (cond
+     (supply? c) (hue (:resource-type c))
+     (mixer? c) (if (cargo-color v)
+                  nil
+                  (resource-color c))
+     (depot? c) nil
+     :default (cargo-color v))))

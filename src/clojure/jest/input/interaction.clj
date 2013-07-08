@@ -5,7 +5,7 @@
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
-            [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming?]]
+            [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? pickup-color]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
 (def ^:private inv-directions (clojure.set/map-invert directions))
@@ -24,13 +24,14 @@
 (defn- maybe-build-route [c dir]
   (dosync
    (if-let [v (first (filter incoming? (vehicles c)))]
-     (let [vehicle-type (:type v)]
+     (let [vehicle-type (:type v)
+           color (pickup-color v)]
        (when (= (path-type (path c dir))
                 (vehicle->path vehicle-type))
          (doseq [p (filter #(= (vehicle->path vehicle-type) (path-type %))
-                           (paths-with-route c (cargo-color v)))]
-           (unbuild-route c (:direction p) (cargo-color v)))
-         (build-route c dir (cargo-color v))
+                           (paths-with-route c color))]
+           (unbuild-route c (:direction p) color))
+         (build-route c dir color)
          (update-vehicles-for-cell-changes c))))))
 
 (defn on-move [id pos1 pos2]
