@@ -298,7 +298,7 @@
 (defn vehicle-state-in-cell [v]
   (let [halfpoint (+ (:entry-time v)
                      (/ (vehicle->duration v) 2))]
-    (if (<= @game-time halfpoint)
+    (if (< @game-time halfpoint)
       :incoming
       :outgoing)))
 

@@ -5,6 +5,7 @@
         [jest.world.path :only [build-path complete-paths]]
         [jest.world.building :only [build-spawn]]
         [jest.score :only [reset-score]]
+        [jest.input.interaction :only [interaction-setup on-down on-move on-up]]
         midje.sweet))
 
 
@@ -21,6 +22,11 @@
      (reset-score)
      (with-mock-scheduler
        (fact ~fact-text ~@body))))
+
+(defmacro interaction-fact [[sx sy] fact-text & body]
+  `(world-fact [~sx ~sy] ~fact-text
+               (interaction-setup)
+               ~@body))
 
 (defn build-spawn-circle []
   {:post [(seq (complete-paths (cell [5 5])))]}
@@ -116,3 +122,13 @@ running all scheduled tasks in order.By default n is 1"
       (mod (+ (* 2 Math/PI) actual) (* 2 Math/PI)))
      ((roughly (mod (+ (* 3 Math/PI) target) (* 2 Math/PI)) margin)
       (mod (+ (* 3 Math/PI) actual) (* 2 Math/PI))))))
+
+
+(defn gesture [id & [fp & points]]
+  (on-down id fp)
+  (loop [prev fp
+         [p & points] points]
+    (when-not (nil? p)
+      (on-move id prev p)
+      (recur p points)))
+  (on-up id (last points)))
