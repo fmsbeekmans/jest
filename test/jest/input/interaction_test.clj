@@ -41,3 +41,13 @@
                               (= (:exit-direction v) dir))]
                       (count (filter (partial exit= :south) vs)) => 1
                       (count (filter (partial exit= :east) vs)) => 1)))
+
+(interaction-fact [5 5]
+                  "When trying to build a route while the only vehicle is on an out path, do not build the route."
+                  (build-spawn (cell [1 1]) :truck)
+                  (doseq [dir [:east :south]]
+                    (build-path (cell [1 1]) dir :road))
+                  (spawn (cell [1 1]))
+                  (tick (/ (path->duration :road) 2))
+                  (gesture 1 [1 1] [1 2])
+                  (:routes (path (cell [1 1]) :south)) => empty?)
