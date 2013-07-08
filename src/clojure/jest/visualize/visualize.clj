@@ -257,15 +257,20 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn vehicles->Stack
   [vehicle-type image]
-  (drawable/->Stack
-   (vec
-    (map (fn [v]
-           (cond
-            (vehicle/moving? v) (moving-vehicle v image)
-            (vehicle/spawning? v) (drawable/->Nothing)
-            (vehicle/despawning? v) (drawable/->Nothing)
-            (vehicle/exploding? v) (drawable/->Nothing)))
-     (vehicle/all-vehicles vehicle/truck?)))))
+  (apply drawable/->Border
+         (drawable/->Stack
+          (vec
+           (map (fn [v]
+                  (cond
+                   (vehicle/moving? v) (moving-vehicle v image)
+                   (vehicle/spawning? v) (drawable/->Nothing)
+                   (vehicle/despawning? v) (drawable/->Nothing)
+                   (vehicle/exploding? v) (drawable/->Nothing)))
+                (vehicle/all-vehicles vehicle/truck?))))
+             (drawable/square-borders-size
+              (sketch-size)
+              (world/world-size)
+              [0 0])))
 
 (defn world->drawable
   [tile-fn path-fn]
