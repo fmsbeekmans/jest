@@ -29,6 +29,20 @@
   [dir]
   (.indexOf [:north :east :south :west] dir))
 
+(defn vehicle-state-in-cell [v]
+  (let [halfpoint (+ (:entry-time v)
+                     (/ (vehicle->duration v) 2))]
+    (if (< @game-time halfpoint)
+      :incoming
+      :outgoing)))
+
+(defn incoming? [v]
+  (= (vehicle-state-in-cell v) :incoming))
+
+(defn outgoing? [v]
+  (= (vehicle-state-in-cell v) :outgoing))
+
+
 (defn route-score
   "Returns the lowest hue difference with the given color among the routes for
    the given path. If there are no routes, route-score returns nil. A lower
@@ -222,6 +236,7 @@
                             (mix-colors (vehicle-cell (vehicle id))
                                         (cargo-color (vehicle id))
                                         (cargo-count (vehicle id)))
+                            (println (resource-color (vehicle-cell (vehicle id))))
                             (clear-cargo id)
                             (update-vehicle-exit id))))
 
@@ -251,14 +266,23 @@
                    (vehicle->path (:type (vehicle id))))))]}
   (let [v (vehicle id)
         path (path (vehicle-cell v)
-                   direction)]
+                   direction)
+        incoming (filter #(and (incoming? %)
+                               (= (:type v)
+                                  (:type %)))
+                         (vehicles (to path)))]
     (dosync
      (unload-vehicle v)
      (load-vehicle (to path) v)
      (vehicle-state-change id :moving)
      (update-vehicle id (comp select-exit vehicle-enter))
      (vehicle-transition-state id)
-     (update-vehicle-exit id))))
+     (update-vehicle-exit id)
+
+     (when (seq incoming)
+       (start-exploding id)
+       (doseq [v incoming]
+         (start-exploding (:id v)))))))
 
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
@@ -299,19 +323,6 @@
    (let [vehicle (load-vehicle-on-spawn c)]
      (schedule-move (:id vehicle))
      vehicle)))
-
-(defn vehicle-state-in-cell [v]
-  (let [halfpoint (+ (:entry-time v)
-                     (/ (vehicle->duration v) 2))]
-    (if (< @game-time halfpoint)
-      :incoming
-      :outgoing)))
-
-(defn incoming? [v]
-  (= (vehicle-state-in-cell v) :incoming))
-
-(defn outgoing? [v]
-  (= (vehicle-state-in-cell v) :outgoing))
 
 (defn valid-out-direction? [v dir]
   (let [path (path (vehicle-cell v) dir)]
