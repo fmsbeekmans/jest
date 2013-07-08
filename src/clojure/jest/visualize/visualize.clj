@@ -23,6 +23,8 @@
 (declare cell-building)
 (declare cell-road)
 
+(declare sketch-size)
+
 (defn replace-fn [p v]
   (fn [x]
     (if (p x) v x)))
@@ -247,7 +249,7 @@ cell-draw-fn is a function that returns a Drawable."
     (world-state->Grid (comp tile-fn (constantly :grass)))
     (world-state->Grid path-fn)
     (vehicles->Stack :truck (tile-fn :truck))
-;    (world-state->Grid paths-to-arrows)
+    (world-state->Grid paths-to-arrows)
     (world-state->Grid (partial cell-building tile-fn))
     ]))
 
