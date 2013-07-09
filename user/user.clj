@@ -93,4 +93,5 @@
 (defn user-setup-touch []
   (common-setup)
   (sketch!)
+  (undecorate-sketch @world-sketch)
   (ensure-wm-touch-input-setup!))
