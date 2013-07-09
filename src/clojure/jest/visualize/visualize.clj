@@ -306,6 +306,7 @@ cell-draw-fn is a function that returns a Drawable."
                    [w h]))))
              (atom [])
              :renderer :java2d
+             :init (fn [_] (quil/frame-rate 60))
              :size [800 600]
              :mouse-pressed input/on-down-handler
              :mouse-released input/on-up-handler
