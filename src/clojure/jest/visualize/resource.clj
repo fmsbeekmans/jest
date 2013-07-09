@@ -9,7 +9,7 @@
         [jest.vehicle :only [cargo-capacity cargo-color cargo-count]]
         [jest.world.building :only [resource-type resource-color resource-count]]))
 
-(def soft-cap 400)
+(def soft-cap 10)
 
 (defn- building-resource-rate-dispatch
   [c]
