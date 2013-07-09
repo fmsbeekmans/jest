@@ -16,6 +16,13 @@
                  [org.clojure/core.match "0.2.0-rc3"]
                  [net.java.dev.jna/jna "3.5.2"]
                  [net.java.dev.jna/platform "3.5.2"]]
+  :repl-options {;; Specify the string to print when prompting for input.
+                 ;; defaults to something like (fn [ns] (str *ns* "=> "))
+                 ;; What to print when the repl session starts.
+                 :welcome (println "Hallo Matthijs...")
+                 ;; Customize the socket the repl task listens on and
+                 ;; attaches to.
+                 :port 3000 }
   :repositories {"pievolution" "http://pievolution.org/maven-repo/"}
   :profiles {:dev {:plugins [[lein-midje "3.0.0"]
                              [codox "0.6.4"]
