@@ -269,12 +269,12 @@ cell-draw-fn is a function that returns a Drawable."
       (case type
         :spawn (tile-fn
                 (hyphenate-keywords :spawn (building/vehicle-type c)))
-        :mixer (drawable/->Stack [(resource-vis c)
-                                  (tile-fn :mixer)])
-        :supply (drawable/->Stack [(resource-vis c)
-                                   (tile-fn :supply-red)])
-        :depot (drawable/->Stack [(resource-vis c)
-                                  (tile-fn :dirt)])))
+        :mixer (drawable/->Stack [(tile-fn :mixer)
+                                  (resource-vis c)])
+        :supply (drawable/->Stack [(tile-fn :supply-red)
+                                   (resource-vis c)])
+        :depot (drawable/->Stack [(tile-fn :dirt)
+                                  (resource-vis c)])))
     (tile-fn nil)))
 
 (defn cell-road
