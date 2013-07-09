@@ -1,12 +1,12 @@
 (ns jest.input.core
   "Transforms device-agnostic input from pixel-based to tile-based."
   (:use [jest.visualize.visualize :only [sketch-size
-                                         world-bricklet]]
+                                         world-bricklet
+                                         min-borders]]
         [jest.input.highlight :only [highlight-cell remove-highlighted-cells
                                      get-highlighted-cells]]
         [jest.world :only [world-size]])
-  (:use [brick.drawable :only [square-borders-size]]
-        [quil.core :only [width height]]))
+  (:use [brick.drawable :only [square-borders-size]]))
 
 (def ^:private pointers (atom {}))
 (defn pointer [id]
@@ -44,7 +44,7 @@
     (square-borders-size
      (sketch-size)
      (world-size)
-     [0 0])
+     min-borders)
     (catch Exception e
       (println (pr-str e))
       [0 0])))

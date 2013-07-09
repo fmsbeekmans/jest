@@ -4,8 +4,8 @@
   (:use clojure.repl
         clojure.pprint
         jest.world.cell
-        jest.visualize.visualize
         jest.visualize.resource
+        [jest.visualize.visualize :exclude [min-borders]]
         jest.visualize.util
         jest.world
         jest.world.building

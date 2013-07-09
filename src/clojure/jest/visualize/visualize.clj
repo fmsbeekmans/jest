@@ -23,6 +23,8 @@
 (declare cell-building)
 (declare cell-road)
 
+(def min-borders [0.1 0.1])
+
 (declare sketch-size)
 
 (defn replace-fn [p v]
@@ -178,13 +180,14 @@
 cell-draw-fn is a function that returns a Drawable."
   [cell-draw-fn]
 ;  {:post [(every? drawable/drawable? (vals (:grid %)))]}
-  (drawable/->SquareTiledGrid
+  (apply drawable/->SquareTiledGrid
    (world/world-width)
    (world/world-height)
    (into {}
          (doall
           (for [c (world/all-cells)]
-            [(world/coords c) (cell-draw-fn c)])))))
+            [(world/coords c) (cell-draw-fn c)])))
+   min-borders))
 
 
 (defrecord Rect
@@ -240,7 +243,7 @@ cell-draw-fn is a function that returns a Drawable."
              (drawable/square-borders-size
               (sketch-size)
               (world/world-size)
-              [0 0])))
+              min-borders)))
 
 (defn world->drawable
   [tile-fn path-fn]
