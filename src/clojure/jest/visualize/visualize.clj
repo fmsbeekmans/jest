@@ -112,7 +112,10 @@
            [[:north _] [:west _] [:south _] [:east _]] :cross
            :else nil)))
 
-(let [cardinal-arrow (memoize (partial arrow 0.5 0.5))]
+(let [cardinal-arrow (memoize (partial arrow 0.5 0.5))
+      arrow-stack (memoize (fn [dirs routes]
+                             (drawable/->Stack
+                              (vec (map cardinal-arrow dirs routes)))))]
   (defn paths-to-arrows [c]
     (let [*pi (partial * Math/PI)
           dir-to-radian  {:north (*pi 3/2)
@@ -120,12 +123,8 @@
                           :south (*pi 1/2)
                           :west (*pi 1)}
           out-p (path/out-paths c)]
-      (drawable/->Stack
-       (vec (map
-             cardinal-arrow
-             (map dir-to-radian
-                  (map :direction out-p))
-             (map :routes out-p)))))))
+      (arrow-stack (map dir-to-radian (map :direction out-p))
+                   (map :routes out-p)))))
 
 (defn nice-lookup []
   (let [loader (comp
