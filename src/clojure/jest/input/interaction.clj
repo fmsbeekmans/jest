@@ -1,7 +1,7 @@
 (ns jest.input.interaction
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell direction-exists?]]
-            [jest.world.building :refer [spawn?]]
+            [jest.world.building :refer [spawn? vehicle-type]]
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
@@ -33,20 +33,6 @@
            (unbuild-route c (:direction p) color))
          (build-route c dir color)
          (update-vehicles-for-cell-changes c))))))
-
-(defn on-move [id pos1 pos2]
-  (let [c1 (cell pos1)
-        c2 (cell pos2)
-        direction (inv-directions (map - pos2 pos1))]
-    (if (path c1 direction)
-      (if (in-path? (path c1 direction))
-        (unbuild-path c1 direction)
-        (maybe-build-route c1 direction))
-
-      (if (or (seq (in-paths c1))
-              (spawn? c1))
-        (build-path c1 direction :road)))
-    ))
 
 (def pointer-track ( atom {}))
 
@@ -110,7 +96,11 @@
                                       type)
                           (update-vehicles-for-cell-changes c1)
                           type)
-                        :invalid))))))
+                        (if (spawn? c1)
+                          (let [type (vehicle->path (vehicle-type c1))]
+                            (build-path c1 direction type)
+                            type)
+                          :invalid)))))))
 
 (defn on-up [id _]
   (let [[type count tile direction] (@pointer-track id)]
