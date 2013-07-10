@@ -10,7 +10,8 @@
             [jest.world.building :as building]
             [jest.vehicle :as vehicle
              :refer [vehicle-cell]]
-            [jest.world.path :as path]
+            [jest.world.path :as path
+             :refer [opposite-dirs]]
             [jest.world.cell :as cell])
   (:require [jest.visualize.points :as points]
             [jest.visualize.util :as util
@@ -269,6 +270,27 @@ cell-draw-fn is a function that returns a Drawable."
 
 (def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-scaler))
 
+(defn despawning-vehicle->location
+  [v]
+  (let [progress (util/vehicle->progress v)
+        stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
+    (if (< progress 0.5)
+      {:position (absolute->relative
+                  (points/point stroke (* 2 progress)))
+       :rotation (lols (opposite-dirs (:entry-direction v)))}
+      {:position (vehicle-center v)
+       :rotation (+ (lols (opposite-dirs (:entry-direction v)))
+                    (* 12 progress Math/PI))})))
+
+(defn despawning-scaler [v d]
+  (drawable/->Floating d
+                       [0.5 0.5]
+                       (min (- 2 (* 2 (util/vehicle->progress v)))
+                            1)
+                       0))
+
+(def despawning-vehicle (vehicle-animation despawning-vehicle->location despawning-scaler))
+
 (defn vehicles->Stack
   [vehicle-type image]
   (apply drawable/->Border
@@ -278,7 +300,7 @@ cell-draw-fn is a function that returns a Drawable."
                   (cond
                    (vehicle/moving? v) (moving-vehicle v image)
                    (vehicle/spawning? v) (spawning-vehicle v image)
-                   (vehicle/despawning? v) (drawable/->Nothing)
+                   (vehicle/despawning? v) (despawning-vehicle v image)
                    (vehicle/exploding? v) (drawable/->Nothing)))
                 (vehicle/all-vehicles vehicle/truck?))))
              (drawable/square-borders-size
