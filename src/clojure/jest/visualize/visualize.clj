@@ -209,30 +209,31 @@ cell-draw-fn is a function that returns a Drawable."
      (* 0.4 h))
     (quil/color-mode :rgb)))
 
-(defn vehicle->location
+(defn moving-vehicle->location
   [v]
   (let [stroke (util/vehicle->stroke v [(quil/width)
                                         (quil/height)])
         p (util/vehicle->progress v)
         [x y] (points/point
                stroke p)]
-    {:p' [(/ x (quil/width))
+    {:position [(/ x (quil/width))
           (/ y (quil/height))]
      :rotation (points/tangent stroke p [0 1])}))
 
-(defn moving-vehicle
-  [v image]
-  (let [{p' :p'
-         rotation :rotation} (vehicle->location v)]
-    (drawable/->Stack [(drawable/->Floating image
-                                            p'
-                                            (util/vehicle-scale)
-                                            rotation)
-                       (drawable/->Floating (resource/drawable-from-resource-rate
-                                             (resource/vehicle-resource-rate v))
-                                            p'
-                                            (util/vehicle-scale)
-                                            0)])))
+(defn vehicle-animation [location-fn]
+  (fn [v image]
+    (let [{:keys [position rotation]} (location-fn v)]
+      (drawable/->Stack [(drawable/->Floating image
+                                              position
+                                              (util/vehicle-scale)
+                                              rotation)
+                         (drawable/->Floating (resource/drawable-from-resource-rate
+                                               (resource/vehicle-resource-rate v))
+                                              position
+                                              (util/vehicle-scale)
+                                              0)]))))
+
+(def moving-vehicle (vehicle-animation moving-vehicle->location))
 
 (defn vehicles->Stack
   [vehicle-type image]
