@@ -106,12 +106,12 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn spawning-moo [vehicle drawable]
   (let [progress (util/vehicle->progress vehicle)]
-    (drawable/->Alpha
+    (drawable/->Tint
      (drawable/->Floating drawable
                           [0.5 0.5]
                           (min 1 (* 2 (util/vehicle->progress vehicle)))
                           0.0)
-     (min 255 (* progress 510)))))
+     [255 (min 255 (* progress 510))])))
 
 (def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-moo))
 
@@ -128,13 +128,13 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn despawning-moo [v d]
   (let [progress (util/vehicle->progress v)]
-    (drawable/->Alpha
+    (drawable/->Tint
      (drawable/->Floating d
                           [0.5 0.5]
                           (min (- 2 (* 2 progress))
                                1)
                           0)
-     (* 255 (max 0 (- 1 (* 2 (- progress 0.5))))))))
+     [255 (* 255 (max 0 (- 1 (* 2 (- progress 0.5)))))])))
 
 (def despawning-vehicle (vehicle-animation despawning-vehicle->location despawning-moo))
 
