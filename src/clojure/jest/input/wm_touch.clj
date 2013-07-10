@@ -138,7 +138,6 @@
                               (get-pane-offset @world-sketch)))
               id (.dwID input)
               event-type (decode-dwflags (.dwFlags input))]
-          (println 'x x 'y y 'id id)
           (case event-type
             :up (receive-up id)
             :down (receive-down id [x y])

@@ -29,7 +29,7 @@
        (* divisor (int (+ (/ h divisor)
                           0.5)))))
   ([h]
-     (hue-snap h 32)))
+     (hue-snap h 15)))
 
 (defmulti hue
   "Given either an amount of integer degrees or a keyword, return a color."
