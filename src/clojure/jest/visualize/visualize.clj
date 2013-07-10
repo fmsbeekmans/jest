@@ -99,8 +99,7 @@ cell-draw-fn is a function that returns a Drawable."
         stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
     (if (< progress 0.5)
       {:position (vehicle-center v)
-       :rotation (+ (lols (:exit-direction v))
-                    (* 4 Math/PI progress))}
+       :rotation (lols (:exit-direction v))}
       {:position (absolute->relative
                   (points/point stroke (* 2 (- progress 0.5))))
        :rotation (lols (:exit-direction v))})))
@@ -125,8 +124,7 @@ cell-draw-fn is a function that returns a Drawable."
                   (points/point stroke (* 2 progress)))
        :rotation (lols (opposite-dirs (:entry-direction v)))}
       {:position (vehicle-center v)
-       :rotation (+ (lols (opposite-dirs (:entry-direction v)))
-                    (* 12 progress Math/PI))})))
+       :rotation (lols (opposite-dirs (:entry-direction v)))})))
 
 (defn despawning-moo [v d]
   (let [progress (util/vehicle->progress v)]
