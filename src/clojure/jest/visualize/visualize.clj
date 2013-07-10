@@ -127,13 +127,16 @@ cell-draw-fn is a function that returns a Drawable."
                   (points/point stroke (* 2 (- progress 0.5))))
        :rotation (lols (:exit-direction v))})))
 
-(defn spawning-scaler [vehicle drawable]
-  (drawable/->Floating drawable
-                       [0.5 0.5]
-                       (min 1 (* 2 (util/vehicle->progress vehicle)))
-                       0.0))
+(defn spawning-moo [vehicle drawable]
+  (let [progress (util/vehicle->progress vehicle)]
+    (drawable/->Alpha
+     (drawable/->Floating drawable
+                          [0.5 0.5]
+                          (min 1 (* 2 (util/vehicle->progress vehicle)))
+                          0.0)
+     (min 255 (* progress 510)))))
 
-(def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-scaler))
+(def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-moo))
 
 (defn despawning-vehicle->location
   [v]
@@ -147,14 +150,17 @@ cell-draw-fn is a function that returns a Drawable."
        :rotation (+ (lols (opposite-dirs (:entry-direction v)))
                     (* 12 progress Math/PI))})))
 
-(defn despawning-scaler [v d]
-  (drawable/->Floating d
-                       [0.5 0.5]
-                       (min (- 2 (* 2 (util/vehicle->progress v)))
-                            1)
-                       0))
+(defn despawning-moo [v d]
+  (let [progress (util/vehicle->progress v)]
+    (drawable/->Alpha
+     (drawable/->Floating d
+                          [0.5 0.5]
+                          (min (- 2 (* 2 progress))
+                               1)
+                          0)
+     (* 255 (max 0 (- 1 (* 2 (- progress 0.5))))))))
 
-(def despawning-vehicle (vehicle-animation despawning-vehicle->location despawning-scaler))
+(def despawning-vehicle (vehicle-animation despawning-vehicle->location despawning-moo))
 
 (defn vehicles->Stack
   [vehicle-type image]
