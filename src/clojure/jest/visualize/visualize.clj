@@ -222,18 +222,21 @@ cell-draw-fn is a function that returns a Drawable."
           (/ y (quil/height))]
      :rotation (points/tangent stroke p [0 1])}))
 
-(defn vehicle-animation [location-fn]
-  (fn [v image]
-    (let [{:keys [position rotation]} (location-fn v)]
-      (drawable/->Stack [(drawable/->Floating image
-                                              position
-                                              (util/vehicle-scale)
-                                              rotation)
-                         (drawable/->Floating (resource/drawable-from-resource-rate
-                                               (resource/vehicle-resource-rate v))
-                                              position
-                                              (util/vehicle-scale)
-                                              0)]))))
+(defn vehicle-animation
+  ([location-fn]
+     (vehicle-animation location-fn (fn [_ x] x)))
+  ([location-fn image-modifier-fn]
+     (fn [v image]
+       (let [{:keys [position rotation]} (location-fn v)]
+         (drawable/->Stack [(drawable/->Floating (image-modifier-fn v image)
+                                                 position
+                                                 (util/vehicle-scale)
+                                                 rotation)
+                            (drawable/->Floating (resource/drawable-from-resource-rate
+                                                  (resource/vehicle-resource-rate v))
+                                                 position
+                                                 (util/vehicle-scale)
+                                                 0)])))))
 
 (def moving-vehicle (vehicle-animation moving-vehicle->location))
 
@@ -258,7 +261,13 @@ cell-draw-fn is a function that returns a Drawable."
                   (points/point stroke (* 2 (- progress 0.5))))
        :rotation (lols (:exit-direction v))})))
 
-(def spawning-vehicle (vehicle-animation spawning-vehicle->location))
+(defn spawning-scaler [vehicle drawable]
+  (drawable/->Floating drawable
+                       [0.5 0.5]
+                       (min 1 (* 2 (util/vehicle->progress vehicle)))
+                       0.0))
+
+(def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-scaler))
 
 (defn vehicles->Stack
   [vehicle-type image]
