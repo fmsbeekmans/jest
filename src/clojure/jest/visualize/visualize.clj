@@ -8,11 +8,13 @@
   (:require [jest.world :as world]
             [jest.movement :as movement]
             [jest.world.building :as building]
-            [jest.vehicle :as vehicle]
+            [jest.vehicle :as vehicle
+             :refer [vehicle-cell]]
             [jest.world.path :as path]
             [jest.world.cell :as cell])
   (:require [jest.visualize.points :as points]
-            [jest.visualize.util :as util]
+            [jest.visualize.util :as util
+             :refer [cell-points absolute->relative]]
             [jest.visualize.resource :as resource]
             [jest.color :as color])
   (:require [jest.visualize.input :as input]))
@@ -235,6 +237,29 @@ cell-draw-fn is a function that returns a Drawable."
 
 (def moving-vehicle (vehicle-animation moving-vehicle->location))
 
+(defn vehicle-center [v]
+  (absolute->relative (:center (cell-points (vehicle-cell v)))))
+
+(def lols
+  {:north (* 1.5 Math/PI)
+   :south (* 0.5 Math/PI)
+   :west Math/PI
+   :east 0.0})
+
+(defn spawning-vehicle->location
+  [v]
+  (let [progress (util/vehicle->progress v)
+        stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
+    (if (< progress 0.5)
+      {:position (vehicle-center v)
+       :rotation (+ (lols (:exit-direction v))
+                    (* 4 Math/PI progress))}
+      {:position (absolute->relative
+                  (points/point stroke (* 2 (- progress 0.5))))
+       :rotation (lols (:exit-direction v))})))
+
+(def spawning-vehicle (vehicle-animation spawning-vehicle->location))
+
 (defn vehicles->Stack
   [vehicle-type image]
   (apply drawable/->Border
@@ -243,7 +268,7 @@ cell-draw-fn is a function that returns a Drawable."
            (map (fn [v]
                   (cond
                    (vehicle/moving? v) (moving-vehicle v image)
-                   (vehicle/spawning? v) (drawable/->Nothing)
+                   (vehicle/spawning? v) (spawning-vehicle v image)
                    (vehicle/despawning? v) (drawable/->Nothing)
                    (vehicle/exploding? v) (drawable/->Nothing)))
                 (vehicle/all-vehicles vehicle/truck?))))

@@ -30,6 +30,14 @@
      :west [(first h-range)
              (second center)]}))
 
+(defn absolute->relative
+  ([point w h]
+     (map /
+          point
+          [w h]))
+  ([point]
+     (absolute->relative point (quil/width) (quil/height))))
+
 (defn vehicle->stroke-to-mid
   [v]
   (let [points (cell-points (world/cell (:coords v)))]
@@ -46,9 +54,9 @@
   (memoize
    (fn [v s]
      (cond
-      (vehicle/spawning? v) (vehicle->stroke-to-mid v)
-      (vehicle/despawning? v) (vehicle->stroke-from-mid v)
-      (vehicle/exploding? v) (vehicle->stroke-from-mid v)
+      (vehicle/spawning? v) (vehicle->stroke-from-mid v)
+      (vehicle/despawning? v) (vehicle->stroke-to-mid v)
+      (vehicle/exploding? v) (vehicle->stroke-to-mid v)
       (vehicle/moving? v) (points/stroke-comp
                            [(vehicle->stroke-to-mid v)
                             (vehicle->stroke-from-mid v)])))))
