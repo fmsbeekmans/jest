@@ -1,6 +1,7 @@
 ;(set! *warn-on-reflection* true)
 
 (ns user
+  (:require [quil.core :as quil])
   (:use clojure.repl
         clojure.pprint
         jest.world.cell
@@ -73,7 +74,13 @@
   (build-path (cell [3 3]) :south :road)
   (build-path (cell [3 4]) :south :road))
 
+(defn graceful-exit []
+  (if-let [world-bricklet @world-bricklet]
+    (let [queue (:command-queue world-bricklet)]
+      (swap! queue conj (fn [_] (quil/exit)) ))))
+
 (defn common-setup []
+  (graceful-exit)
   (scheduler-reset!)
   (reset-score)
   (interaction-setup)
@@ -82,8 +89,7 @@
 
   (build-spawn (cell [4 2]) :truck)
   (start!)
-  (pause!)
-)
+  (pause!))
 
 (defn user-setup []
   (setup-quil-mouse-input)
