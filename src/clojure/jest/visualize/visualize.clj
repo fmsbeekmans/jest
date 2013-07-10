@@ -3,43 +3,21 @@
   (:use jest.util)
   (:use jest.visualize.arrow)
   (:use jest.visualize.junction)
-  (:use [clojure.core.match :only [match]])
-  (:require [brick.image :as image]
-            [brick.drawable :as drawable]
+  (:use jest.visualize.building)
+  (:require [brick.drawable :as drawable]
             [quil.core :as quil])
   (:require [jest.world :as world]
-            [jest.movement :as movement]
-            [jest.world.building :as building]
             [jest.vehicle :as vehicle
              :refer [vehicle-cell]]
             [jest.world.path :as path
-             :refer [opposite-dirs]]
-            [jest.world.cell :as cell])
+             :refer [opposite-dirs]])
   (:require [jest.visualize.points :as points]
             [jest.visualize.util :as util
              :refer [cell-points absolute->relative]]
-            [jest.visualize.resource :as resource]
-            [jest.color :as color])
+            [jest.visualize.resource :as resource])
   (:require [jest.visualize.input :as input]))
 
 (def cell-bg :background)
-
-(defn cell-building
-  "Which building tile-key fits this cell?"
-  [tile-fn c]
-  (if-let [type (building/building-type c)]
-    (let [resource-vis (comp resource/drawable-from-resource-rate
-                             resource/building-resource-rate)]
-      (case type
-        :spawn (tile-fn
-                (hyphenate-keywords :spawn (building/vehicle-type c)))
-        :mixer (drawable/->Stack [(tile-fn :mixer)
-                                  (resource-vis c)])
-        :supply (drawable/->Stack [(tile-fn :supply-red)
-                                   (resource-vis c)])
-        :depot (drawable/->Stack [(tile-fn :dirt)
-                                  (resource-vis c)])))
-    (tile-fn nil)))
 
 (def min-borders [0.1 0.1])
 
@@ -174,10 +152,10 @@ cell-draw-fn is a function that returns a Drawable."
                    (vehicle/despawning? v) (despawning-vehicle v image)
                    (vehicle/exploding? v) (drawable/->Nothing)))
                 (vehicle/all-vehicles vehicle/truck?))))
-             (drawable/square-borders-size
-              (sketch-size)
-              (world/world-size)
-              min-borders)))
+         (drawable/square-borders-size
+          (sketch-size)
+          (world/world-size)
+          min-borders)))
 
 (defn world->drawable
   [tile-fn path-fn]
