@@ -1,9 +1,7 @@
 (ns jest.visualize.visualize
   "Functions to facilitate the visualisation of the world state."
   (:use jest.util)
-  (:use [clojure.core.match :only (match)])
-
-
+  (:use [clojure.core.match :only [match]])
   (:require [brick.image :as image]
             [brick.drawable :as drawable]
             [quil.core :as quil])
@@ -77,10 +75,10 @@
            [[:west :out]] :road-w
            [[:south :out]] :road-s
            [[:east :out]] :road-e
-           [[:north :in]] :road-s
-           [[:west :in]] :road-e
-           [[:south :in]] :road-n
-           [[:east :in]] :road-w
+           [[:north :in]] :road-end-s
+           [[:west :in]] :road-end-e
+           [[:south :in]] :road-end-n
+           [[:east :in]] :road-end-w
 
            [[_ :in] [_ :in]] :road-blocked
            ;; double
@@ -138,6 +136,11 @@
           re (loader "road-e.png")
           rb (drawable/->Nothing)
 
+          ren (loader "road-end-n.png")
+          rew (loader "road-end-w.png")
+          res (loader "road-end-s.png")
+          ree (loader "road-end-e.png")
+
           tnw (loader "turn-nw.png")
           tne (loader "turn-ne.png")
           tse (loader "turn-se.png")
@@ -155,6 +158,10 @@
            :road-s rs
            :road-e re
            :road-blocked rb
+           :road-end-n ren
+           :road-end-w rew
+           :road-end-s res
+           :road-end-e ree
            :turn-nw tnw
            :turn-ne tne
            :turn-se tse
