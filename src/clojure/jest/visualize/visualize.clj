@@ -22,9 +22,24 @@
             [jest.color :as color])
   (:require [jest.visualize.input :as input]))
 
-(declare cell-bg)
-(declare cell-building)
-(declare cell-road)
+(def cell-bg :background)
+
+(defn cell-building
+  "Which building tile-key fits this cell?"
+  [tile-fn c]
+  (if-let [type (building/building-type c)]
+    (let [resource-vis (comp resource/drawable-from-resource-rate
+                             resource/building-resource-rate)]
+      (case type
+        :spawn (tile-fn
+                (hyphenate-keywords :spawn (building/vehicle-type c)))
+        :mixer (drawable/->Stack [(tile-fn :mixer)
+                                  (resource-vis c)])
+        :supply (drawable/->Stack [(tile-fn :supply-red)
+                                   (resource-vis c)])
+        :depot (drawable/->Stack [(tile-fn :dirt)
+                                  (resource-vis c)])))
+    (tile-fn nil)))
 
 (def min-borders [0.1 0.1])
 
@@ -169,41 +184,7 @@ cell-draw-fn is a function that returns a Drawable."
     (world-state->Grid (partial cell-building tile-fn))
     ]))
 
-(defn cell-bg [c]
-  "What is the background tile-key for this cell?"
-  (:background c))
 
-(defn cell-building
-  "Which building tile-key fits this cell?"
-  [tile-fn c]
-  (if-let [type (building/building-type c)]
-    (let [resource-vis (comp resource/drawable-from-resource-rate
-                             resource/building-resource-rate)]
-      (case type
-        :spawn (tile-fn
-                (hyphenate-keywords :spawn (building/vehicle-type c)))
-        :mixer (drawable/->Stack [(tile-fn :mixer)
-                                  (resource-vis c)])
-        :supply (drawable/->Stack [(tile-fn :supply-red)
-                                   (resource-vis c)])
-        :depot (drawable/->Stack [(tile-fn :dirt)
-                                  (resource-vis c)])))
-    (tile-fn nil)))
-
-(defn cell-road
-  "Return the appropriate tile-key for roads in this cell."
-  [c]
-  (let [{in :in
-         out :out} (group-seq
-                    (path/paths c :road)
-                    {:in path/in-path?
-                     :out path/out-path?})]
-    ;; actual
-    (apply (partial hyphenate-keywords :road)
-           (map :direction out))
-    ;; temp
-    (if-not (empty? (first out))
-      (hyphenate-keywords :road (:direction (first out))))))
 
 (defn setup [tile-fn]
   ;init een bricklet met tile-set
