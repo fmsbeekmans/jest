@@ -50,7 +50,57 @@
   (build-spawn (cell [5 2]) :truck))
 
 (def levels
-  {:tutorial
+  {:flurp
+   [(fn level1 []
+       (initialize-world 21 17)
+       (enable-spawner (build-spawn (cell [3 6]) :truck) 0 1000)
+       (dotimes [i 4]
+         (build-path (cell [4 (+ 6 i)]) :south :road))
+       (dotimes [i 3]
+         (build-path (cell [(- 4 i) 10]) :west :road))
+       (dotimes [i 4]
+         (build-path (cell [1 (- 10 i)]) :north :road))
+       (dotimes [i 3]
+         (build-path (cell [(+ 1 i) 6]) :east :road))
+       (build-path (cell [14 8]) :east :road)
+       (build-spawn (cell [15 8]) :truck)
+       (build-path (cell [6 8]) :east :road)
+       (build-supply (cell [7 8]) :red)
+       (build-path (cell [7 8]) :east :road)
+       (build-path (cell [10 8]) :east :road)
+       (build-depot (cell [11 8]) :red 10)
+       (build-path (cell [11 8]) :east :road)
+       )
+    (fn level2 []
+      (initialize-world 21 17)
+      (enable-spawner (build-spawn (cell [3 6]) :truck) 0 4000)
+      (enable-spawner (build-spawn (cell [3 10]) :truck) 2000 4000)
+      (dotimes [i 4]
+        (build-path (cell [(+ 3 i) 6]) :east :road)
+        (build-path (cell [(+ 3 i) 10]) :east :road))
+      (dotimes [i 4]
+        (build-path (cell [(+ 10 i) 6]) :east :road)
+        (build-path (cell [(+ 10 i) 10]) :east :road))
+      
+      (dotimes [i 2]
+        (build-path (cell [7 (+ 6 i)]) :south :road)
+        (build-path (cell [7 (- 10 i)]) :north :road)
+        (build-path (cell [10 (+ 8 i)]) :south :road)
+        (build-path (cell [10 (- 8 i)]) :north :road)
+        )
+      (dotimes [i 3]
+        (build-path (cell [(+ 7 i) 8]) :east :road))
+
+      (build-supply (cell [4 6]) :red)
+      (build-supply (cell [4 10]) :blue)
+      (build-depot (cell [13 6]) :blue 10)
+      (build-depot (cell [13 10]) :red 10)
+
+      (build-spawn (cell [14 6]) :truck)
+      (build-spawn (cell [14 10]) :truck)
+      )]
+
+   :tutorial
    [(fn []
       (initialize-world 9 4)
       (build-spawn (cell [1 1]) :truck)
@@ -102,7 +152,7 @@
 
       )
     (fn []
-      (initialize-world 6 6)
+      (initialize-world 22 18)
       (let [spawns [[1 1]
                     [3 2]
                     [2 3]
