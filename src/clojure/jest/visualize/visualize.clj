@@ -4,6 +4,7 @@
   (:use jest.visualize.arrow)
   (:use jest.visualize.junction)
   (:use jest.visualize.building)
+  (:require [jest.score :as score])
   (:require [brick.drawable :as drawable]
             [quil.core :as quil])
   (:require [jest.world :as world]
@@ -22,6 +23,14 @@
 (def min-borders [0.1 0.1])
 
 (declare sketch-size)
+
+(defn score->drawable [score]
+  (reify drawable/Drawable
+    (draw [this [w h]]
+      (quil/push-style)
+      (quil/fill 255)
+      (quil/text (str "Score: " score) 10 10)
+      (quil/pop-style))))
 
 (let [cardinal-arrow (memoize (partial arrow 0.5 0.5))
       arrow-stack (memoize (fn [dirs routes]
@@ -164,6 +173,7 @@ cell-draw-fn is a function that returns a Drawable."
     (vehicles->Stack :truck (tile-fn :truck))
     (world-state->Grid paths-to-arrows)
     (world-state->Grid (partial cell-building tile-fn))
+    (score->drawable @score/current-score)
     ]))
 
 
@@ -176,6 +186,7 @@ cell-draw-fn is a function that returns a Drawable."
              (atom
               (reify drawable/Drawable
                 (draw [this [w h]]
+                  (quil/background 200)
                   (drawable/.draw
                    (world->drawable
                     tile-fn
