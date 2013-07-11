@@ -6,7 +6,7 @@
                              cargo-count clear-cargo load-vehicle despawning?
                              exploding? moving? map->Vehicle]]
         [jest.color :only [<=delta? hue hue-matches?]]
-        [jest.world :only [alter-cell coords]]
+        [jest.world :only [cell alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
                                 opposite-dirs path path-type to
                                 out-path?]]
@@ -374,12 +374,12 @@ This function should be called from within a transaction."
 (defn start-spawning []
   (doseq [{:keys [spawn-rate spawn-offset] :as s} (spawning-spawners)]
     (letfn [(spawn-and-reschedule []
-              (spawn s)
-              (if (active? s)
-                (schedule spawn-and-reschedule (offset spawn-rate))))]
+              (when (active? s)
+               (spawn s)
+               (schedule spawn-and-reschedule (offset spawn-rate))))]
       (activate-spawner s)
       (schedule spawn-and-reschedule (offset spawn-offset)))))
 
 (defn stop-spawning []
   (doseq [s @active-spawners]
-    (deactivate-spawner s)))
+    (deactivate-spawner (cell s))))
