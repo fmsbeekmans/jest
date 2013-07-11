@@ -222,3 +222,13 @@
   (sketch!)
   (undecorate-sketch @world-sketch)
   (ensure-wm-touch-input-setup!))
+
+(defn path-definition-for [p]
+  `(build-path (cell ~(:coords p)) ~(:direction p) ~(:type p)))
+
+(defn extract-path-definitions []
+  (map path-definition-for (flatten (map out-paths (all-cells)))))
+
+(defn print-path-definitions []
+  (doseq [pd (extract-path-definitions)]
+    (println pd)))
