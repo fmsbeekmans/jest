@@ -49,6 +49,77 @@
 
   (build-spawn (cell [5 2]) :truck))
 
+(def levels
+  {:tutorial
+   [(fn []
+      (initialize-world 9 4)
+      (build-spawn (cell [1 1]) :truck)
+      (build-spawn (cell [1 3]) :truck)
+      (build-spawn (cell [8 1]) :truck)
+      (build-spawn (cell [8 3]) :truck)
+      
+      (build-supply (cell [3 1]) :blue)
+      (build-supply (cell [3 3]) :red)
+      
+      (build-depot (cell [6 1]) :blue 1000)
+      (build-depot (cell [6 3]) :red 1000)
+
+      (dotimes [i 6]
+        (build-path (cell [(+ 1 i) 1]) :east :road)
+        (build-path (cell [(+ 1 i) 3]) :east :road)))
+    
+    (fn []
+      (initialize-world 9 4)
+      (build-spawn (cell [1 1]) :truck)
+      (build-spawn (cell [1 3]) :truck)
+      (build-spawn (cell [8 1]) :truck)
+      (build-spawn (cell [8 3]) :truck)
+      
+      (build-supply (cell [3 1]) :blue)
+      (build-supply (cell [3 3]) :red)
+      
+      (build-depot (cell [6 1]) :red 1000)
+      (build-depot (cell [6 3]) :blue 1000)
+
+      (build-path (cell [1 1]) :east :road)
+      (build-path (cell [2 1]) :east :road)
+      (build-path (cell [3 1]) :east :road)
+      (build-path (cell [4 1]) :south :road)
+      (build-path (cell [4 2]) :east :road)
+      (build-path (cell [5 2]) :north :road)
+      (build-path (cell [5 2]) :south :road)
+      
+      (build-path (cell [1 3]) :north :road)
+      (build-path (cell [1 2]) :east :road)
+      (build-path (cell [2 2]) :south :road)
+      (build-path (cell [2 3]) :east :road)
+      (build-path (cell [3 3]) :east :road)
+      (build-path (cell [4 3]) :north :road)
+
+      (dotimes [i 3]
+        (build-path (cell [(+ 5 i) 1]) :east :road)
+        (build-path (cell [(+ 5 i) 3]) :east :road))
+
+      )
+    (fn []
+      (initialize-world 6 6)
+      (let [spawns [[1 1]
+                    [3 2]
+                    [2 3]
+                    [4 4]]]
+        (doseq [spawn spawns]
+          (build-spawn (cell spawn) :truck))
+        (doseq [spawn spawns
+                dir [:north :east :south :west]]
+          (build-path (cell spawn) dir :road)))
+      
+      (build-supply (cell [2 1]) :red)
+      (build-supply (cell [3 4]) :green)
+      
+      (build-depot (cell [3 3]) :red 1000)
+      (build-depot (cell [2 2]) :green 1000)
+      )
+    ]})
 
 (defn build-another-level []
   (initialize-world 8 8)
@@ -85,9 +156,9 @@
   (reset-score)
   (interaction-setup)
   (load-level "levels/alpha_ugly.json")
-  (build-another-level)
+  ((get-in levels [:tutorial 2]))
 
-  (build-spawn (cell [4 2]) :truck)
+;  (build-spawn (cell [4 2]) :truck)
   (start!)
   (pause!))
 
