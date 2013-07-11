@@ -79,7 +79,7 @@ traversing such a path"}
          (alter-var-root #'vehicle->path assoc ~vehicle-type ~path-type)
          (alter-var-root #'path->duration assoc ~path-type ~duration))))
 
-(defpath :road :truck 2000)
+(defpath :road :truck 800)
 (defpath :rails :train 5000)
 (defpath :canal :boat 20000)
 
