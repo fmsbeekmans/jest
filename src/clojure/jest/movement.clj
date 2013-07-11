@@ -372,13 +372,15 @@ This function should be called from within a transaction."
 
 
 (defn start-spawning []
-  (doseq [{:keys [spawn-rate spawn-offset] :as s} (spawning-spawners)]
+  (doseq [{:keys [coord spawn-rate spawn-offset] :as s} (spawning-spawners)]
+    (println coord)
     (letfn [(spawn-and-reschedule []
-              (when (active? s)
-               (spawn s)
-               (schedule spawn-and-reschedule (offset spawn-rate))))]
+              (let [s (cell coord)]
+                (when (active? s)
+                  (spawn s)
+                  (schedule spawn-and-reschedule (offset (:spawn-rate s))))))]
       (activate-spawner s)
-      (schedule spawn-and-reschedule (offset spawn-offset)))))
+      (schedule spawn-and-reschedule (offset (:spawn-offset s))))))
 
 (defn stop-spawning []
   (doseq [s @active-spawners]
