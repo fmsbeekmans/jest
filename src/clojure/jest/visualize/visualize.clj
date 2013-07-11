@@ -66,8 +66,7 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn moving-vehicle->location
   [v]
-  (let [stroke (util/vehicle->stroke v [(quil/width)
-                                        (quil/height)])
+  (let [stroke (util/vehicle->stroke v (sketch-size))
         p (util/vehicle->progress v)
         [x y] (points/point
                stroke p)]
@@ -205,10 +204,16 @@ cell-draw-fn is a function that returns a Drawable."
   (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))
 
 (defn sketch-width []
-  (.getWidth @world-sketch))
+  (try
+    (.getWidth @world-sketch)
+    (catch NullPointerException e
+      0)))
 
 (defn sketch-height []
-  (.getHeight @world-sketch))
+  (try
+    (.getHeight @world-sketch)
+    (catch NullPointerException e
+      0)))
 
 (defn sketch-size []
   [(sketch-width) (sketch-height)])
