@@ -11,15 +11,12 @@
 (def ^:private inv-directions (clojure.set/map-invert directions))
 
 (defn on-down [id pos]
-  (if (and (direction-exists? (cell pos) :south)
-           (spawn? (direction (cell pos) :south)))
-    (spawn (direction (cell pos) :south))
-    (case pos
-      [0 0]
-      (if (paused?)
-        (resume!)
-        (pause!))
-      nil)))
+  (case pos
+    [0 0]
+    (if (paused?)
+      (resume!)
+      (pause!))
+    nil))
 
 (defn- maybe-build-route [c dir]
   (dosync
