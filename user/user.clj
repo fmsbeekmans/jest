@@ -232,3 +232,8 @@
 (defn print-path-definitions []
   (doseq [pd (extract-path-definitions)]
     (println pd)))
+
+
+(defmacro at-pointer-cell [[c] & body]
+  `(let [~c (cell (first (vals (all-pointers))))]
+     ~@body))
