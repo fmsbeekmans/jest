@@ -52,9 +52,9 @@
 
 (defn build-another-level []
   (initialize-world 8 8)
-  (build-spawn (cell [1 1]) :truck)
-  (build-spawn (cell [2 1]) :truck)
-  (build-spawn (cell [3 1]) :truck)
+  (enable-spawner (build-spawn (cell [1 1]) :truck) 0 3000)
+  (enable-spawner (build-spawn (cell [2 1]) :truck) 1000 3000)
+  (enable-spawner (build-spawn (cell [3 1]) :truck) 2000 3000)
   (build-supply (cell [1 2]) :red)
   (build-supply (cell [2 2]) :green)
   (build-mixer (cell [3 3]))

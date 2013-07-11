@@ -103,6 +103,15 @@
 (defbuilding depot :resource-type :quotum)
 (defbuilding mixer)
 
+(defn enable-spawner [spawn offset rate]
+  (dosync 
+   (alter-cell spawn assoc :spawning? true)
+   (alter-cell spawn assoc :spawn-offset offset)
+   (alter-cell spawn assoc :spawn-rate rate)))
+
+(defn spawning-spawners []
+  (filter :spawning? (all-spawns)))
+
 (def resource-soft-cap 500)
 
 (defn resource-type

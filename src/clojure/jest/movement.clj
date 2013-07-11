@@ -12,7 +12,8 @@
                                 out-path?]]
         [jest.world.building :only [spawn? vehicle-type resource-color
                                     resource-count reduce-resource mix-colors
-                                    supply? mixer? depot?]]
+                                    supply? mixer? depot? all-spawns
+                                    spawning-spawners]]
         [jest.scheduler :only [schedule offset game-time]]
         [jest.score :only [score-vehicle]])
   (:require [jest.util :as util]))
@@ -355,3 +356,30 @@ This function should be called from within a transaction."
                   (resource-color c))
      (depot? c) nil
      :default (cargo-color v))))
+
+(def active-spawners (atom #{}))
+
+(defn- activate-spawner [s]
+  (swap! active-spawners
+         conj (coords s)))
+
+(defn- deactivate-spawner [s]
+  (swap! active-spawners
+         disj (coords s)))
+
+(defn active? [s]
+  (@active-spawners (coords s)))
+
+
+(defn start-spawning []
+  (doseq [{:keys [spawn-rate spawn-offset] :as s} (spawning-spawners)]
+    (letfn [(spawn-and-reschedule []
+              (spawn s)
+              (if (active? s)
+                (schedule spawn-and-reschedule (offset spawn-rate))))]
+      (activate-spawner s)
+      (schedule spawn-and-reschedule (offset spawn-offset)))))
+
+(defn stop-spawning []
+  (doseq [s @active-spawners]
+    (deactivate-spawner s)))
