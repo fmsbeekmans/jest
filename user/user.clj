@@ -100,6 +100,7 @@
       (build-spawn (cell [14 10]) :truck)
       )
     (fn level3 []
+      (initialize-world 21 17)
       (jest.world.path/build-path (jest.world/cell [4 3]) :east :road)
       (jest.world.path/build-path (jest.world/cell [7 6]) :west :road)
       (jest.world.path/build-path (jest.world/cell [8 7]) :south :road)
