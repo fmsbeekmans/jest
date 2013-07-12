@@ -29,7 +29,8 @@
         jest.input.core
         jest.input.interaction
         jest.vehicle
-        jest.world.route))
+        jest.world.route)
+  (:require [jest.input.editor :refer [disable-editor edit]]))
 
 (defn build-level []
   (initialize-world 20 14)
