@@ -47,7 +47,8 @@
   {:red (hue 0)
    :yellow (hue 60)
    :green (hue 120)
-   :blue (hue 240)})
+   :blue (hue 240)
+   :purple (hue 300)})
 
 (defmethod hue clojure.lang.Keyword [color-name]
   (colors color-name))
