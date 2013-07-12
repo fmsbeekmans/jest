@@ -288,7 +288,35 @@
   (doseq [pd (extract-path-definitions)]
     (println pd)))
 
+(defn building-for [c]
+  (let [type (building-type c)
+        form 
+        `(~(symbol (str "build-" (subs (str  type) 1))) (cell ~(coords c))
+          ~@(case type
+              :spawn [(:vehicle-type c)]
+              :supply [(:resource-type c)]
+              :mixer []
+              :depot [(:resource-type c) (:quotum c)]))]
+    (if (and (spawn? c)
+             (:spawning? c))
+      `(enable-spawner ~form ~(:spawn-offset c) ~(:spawn-rate c))
+      form)))
+
+(defn extract-building-definitions []
+  (map building-for (concat (all-spawns)
+                            (all-supplies)
+                            (all-mixers)
+                            (all-depots))))
+
+(defn print-level []
+  (doseq [e (concat (extract-building-definitions)
+                    (extract-path-definitions))]
+    (println e)))
 
 (defmacro at-pointer-cell [[c] & body]
   `(let [~c (cell (first (vals (all-pointers))))]
      ~@body))
+
+(defn make-mixer-empty [m]
+  (dosync
+   (alter-cell m assoc :resource nil)))
