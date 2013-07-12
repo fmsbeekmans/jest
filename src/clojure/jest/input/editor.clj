@@ -41,4 +41,4 @@
 (building-editor mixer)
 
 (defmacro edit [type & args]
-  `(set-editor (~(symbol (str type "-editor")) ~@args)))
+  `(set-editor (~(symbol "jest.input.editor" (str type "-editor")) ~@args)))
