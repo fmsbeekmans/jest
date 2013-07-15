@@ -47,20 +47,21 @@
     [rate color]))
 
 (defn drawable-from-resource-rate [[rate color]]
-  (reify drawable/Drawable
-    (draw [this [w h]]
-      (let [w' (/ w 8)
-            h' (/ h 6)
-            r (* rate h')
-            dy (- h' r)
-            hsb (color/hue->hsb color)]
-        (quil/color-mode :hsb)
-        (quil/push-style)
-        (apply quil/stroke hsb)
-        (quil/no-fill)
-        (quil/rect 0 0 w' h')
-        (apply quil/fill hsb)
-        (quil/rect 0 dy w' r)
-        (quil/pop-style)
-        (quil/color-mode :rgb)
-        ))))
+  (let [rate (min rate 1.0)]
+    (reify drawable/Drawable
+      (draw [this [w h]]
+        (let [w' (/ w 8)
+              h' (/ h 6)
+              r (* rate h')
+              dy (- h' r)
+              hsb (color/hue->hsb color)]
+          (quil/color-mode :hsb)
+          (quil/push-style)
+          (apply quil/stroke hsb)
+          (quil/no-fill)
+          (quil/rect 0 0 w' h')
+          (apply quil/fill hsb)
+          (quil/rect 0 dy w' r)
+          (quil/pop-style)
+          (quil/color-mode :rgb)
+          )))))
