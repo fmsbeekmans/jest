@@ -13,7 +13,8 @@
         [jest.world.building :only [spawn? vehicle-type resource-color
                                     resource-count reduce-resource mix-colors
                                     supply? mixer? depot? all-spawns
-                                    spawning-spawners]]
+                                    spawning-spawners
+                                    dropoff-resource]]
         [jest.scheduler :only [schedule offset game-time]]
         [jest.score :only [score-vehicle]])
   (:require [jest.util :as util]))
@@ -244,14 +245,17 @@
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
-  (schedule-half-duration (vehicle id)
-                          #(when (hue-matches? (cargo-color (vehicle id))
-                                               (hue (:resource-type (vehicle-cell (vehicle id)))))
-                             ;;TODO this should also update some score
-                             (score-vehicle :deliver (vehicle id))
-
-                             (clear-cargo id)
-                             (update-vehicle-exit id))))
+  (let [v (vehicle id)
+        c (vehicle-cell v)]
+    (schedule-half-duration
+     v
+     #(when (hue-matches? (cargo-color v)
+                          (hue (:resource-type c)))
+        ;;TODO this should also update some score
+        (score-vehicle :deliver v)
+        (dropoff-resource c (cargo-count v))
+        (clear-cargo id)
+        (update-vehicle-exit id)))))
 
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
