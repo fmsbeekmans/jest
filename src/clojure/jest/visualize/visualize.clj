@@ -137,7 +137,7 @@ cell-draw-fn is a function that returns a Drawable."
      (drawable/->Floating drawable
                           [0.5 0.5]
                           (min 1 (* 2 (util/vehicle->progress vehicle)))
-                          0.0)
+                          0)
      (drawable/->Tint
        ,,, [255 (min 255 (* progress 510))]))))
 
