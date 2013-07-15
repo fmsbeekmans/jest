@@ -8,6 +8,7 @@
         jest.visualize.resource
         [jest.visualize.visualize :exclude [min-borders]]
         jest.visualize.util
+        jest.tiled.validation
         jest.world
         jest.world.building
         jest.movement
@@ -17,6 +18,7 @@
         jest.input.highlight
         jest.color
         jest.score
+        jest.tileset
 
         brick.drawable
         brick.image
@@ -209,14 +211,16 @@
 
 (defn common-setup []
   (graceful-exit)
+  (initialize-world 0 0)
   (scheduler-reset!)
   (reset-score)
   (interaction-setup)
-  (load-level "levels/alpha_ugly.json")
+  ;(load-level "levels/alpha_ugly.json")
+  (setup (load-tileset "tileset.json"))
   (scheduler-reset!)
   ((get-in levels [:tutorial 0]))
 
-;  (build-spawn (cell [4 2]) :truck)
+  (build-spawn (cell [4 2]) :truck)
   (start!)
   (start-spawning)
   (pause!))
