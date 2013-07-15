@@ -23,6 +23,7 @@
 (def min-borders [0.1 0.1])
 
 (declare sketch-size)
+(declare world-bricklet)
 
 (defn score->drawable [score]
   (reify drawable/Drawable
@@ -31,6 +32,24 @@
       (quil/fill 255)
       (quil/text (str "Score: " score) 10 10)
       (quil/pop-style))))
+
+(defn schedule-on-fps [f]
+  (swap! (:command-queue @world-bricklet)
+         conj (fn [_] (f))))
+
+(defn score-animation [score-delta location type duration]
+  (let [[x y] location]
+    (fn []
+      (when (pos? duration)
+        (quil/push-style)
+        (quil/fill 255 (min (* 3 duration) 255))
+        (quil/text (str (if (pos? score-delta) "+")
+                        score-delta)
+                   x y
+                   duration)
+        (schedule-on-fps
+         (score-animation score-delta [x (dec y)] type (dec duration)))
+        (quil/pop-style)))))
 
 (let [cardinal-arrow (memoize (partial arrow 0.5 0.5))
       arrow-stack (memoize (fn [dirs routes]
