@@ -104,7 +104,7 @@
 (defbuilding mixer)
 
 (defn enable-spawner [spawn offset rate]
-  (dosync 
+  (dosync
    (alter-cell spawn assoc :spawning? true)
    (alter-cell spawn assoc :spawn-offset offset)
    (alter-cell spawn assoc :spawn-rate rate)))
@@ -129,10 +129,14 @@
   (:vehicle-type c))
 
 ;; functions for depots
-(defn dropoff-resource
+(defn- dropoff-resource'
   [cell amount]
   {:pre [(depot? cell)]}
   (update-in cell [:amount] (fnil + 0) amount))
+
+(defn dropoff-resource
+  [cell amount]
+  (alter-cell cell dropoff-resource' amount))
 
 ;; functions for mixers
 (defn resource-color
