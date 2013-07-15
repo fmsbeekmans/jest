@@ -10,12 +10,8 @@ glyphs = [
     ("S-tru","spawn-truck"),
     ("S-tra","spawn-train"),
     ("S-b","spawn-boat"),
-    ("Su-r","supply-red"),
-    ("Su-g","supply-green"),
-    ("Su-b","supply-blue"),
-    ("D-r","depot-red"),
-    ("D-g","depot-green"),
-    ("D-b","depot-blue"),
+    ("Su","supply"),
+    ("D","depot"),
 
     # tiled only
     ("ro<","road-west"),
@@ -37,11 +33,11 @@ glyphs = [
 
     # rest
     ("", "default"),
-    ("M","mixer"),
-    ("My","mixer-yellow")
+    ("M","mixer")
     ]
 
 sane_fill = 2
+box=(48,48)
 
 def i_name(i, g):
     fmt = ("%0" + str(sane_fill) +"d")
@@ -53,7 +49,7 @@ def create_letter(p,g, f):
     if os.path.isfile(override_fname):
         shutil.copyfile(override_fname,fname)
     else:
-        i = Image.new("RGB", (48,48), "magenta")
+        i = Image.new("RGB", box, "magenta")
         d = ImageDraw.Draw(i)
         mask=Image.new('L', i.size, color=255)
         alpha_draw=ImageDraw.Draw(mask)
@@ -67,17 +63,21 @@ def wrap_q(s):
     return "\"" + s + "\""
 
 def create_mapping(i, s):
-    outp = wrap_q(str(i+1)) + ":" + wrap_q(s)
+    outp = wrap_q(str(i)) + ":" + wrap_q(s)
     return outp
 
 
 
 def create_all():
     s = ""
+    s += "{\"w\":" + str(box[0]) +","
+    s += "\"h\":" + str(box[1]) +","
+    s += "\"dict\":{"
     f = ImageFont.truetype("proggy.ttf", 24)
     for i,[g,n] in enumerate(glyphs):
         create_letter(i,g,f)
         s += create_mapping(i,n) + ","
+    s += "}}"
     return s
 
 def delete_all():
