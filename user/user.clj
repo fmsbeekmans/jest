@@ -45,8 +45,8 @@
   (build-path (cell [2 2]) :south :road)
   (build-path (cell [2 3]) :east :road)
 
-  (build-depot (cell [4 3]) :red 1000)
-  (build-depot (cell [4 4]) :blue 1000)
+  (build-depot (cell [4 3]) :red 30)
+  (build-depot (cell [4 4]) :blue 30)
 
   (build-spawn (cell [5 2]) :truck))
 
@@ -82,7 +82,7 @@
       (dotimes [i 4]
         (build-path (cell [(+ 10 i) 6]) :east :road)
         (build-path (cell [(+ 10 i) 10]) :east :road))
-      
+
       (dotimes [i 2]
         (build-path (cell [7 (+ 6 i)]) :south :road)
         (build-path (cell [7 (- 10 i)]) :north :road)
@@ -187,7 +187,7 @@
   (build-supply (cell [2 2]) :green)
   (build-mixer (cell [3 3]))
   (build-spawn (cell [4 3]) :truck)
-  (build-depot (cell [3 4]) :yellow 1000)
+  (build-depot (cell [3 4]) :yellow 30)
   (build-spawn (cell [3 5]) :truck)
 
   (build-path (cell [1 1]) :south :road)
@@ -245,7 +245,7 @@
 
 (defn building-for [c]
   (let [type (building-type c)
-        form 
+        form
         `(~(symbol (str "build-" (subs (str  type) 1))) (cell ~(coords c))
           ~@(case type
               :spawn [(:vehicle-type c)]
