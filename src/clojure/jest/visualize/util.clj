@@ -41,14 +41,14 @@
 (defn vehicle->stroke-to-mid
   [v]
   (let [points (cell-points (world/cell (:coords v)))]
-    (points/stroke (points (:entry-direction v))
-                   (points :center))))
+    (points/->Linear (points (:entry-direction v))
+                     (points :center))))
 
 (defn vehicle->stroke-from-mid
   [v]
   (let [points (cell-points (world/cell (:coords v)))]
-    (points/stroke (points :center)
-                   (points (:exit-direction v)))))
+    (points/->Linear (points :center)
+                     (points (:exit-direction v)))))
 
 (def vehicle->stroke
   (memoize
@@ -57,7 +57,7 @@
       (vehicle/spawning? v) (vehicle->stroke-from-mid v)
       (vehicle/despawning? v) (vehicle->stroke-to-mid v)
       (vehicle/exploding? v) (vehicle->stroke-to-mid v)
-      (vehicle/moving? v) (points/stroke-comp
+      (vehicle/moving? v) (points/->ComposedStroke
                            [(vehicle->stroke-to-mid v)
                             (vehicle->stroke-from-mid v)])))))
 

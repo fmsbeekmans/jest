@@ -87,11 +87,11 @@ cell-draw-fn is a function that returns a Drawable."
   [v]
   (let [stroke (util/vehicle->stroke v (sketch-size))
         p (util/vehicle->progress v)
-        [x y] (points/point
+        [x y] (points/.point
                stroke p)]
     {:position [(/ x (quil/width))
           (/ y (quil/height))]
-     :rotation (points/tangent stroke p [0 1])}))
+     :rotation (points/.tangent stroke p)}))
 
 (defn vehicle-animation
   ([location-fn]
@@ -128,7 +128,7 @@ cell-draw-fn is a function that returns a Drawable."
       {:position (vehicle-center v)
        :rotation (lols (:exit-direction v))}
       {:position (absolute->relative
-                  (points/point stroke (* 2 (- progress 0.5))))
+                  (points/.point stroke (* 2 (- progress 0.5))))
        :rotation (lols (:exit-direction v))})))
 
 (defn spawning-animation [vehicle drawable]
@@ -149,7 +149,7 @@ cell-draw-fn is a function that returns a Drawable."
         stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
     (if (< progress 0.5)
       {:position (absolute->relative
-                  (points/point stroke (* 2 progress)))
+                  (points/.point stroke (* 2 progress)))
        :rotation (lols (opposite-dirs (:entry-direction v)))}
       {:position (vehicle-center v)
        :rotation (lols (opposite-dirs (:entry-direction v)))})))
