@@ -24,25 +24,26 @@
            [[:south :in]] :road-end-n
            [[:east :in]] :road-end-w
 
-           [[_ :in] [_ :in]] :road-blocked
+           [[:north :in] [:south :in]] :road-blocked
+           [[:west :in] [:east :in]] :road-blocked
            ;; double
-           [[:north :in] [:west :out]] :turn-nw
-           [[:north :in] [:south :out]] :road-s
-           [[:north :in] [:east :out]] :turn-ne
+           [[:north _] [:west _]] :turn-nw
+           [[:north _] [:south _]] :road-s
+           [[:north _] [:east _]] :turn-ne
 
-           [[:north :out] [:west :in]] :turn-nw
-           [[:north :out] [:south :in]] :road-n
-           [[:north :out] [:east :in]] :turn-ne
+           [[:north _] [:west _]] :turn-nw
+           [[:north _] [:south _]] :road-n
+           [[:north _] [:east _]] :turn-ne
 
-           [[:west :in] [:south :out]] :turn-sw
-           [[:west :in] [:east :out]] :road-e
+           [[:west _] [:south _]] :turn-sw
+           [[:west _] [:east _]] :road-e
 
-           [[:west :out] [:south :in]] :turn-sw
-           [[:west :out] [:east :in]] :road-w
+           [[:west _] [:south _]] :turn-sw
+           [[:west _] [:east _]] :road-w
 
-           [[:south :in] [:east :out]] :turn-se
+           [[:south _] [:east _]] :turn-se
 
-           [[:south :out] [:east :in]] :turn-se
+           [[:south _] [:east _]] :turn-se
 
            ;; triple
            [[:north _] [:west _] [:south _]] :cross-t-e
