@@ -42,7 +42,7 @@
     (fn []
       (when (pos? duration)
         (quil/push-style)
-        (quil/fill 255 (min (* 3 duration) 255))
+        (quil/fill 0 (min (* 3 duration) 255))
         (quil/text (str (if (pos? score-delta) "+")
                         score-delta)
                    x y
@@ -283,6 +283,20 @@ cell-draw-fn is a function that returns a Drawable."
    (partial - 1)
    (tl)))
 
+(defn abs-tl []
+  (map * (tl) (sketch-size)))
+
+(defn abs-br []
+  (map * (br) (sketch-size)))
+
+(defn map-size []
+  (map - (abs-br) (abs-tl)))
+
+(defn cell-size []
+  (map /
+       (map-size)
+       (world-size)))
+
 (defn pixel->tile
   [x y]
   (let [tl (map * (tl) (sketch-size))
@@ -296,15 +310,20 @@ cell-draw-fn is a function that returns a Drawable."
     tpos))
 
 (defn tile->pixel
-  [tx ty]
-  (let [tl (map * (tl) (sketch-size))
-        br (map * (br) (sketch-size))
-        map-size (map - br tl)
-        cell-size (map / map-size (world-size))]
-    (map +
-         tl
-         (map #(/ % 2) cell-size)
-         (map * cell-size [tx ty]))))
+  ([[tx ty] [dx dy]]
+     (let [tl (map * (tl) (sketch-size))
+           br (map * (br) (sketch-size))
+           map-size (map - br tl)
+           cell-size (map / map-size (world-size))]
+       (map +
+            tl
+            (map #(/ % 2) cell-size)
+            (map * cell-size [tx ty])
+            (map *
+                 cell-size
+                 [dx dy]))))
+  ([[tx ty]]
+     (tile->pixel [tx ty] [0 0])))
 
 (defmacro with-tile [[t c] & body]
   `(let [~t (apply pixel->tile ~c)]
@@ -312,7 +331,6 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn animate-score-on-tile [score-delta [tx ty] type duration]
   (schedule-on-fps #((score-animation score-delta
-                                      (tile->pixel tx ty)
+                                      (tile->pixel [tx ty] [-0.4 -0.1])
                                       type
                                       duration))))
-
