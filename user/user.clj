@@ -302,3 +302,5 @@
                        (:tutorial levels))))
    :watches (vec (concat (if-let [wb @world-bricklet]
                            [{:w (:command-queue wb) :t "Command-queue" :tf count}])))})
+
+;; usage: (temp-gui (create-control-panel (demo-conf)))
