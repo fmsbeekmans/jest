@@ -146,12 +146,14 @@ stroke itself."
   Stroke
   (length
     [this]
-    (let [dif (* (- (angle (:end this))
-                    (angle (:start this)))
+    (angle (- (angle (:end this))
+              (angle (:start this))))
+    (let [dif (* (angle (- (angle (:end this))
+                           (angle (:start this))))
                  (:r this))]
       (case (:dir this)
-        :clock-wise (- (* 2 Math/PI) dif)
-        :counter-clock-wise dif)))
+        :clock-wise (* (:r this) (angle (- (* 2 Math/PI) (angle dif))))
+        :counter-clock-wise (* (:r this) dif))))
   (tangent
     [this p]
     (let [zero-between (and
@@ -160,11 +162,11 @@ stroke itself."
           through-zero (if (= (:dir this) :clock-wise)
                          (not zero-between)
                          zero-between)
-          [p'] (apply progress
-                      (.point (if through-zero
-                                (->ComposedStroke
-                                 [(->Linear [(:start this)]
-                                            [0])
+          p' (apply progress
+                (.point (if through-zero
+                          (->ComposedStroke
+                           [(->Linear [(:start this)]
+                                      [0])
                                   (->Linear [0]
                                             [(:end this)])])
                                 (->Linear [(:start this)]
@@ -175,22 +177,24 @@ stroke itself."
   (point
     [this p]
     (let [zero-between (and
-                        (neg? (:start this))
-                        (pos? (:end this)))
+                        (neg? (angle (:start this)))
+                        (pos? (angle (:end this))))
+          
           through-zero (if (= (:dir this) :clock-wise)
                          (not zero-between)
                          zero-between)
-          [p'] (apply progress
-                      (.point (if through-zero
-                                (->ComposedStroke
-                                 [(->Linear [(:start this)]
-                                            [0])
-                                  (->Linear [0]
-                                            [(:end this)])])
-                                (->Linear [(:start this)]
-                                          [(:end this)])) (progress p)))]
-      (doall (map (fn [c fn]
-                    (+ c (* (:r this) (apply fn p'))))
+          p-stroke (if through-zero
+                          (->ComposedStroke
+                           [(->Linear [(:start this)]
+                                      [0])
+                            (->Linear [0]
+                                      [(:end this)])])
+                          (->Linear [(:start this)]
+                                    [(:end this)]))
+          p' (/ (first (.point p-stroke (progress p)))
+                (.length p-stroke))]
+      (doall (map (fn [c f]
+                    (+ c (* (:r this) (f (progress p')))))
                   (:center this)
                   [cos sin])))))
 

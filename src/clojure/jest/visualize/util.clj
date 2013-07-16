@@ -54,8 +54,6 @@
   [c rel]
   (let [points (cell-points c)]
     (into points (vec (map (fn [center [dir border]]
-                             (println border
-                                      center)
                              [(hyphenate-keywords dir :p)
                               (points/.point
                                (->Linear center
@@ -95,15 +93,17 @@
 (defn arc-center
   [points from to]
   (let [get-fn (if (or (= from :south)
-                       (= from :north))
+                       (= from :south-p)
+                       (= from :north)
+                       (= from :north-p))
                     [second first]
                     [first second])]
-    (map
-     (fn [get-fn point]
-       (get-fn point))
-     get-fn
-     [(points from)
-      (points to)])))
+    (vec (map
+          (fn [get-fn point]
+            (get-fn point))
+          get-fn
+          [(points from)
+           (points to)]))))
 
 (defn vehicle->arc
   [v]
@@ -113,21 +113,21 @@
          rel-dir (rel-direction (:entry-direction v)
                                 (:exit-direction v))]
     (->ComposedStroke
-     (points->stroke points
-                     (:entry-direction v)
-                     (hyphenate-keywords (:entry-direction v) :p))
-     (->Arc
-      (arc-center (points :center)
-                  from-key
-                  to-key)
-      (- (first (points :center))
-         (first (points :east-p)))
-      (* (dirs :from-key) 0.5 Math/PI)
-      (* (dirs :to-key) 0.5 Math/PI)
-      rel-dir)
-     (points->stroke points
-                     (hyphenate-keywords (:exit-direction v) :p)
-                     (:exit-direction v)))))
+     [(points->stroke points
+                      (:entry-direction v)
+                      (hyphenate-keywords (:entry-direction v) :p))
+      (->Arc
+       (arc-center points
+                   from-key
+                   to-key)
+       (- (first (points :east-p))
+          (first (points :center)))
+       (* (dirs (:entry-direction v)) 0.5 Math/PI)
+       (* (dirs (:exit-direction v)) 0.5 Math/PI)
+       rel-dir)
+      (points->stroke points
+                      (hyphenate-keywords (:exit-direction v) :p)
+                      (:exit-direction v))])))
 
 (defn vehicle->straight
   [v]
@@ -143,7 +143,7 @@
       (vehicle/spawning? v) (vehicle->stroke-from-mid v)
       (vehicle/despawning? v) (vehicle->stroke-to-mid v)
       (vehicle/exploding? v) (vehicle->stroke-to-mid v)
-      (vehicle/moving? v) (vehicle->straight v)))))
+      (vehicle/moving? v) (vehicle->arc v)))))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
