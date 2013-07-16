@@ -14,14 +14,14 @@
          (against-background
           (v/sketch-size) => [100 100]
           (w/world-size) => [10 10]
-          (ic/tl) => [0 0]
-          (ic/br) => [1 1])))
+          (v/tl) => [0 0]
+          (v/br) => [1 1])))
 
 (tiling-fact "pixel->tile correctly calculates a tile based on a pixel"
-             (ic/pixel->tile 0 0) => [0 0]
-             (ic/pixel->tile 12 22) => [1 2]
-             (ic/pixel->tile 200 180) => [9 9]
-             (ic/pixel->tile -12 -15) => [0 0])
+             (v/pixel->tile 0 0) => [0 0]
+             (v/pixel->tile 12 22) => [1 2]
+             (v/pixel->tile 200 180) => [9 9]
+             (v/pixel->tile -12 -15) => [0 0])
 
 (tiling-fact "The pointer function returns a pointer"
              (ic/receive-down 1 [12 15])
