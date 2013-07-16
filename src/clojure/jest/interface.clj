@@ -20,7 +20,7 @@
 (defn temp-gui [contents]
   (-> (frame :title "Hello Swing"
              :size [500 :by 500]
-             :content (mig-panel :items (map vector contents)))
+             :content (flow-panel :align :left :items contents))
       show!)
 )
 
