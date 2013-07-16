@@ -1,12 +1,8 @@
 (ns jest.input.core
   "Transforms device-agnostic input from pixel-based to tile-based."
-  (:use [jest.visualize.visualize :only [sketch-size
-                                         world-bricklet
-                                         min-borders]]
-        [jest.input.highlight :only [highlight-cell remove-highlighted-cells
-                                     get-highlighted-cells]]
-        [jest.world :only [world-size]])
-  (:use [brick.drawable :only [square-borders-size]]))
+  (:require [jest.input.highlight :refer [highlight-cell remove-highlighted-cells
+                                          get-highlighted-cells]]
+            [jest.visualize.visualize :refer [with-tile]]))
 
 (def ^:private pointers (atom {}))
 (defn pointer [id]
@@ -37,39 +33,6 @@
 
 (defn reset-input-handlers! []
   (reset! handlers {}))
-
-(defn tl
-  []
-  (try
-    (square-borders-size
-     (sketch-size)
-     (world-size)
-     min-borders)
-    (catch Exception e
-      (println (pr-str e))
-      [0 0])))
-
-(defn br
-  []
-  (map
-   (partial - 1)
-   (tl)))
-
-(defn pixel->tile
-  [x y]
-  (let [tl (map * (tl) (sketch-size))
-        br (map * (br) (sketch-size))
-        map-size (map - br tl)
-        cell-size (map / map-size (world-size))
-        ppos (map - [x y] tl)
-        tpos (map (comp int /) ppos cell-size)
-        tpos (map max [0 0]
-                  (map min tpos (map dec (world-size))))]
-    tpos))
-
-(defmacro with-tile [[t c] & body]
-  `(let [~t (apply pixel->tile ~c)]
-     ~@body))
 
 (defn receive-down [id p]
   (with-tile [t p]

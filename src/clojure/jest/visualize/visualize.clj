@@ -5,9 +5,9 @@
   (:use jest.visualize.junction)
   (:use jest.visualize.building)
   (:require [jest.score :as score])
-  (:require [brick.drawable :as drawable]
+  (:require [brick.drawable :as drawable :refer [square-borders-size]]
             [quil.core :as quil])
-  (:require [jest.world :as world]
+  (:require [jest.world :as world :refer [world-size]]
             [jest.vehicle :as vehicle
              :refer [vehicle-cell]]
             [jest.world.path :as path
@@ -265,3 +265,54 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn sketch-size []
   [(sketch-width) (sketch-height)])
+
+(defn tl
+  []
+  (try
+    (square-borders-size
+     (sketch-size)
+     (world-size)
+     min-borders)
+    (catch Exception e
+      (println (pr-str e))
+      [0 0])))
+
+(defn br
+  []
+  (map
+   (partial - 1)
+   (tl)))
+
+(defn pixel->tile
+  [x y]
+  (let [tl (map * (tl) (sketch-size))
+        br (map * (br) (sketch-size))
+        map-size (map - br tl)
+        cell-size (map / map-size (world-size))
+        ppos (map - [x y] tl)
+        tpos (map (comp int /) ppos cell-size)
+        tpos (map max [0 0]
+                  (map min tpos (map dec (world-size))))]
+    tpos))
+
+(defn tile->pixel
+  [tx ty]
+  (let [tl (map * (tl) (sketch-size))
+        br (map * (br) (sketch-size))
+        map-size (map - br tl)
+        cell-size (map / map-size (world-size))]
+    (map +
+         tl
+         (map #(/ % 2) cell-size)
+         (map * cell-size [tx ty]))))
+
+(defmacro with-tile [[t c] & body]
+  `(let [~t (apply pixel->tile ~c)]
+     ~@body))
+
+(defn animate-score-on-tile [score-delta [tx ty] type duration]
+  (schedule-on-fps #((score-animation score-delta
+                                      (tile->pixel tx ty)
+                                      type
+                                      duration))))
+
