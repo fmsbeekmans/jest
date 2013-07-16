@@ -1,12 +1,16 @@
 (ns jest.visualize.util
+  (:require [jest.util :refer [hyphenate-keywords]])
   (:require [jest.world :as world]
             [jest.vehicle :as vehicle]
             [jest.movement :as movement]
             [jest.world.cell :as cell]
             [jest.scheduler :as scheduler])
-  (:require [jest.visualize.points :as points])
+  (:require [jest.visualize.points :as points
+                                   :refer [->Linear ->ComposedStroke ->Arc]])
   (:require [quil.core :as quil]
             [brick.drawable :as drawable]))
+
+(def corner-rel 0.5)
 
 (defn cell-points [c]
   (let [coord (:coord c)
@@ -30,6 +34,20 @@
      :west [(first h-range)
              (second center)]}))
 
+(defn cell-points-p
+  [c rel]
+  (let [points (cell-points c)]
+    (into points (vec (map (fn [center [dir border]]
+                             (println border
+                                      center)
+                             [(hyphenate-keywords dir :p)
+                              (points/.point
+                               (->Linear center
+                                         border) rel)])
+                           (repeat (:center points))
+                           (filter (fn [[dir _]]
+                                     (not= dir :center)) points))))))
+
 (defn absolute->relative
   ([point w h]
      (map /
@@ -40,15 +58,21 @@
 
 (defn vehicle->stroke-to-mid
   [v]
-  (let [points (cell-points (world/cell (:coords v)))]
-    (points/->Linear (points (:entry-direction v))
-                     (points :center))))
+  (let [points (cell-points-p (world/cell (:coords v))
+                              corner-rel)]
+    (->Linear (points (hyphenate-keywords (:entry-direction v) :p))
+              (points :center))))
 
 (defn vehicle->stroke-from-mid
   [v]
-  (let [points (cell-points (world/cell (:coords v)))]
-    (points/->Linear (points :center)
-                     (points (:exit-direction v)))))
+  (let [points (cell-points-p (world/cell (:coords v))
+                              corner-rel)]
+    (comment (points (hyphenate-keywords (:exit-direction v) :p))
+             (points :center))
+    (->Linear (points :center)
+              (points (hyphenate-keywords (:exit-direction v) :p)))))
+
+
 
 (def vehicle->stroke
   (memoize
@@ -57,7 +81,7 @@
       (vehicle/spawning? v) (vehicle->stroke-from-mid v)
       (vehicle/despawning? v) (vehicle->stroke-to-mid v)
       (vehicle/exploding? v) (vehicle->stroke-to-mid v)
-      (vehicle/moving? v) (points/->ComposedStroke
+      (vehicle/moving? v) (->ComposedStroke
                            [(vehicle->stroke-to-mid v)
                             (vehicle->stroke-from-mid v)])))))
 
