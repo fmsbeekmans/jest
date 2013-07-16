@@ -15,6 +15,13 @@
   [l]
   (.point l 1))
 
+(defn progress
+  [p]
+  (cond
+   (> 0 p) 0
+   (< 1 p) 1
+   :default p))
+
 ;; Stroke protocol
 
 (defprotocol Stroke
@@ -26,14 +33,6 @@
 
 (defrecord Linear [start end]
   Stroke
-  (point [this p]
-    (let [togo (- 1 p)]
-      (vec (map (fn [from-c to-c]
-                  (+
-                   (* p to-c)
-                   (* togo from-c)))
-                (:start this)
-                (:end this)))))
   (length [this]
     (Math/sqrt
      (apply +
@@ -42,6 +41,15 @@
                      (* d d)))
                  (:start this)
                  (:end this)))))
+  (point [this p]
+    (let [p' (progress p)
+          togo (- 1 p')]
+      (vec (map (fn [from-c to-c]
+                  (+
+                   (* p' to-c)
+                   (* togo from-c)))
+                (:start this)
+                (:end this)))))
   (tangent [this p]
     (let [p1 (start-point this)
           p2 (end-point this)
@@ -58,7 +66,6 @@ interval and as value a map of offset, howmuch stroke comes before this
 starts in absolute? progress, relative, how long is this sub-stroke? and the
 stroke itself."
   [ss]
-;;  {:pre [(strokes-connected? ss)]}
   (let [total-length (apply + (map length ss))]
     (loop [sum 0
            ss' ss
@@ -66,7 +73,9 @@ stroke itself."
       (if (seq ss')
         (let [sub-stroke (first ss')
               length' (/ (length sub-stroke) total-length)
-              sum' (+ sum length')]
+              sum' (if (empty? ss)
+                       1
+                       (+ sum length'))]
           (recur
            sum'
            (rest ss')
@@ -80,68 +89,49 @@ stroke itself."
   "At which sub-stroke is p?"
   [composed p]
 ;  {:pre [(= (:stroke-type (meta composed)) :composed)]}
-  (first
-   (cond
-    (zero? p) (keep
+  (let [p' (progress p)]
+    (first
+     (cond
+      (zero? p') (keep
+                 (fn [[[start end] sub-stroke]]
+                   (if (zero? start)
+                     sub-stroke))
+                 (:indexed-sub-strokes (meta composed)))
+      (= 1 p') (keep
                (fn [[[start end] sub-stroke]]
-                 (if (zero? start)
+                 (if (= 1 start)
                    sub-stroke))
                (:indexed-sub-strokes (meta composed)))
-    (= 1 p) (keep
-             (fn [[[start end] sub-stroke]]
-               (if (= 1 start)
-                 sub-stroke))
-             (:indexed-sub-strokes (meta composed)))
-    :default (keep
-              (fn [[[start end] sub-stroke]]
-                (if (and
-                     (> p start)
-                     (<= p end))
-                  sub-stroke))
-              (:indexed-sub-strokes (meta composed))))))
-
-(defn strokes-connected?
-  "Does each stroke start at the end of the stroke before it?"
-  [ss]
-  (if (seq ss)
-    (loop [stroke (first ss)
-           last-p (start-point stroke)
-           ss' ss]
-      (if (seq ss')
-        (if (= (set (map (fn [last first]
-                           (= (double first)
-                              (double last)))
-                         last-p (start-point stroke)))
-               #{true})
-          (recur (second ss')
-                 (end-point stroke)
-                 (rest ss'))
-          false)
-        true))
-    true))
+      :default (keep
+                (fn [[[start end] sub-stroke]]
+                  (if (and
+                       (> p' start)
+                       (<= p' end))
+                    sub-stroke))
+                (:indexed-sub-strokes (meta composed)))))))
 
 (defrecord ComposedStroke [sub]
   Stroke
+  (length [this]
+    (apply + (map (comp length :stroke)
+                  (vals (:indexed-sub-strokes (meta this))))))
   (point [this p]
     (let [{offset :offset
            p' :progress
-           sub-stroke :stroke} (sub-stroke this p)
-           p'' (/ (- p offset)
-                  p')]
+           sub-stroke :stroke} (sub-stroke this (progress p))
+           p'' (progress (/ (- (progress p) offset)
+                            (progress p')))]
       (.point sub-stroke (cond
                           (> p'' 1) 1
                           (< p'' 0) 0
                           :default p''))))
-  (length [this]
-    (apply + (map (comp length :stroke)
-                  (vals (:indexed-sub-strokes (meta this))))))
   (tangent [this p]
     (let [{offset :offset
            p' :progress
-           sub-stroke :stroke} (sub-stroke this p)]
+           sub-stroke :stroke} (sub-stroke this (progress p))]
       (tangent sub-stroke
-               (/ (- p offset)
-                  p')))))
+               (/ (- (progress p) offset)
+                  (progress p'))))))
 
 (defn ->ComposedStroke [sub]
   (with-meta (ComposedStroke. sub)
@@ -170,14 +160,15 @@ stroke itself."
           through-zero (if (= (:dir this) :clock-wise)
                          (not zero-between)
                          zero-between)
-          [p'] (.point (if through-zero
-                         (->ComposedStroke
-                          [(->Linear [(:start this)]
-                                     [0])
-                           (->Linear [0]
-                                     [(:end this)])])
-                         (->Linear [(:start this)]
-                                    [(:end this)])) p)]
+          [p'] (apply progress
+                      (.point (if through-zero
+                                (->ComposedStroke
+                                 [(->Linear [(:start this)]
+                                            [0])
+                                  (->Linear [0]
+                                            [(:end this)])])
+                                (->Linear [(:start this)]
+                                          [(:end this)])) (progress p)))]
       ((case (:dir this)
           :clock-wise -
           :counter-clock-wise +) p' (* 0.5 Math/PI))))
@@ -189,14 +180,15 @@ stroke itself."
           through-zero (if (= (:dir this) :clock-wise)
                          (not zero-between)
                          zero-between)
-          [p'] (.point (if through-zero
-                         (->ComposedStroke
-                          [(->Linear [(:start this)]
-                                     [0])
-                           (->Linear [0]
-                                     [(:end this)])])
-                         (->Linear [(:start this)]
-                                   [(:end this)])) p)]
+          [p'] (apply progress
+                      (.point (if through-zero
+                                (->ComposedStroke
+                                 [(->Linear [(:start this)]
+                                            [0])
+                                  (->Linear [0]
+                                            [(:end this)])])
+                                (->Linear [(:start this)]
+                                          [(:end this)])) (progress p)))]
       (doall (map (fn [c fn]
                     (+ c (* (:r this) (apply fn p'))))
                   (:center this)
