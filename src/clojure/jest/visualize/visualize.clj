@@ -4,7 +4,7 @@
   (:use jest.visualize.arrow)
   (:use jest.visualize.junction)
   (:use jest.visualize.building)
-  (:require [jest.score :as score])
+  (:require [jest.score :as score :refer [set-visualize-score-fn!]])
   (:require [brick.drawable :as drawable :refer [square-borders-size]]
             [quil.core :as quil])
   (:require [jest.world :as world :refer [world-size]]
@@ -223,7 +223,7 @@ cell-draw-fn is a function that returns a Drawable."
     (score->drawable @score/current-score)
     ]))
 
-
+(declare animate-score-on-tile)
 
 (defn setup [tile-fn]
   ;init een bricklet met tile-set
@@ -246,7 +246,8 @@ cell-draw-fn is a function that returns a Drawable."
              :init (fn [_] (quil/frame-rate 60))
              :mouse-pressed input/on-down-handler
              :mouse-released input/on-up-handler
-             :mouse-dragged input/on-move-handler))))
+             :mouse-dragged input/on-move-handler)))
+  (set-visualize-score-fn! #(animate-score-on-tile %1 %2 %3 60)))
 
 (defn sketch! []
   (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))

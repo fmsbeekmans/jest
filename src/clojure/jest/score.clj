@@ -1,7 +1,6 @@
 (ns jest.score
   (:require [jest.world :refer [coords]]
-            [jest.vehicle :refer [cargo-count vehicle-cell]]
-            [jest.visualize.visualize :refer [animate-score-on-tile]]))
+            [jest.vehicle :refer [cargo-count vehicle-cell]]))
 
 (defonce current-score (ref nil))
 
@@ -31,12 +30,16 @@
   (+ (scoring-base event)
                    (* multiplier (scoring-extra event))))
 
+(def visualize-score-fn (atom (fn [score tile type])))
+(defn set-visualize-score-fn! [f]
+  (reset! visualize-score-fn f))
+
 (defn score
   ([tile event multiplier]
-     (println :hoi tile)
-     (add-score (calculate-score event multiplier))
-     (send score-agent
-           (fn [_] (animate-score-on-tile (calculate-score event multiplier) tile :wut 60))))
+     (let [sc (calculate-score event multiplier)]
+       (add-score sc)
+       (send score-agent
+             (fn [_] (@visualize-score-fn sc tile :wut)))))
   ([tile event]
      (score tile event 1)))
 
