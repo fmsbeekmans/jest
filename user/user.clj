@@ -19,6 +19,7 @@
         jest.color
         jest.score
         jest.tileset
+        jest.interface
 
         brick.drawable
         brick.image
@@ -279,3 +280,14 @@
 (defn make-mixer-empty [m]
   (dosync
    (alter-cell m assoc :resource nil)))
+
+(defn- level-helper [selector]
+    (get-in levels selector))
+
+(def gui-conf
+  {:fn-s [{:f pause! :t "Pause"}
+           {:f resume! :t "Resume"}
+           {:f (level-helper [:tutorial 0]) :t "Level 0"}
+           {:f (level-helper [:tutorial 1]) :t "Level 1"}]
+   :watches [{:w world-sketch, :t "World Sketch"}
+             {:w world-bricklet, :t "World bricklet"}]})
