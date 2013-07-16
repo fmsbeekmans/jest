@@ -79,16 +79,14 @@
 
 (defn vehicle->stroke-to-mid
   [v]
-  (let [points (cell-points (world/cell (:coords v))
-                            corner-rel)]
+  (let [points (cell-points (world/cell (:coords v)))]
     (points->stroke points
                     (:entry-direction v)
                     :center)))
 
 (defn vehicle->stroke-from-mid
   [v]
-  (let [points (cell-points (world/cell (:coords v))
-                            corner-rel)]
+  (let [points (cell-points (world/cell (:coords v)))]
     (points->stroke points
                     :center
                     (:exit-direction v))))
@@ -133,7 +131,7 @@
 
 (defn vehicle->straight
   [v]
-  (let [points (cell-points (world/cell (:coords v)) corner-rel)]
+  (let [points (cell-points (world/cell (:coords v)))]
     (points->stroke points
                     (:entry-direction v)
                     (:exit-direction v))))
@@ -145,9 +143,7 @@
       (vehicle/spawning? v) (vehicle->stroke-from-mid v)
       (vehicle/despawning? v) (vehicle->stroke-to-mid v)
       (vehicle/exploding? v) (vehicle->stroke-to-mid v)
-      (vehicle/moving? v) (->ComposedStroke
-                           [(vehicle->stroke-to-mid v)
-                            (vehicle->stroke-from-mid v)])))))
+      (vehicle/moving? v) (vehicle->straight v)))))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
