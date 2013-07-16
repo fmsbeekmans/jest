@@ -30,5 +30,3 @@
           watches (for [{:keys [w t tf]} watches]
                     (watcher-label w t tf))]
       (concat fn-buttons watches))))
-
-(def x (atom 0))
