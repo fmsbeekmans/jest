@@ -29,8 +29,7 @@
     (let [fn-buttons (for [{:keys [f t]} fn-s]
                        (fn-button f t))
           watches (for [{:keys [w t]} watches]
-                    (watcher-label w t))
-          levels (for)]
+                    (watcher-label w t))]
       (concat fn-buttons watches))))
 
 (def x (atom 0))
