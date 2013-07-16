@@ -8,9 +8,25 @@
   (:require [jest.visualize.points :as points
                                    :refer [->Linear ->ComposedStroke ->Arc]])
   (:require [quil.core :as quil]
-            [brick.drawable :as drawable]))
+            [brick.drawable :as drawable])
+  (:require [clojure.algo.generic.math-functions :as m]))
 
 (def corner-rel 0.5)
+
+(def dirs
+  {:east 0
+   :north 1
+   :west 2
+   :south 3})
+
+(defn rel-direction
+  [from to]
+  (case (mod (- (dirs from)
+                (dirs to)) 4)
+    0 :reverse
+    1 :clock-wise
+    2 :straight
+    3 :counter-clock-wise))
 
 (defn cell-points [c]
   (let [coord (:coord c)
@@ -56,23 +72,71 @@
   ([point]
      (absolute->relative point (quil/width) (quil/height))))
 
+(defn points->stroke
+  ([points from to]
+   (->Linear (points from)
+             (points to))))
+
 (defn vehicle->stroke-to-mid
   [v]
-  (let [points (cell-points-p (world/cell (:coords v))
-                              corner-rel)]
-    (->Linear (points (hyphenate-keywords (:entry-direction v) :p))
-              (points :center))))
+  (let [points (cell-points (world/cell (:coords v))
+                            corner-rel)]
+    (points->stroke points
+                    (:entry-direction v)
+                    :center)))
 
 (defn vehicle->stroke-from-mid
   [v]
-  (let [points (cell-points-p (world/cell (:coords v))
-                              corner-rel)]
-    (comment (points (hyphenate-keywords (:exit-direction v) :p))
-             (points :center))
-    (->Linear (points :center)
-              (points (hyphenate-keywords (:exit-direction v) :p)))))
+  (let [points (cell-points (world/cell (:coords v))
+                            corner-rel)]
+    (points->stroke points
+                    :center
+                    (:exit-direction v))))
 
 
+(defn arc-center
+  [points from to]
+  (let [get-fn (if (or (= from :south)
+                       (= from :north))
+                    [second first]
+                    [first second])]
+    (map
+     (fn [get-fn point]
+       (get-fn point))
+     get-fn
+     [(points from)
+      (points to)])))
+
+(defn vehicle->arc
+  [v]
+  (let [points (cell-points-p (world/cell (:coords v)) corner-rel)
+         from-key (hyphenate-keywords (:entry-direction v) :p)
+         to-key (hyphenate-keywords (:exit-direction v) :p)
+         rel-dir (rel-direction (:entry-direction v)
+                                (:exit-direction v))]
+    (->ComposedStroke
+     (points->stroke points
+                     (:entry-direction v)
+                     (hyphenate-keywords (:entry-direction v) :p))
+     (->Arc
+      (arc-center (points :center)
+                  from-key
+                  to-key)
+      (- (first (points :center))
+         (first (points :east-p)))
+      (* (dirs :from-key) 0.5 Math/PI)
+      (* (dirs :to-key) 0.5 Math/PI)
+      rel-dir)
+     (points->stroke points
+                     (hyphenate-keywords (:exit-direction v) :p)
+                     (:exit-direction v)))))
+
+(defn vehicle->straight
+  [v]
+  (let [points (cell-points (world/cell (:coords v)) corner-rel)]
+    (points->stroke points
+                    (:entry-direction v)
+                    (:exit-direction v))))
 
 (def vehicle->stroke
   (memoize
