@@ -16,7 +16,8 @@
                  [org.clojure/core.match "0.2.0-rc3"]
                  [net.java.dev.jna/jna "3.5.2"]
                  [seesaw "1.4.3"]
-                 [net.java.dev.jna/platform "3.5.2"]]
+                 [net.java.dev.jna/platform "3.5.2"]
+                 [org.clojure/algo.generic "0.1.1"]]
   :repl-options {;; Specify the string to print when prompting for input.
                  ;; defaults to something like (fn [ns] (str *ns* "=> "))
                  ;; What to print when the repl session starts.

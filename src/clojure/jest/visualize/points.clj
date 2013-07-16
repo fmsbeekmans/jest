@@ -1,6 +1,7 @@
 (ns jest.visualize.points
   "Helps to define routes through n-dimentional spaces and
-   get the needed. Defined are simple and composite.")
+   get the needed. Defined are simple and composite."
+  (:require [clojure.algo.generic.math-functions :refer [sin cos]]))
 
 ;; Helper functions
 
@@ -145,4 +146,59 @@ stroke itself."
 (defn ->ComposedStroke [sub]
   (with-meta (ComposedStroke. sub)
     {:indexed-sub-strokes (index-sub-strokes sub)}))
+
+(defn angle
+  [a]
+  (mod a (* 2 Math/PI)))
+
+(defrecord Arc
+  [center r start end dir]
+  Stroke
+  (length
+    [this]
+    (let [dif (* (- (angle (:end this))
+                    (angle (:start this)))
+                 (:r this))]
+      (case (:dir this)
+        :clock-wise (- (* 2 Math/PI) dif)
+        :counter-clock-wise dif)))
+  (tangent
+    [this p]
+    (let [zero-between (and
+                        (neg? (:start this))
+                        (pos? (:end this)))
+          through-zero (if (= (:dir this) :clock-wise)
+                         (not zero-between)
+                         zero-between)
+          [p'] (.point (if through-zero
+                         (->ComposedStroke
+                          [(->Linear [(:start this)]
+                                     [0])
+                           (->Linear [0]
+                                     [(:end this)])])
+                         (->Linear [(:start this)]
+                                    [(:end this)])) p)]
+      ((case (:dir this)
+          :clock-wise -
+          :counter-clock-wise +) p' (* 0.5 Math/PI))))
+  (point
+    [this p]
+    (let [zero-between (and
+                        (neg? (:start this))
+                        (pos? (:end this)))
+          through-zero (if (= (:dir this) :clock-wise)
+                         (not zero-between)
+                         zero-between)
+          [p'] (.point (if through-zero
+                         (->ComposedStroke
+                          [(->Linear [(:start this)]
+                                     [0])
+                           (->Linear [0]
+                                     [(:end this)])])
+                         (->Linear [(:start this)]
+                                   [(:end this)])) p)]
+      (doall (map (fn [c fn]
+                    (+ c (* (:r this) (apply fn p'))))
+                  (:center this)
+                  [cos sin])))))
 
