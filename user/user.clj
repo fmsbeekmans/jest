@@ -284,10 +284,21 @@
 (defn- level-helper [selector]
     (get-in levels selector))
 
-(def gui-conf
+(def ex-conf
   {:fn-s [{:f pause! :t "Pause"}
            {:f resume! :t "Resume"}
            {:f (level-helper [:tutorial 0]) :t "Level 0"}
            {:f (level-helper [:tutorial 1]) :t "Level 1"}]
    :watches [{:w world-sketch, :t "World Sketch"}
              {:w world-bricklet, :t "World bricklet"}]})
+
+(defn demo-conf []
+  {:fn-s (vec (concat [{:f pause! :t "Pause"}
+                       {:f resume! :t "Resume"}
+                       {:f start-spawning :t "Start spawning"}
+                       {:f stop-spawning :t "Stop spawning"}]
+                      (map-indexed
+                       (fn [i f] {:f f :t (str "Level " i)})
+                       (:tutorial levels))))
+   :watches (vec (concat (if-let [wb @world-bricklet]
+                           [{:w (:command-queue wb) :t "Command-queue" :tf count}])))})

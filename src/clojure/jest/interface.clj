@@ -9,12 +9,11 @@
 (defn fn-button [f t]
   ((fn-button-helper f) :text t))
 
-(defn- watcher-label [w t]
-  (let [tr #(str t ": " %1)
-        l (label (tr "---"))]
-    (b/bind w (b/transform tr) l)
+(defn watcher-label [w t tf]
+  (let [vis #(str t ": " %1)
+        l (label (vis "---"))]
+    (b/bind w (b/transform (comp vis (or tf identity))) l)
     l))
-
 
 
 (defn temp-gui [contents]
@@ -28,8 +27,8 @@
   (let [{:keys [fn-s watches levels]} config]
     (let [fn-buttons (for [{:keys [f t]} fn-s]
                        (fn-button f t))
-          watches (for [{:keys [w t]} watches]
-                    (watcher-label w t))]
+          watches (for [{:keys [w t tf]} watches]
+                    (watcher-label w t tf))]
       (concat fn-buttons watches))))
 
 (def x (atom 0))
