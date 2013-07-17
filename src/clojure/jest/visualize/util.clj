@@ -105,6 +105,10 @@
           [(points from)
            (points to)]))))
 
+(defn vehicle->rel-direction
+  [v]
+  (apply rel-direction ((juxt :entry-direction :exit-direction) v)))
+
 (defn vehicle->arc
   [v]
   (let [points (cell-points-p (world/cell (:coords v)) corner-rel)
@@ -138,12 +142,16 @@
 
 (def vehicle->stroke
   (memoize
-   (fn [v s]
+   (fn [v _]
      (cond
       (vehicle/spawning? v) (vehicle->stroke-from-mid v)
       (vehicle/despawning? v) (vehicle->stroke-to-mid v)
       (vehicle/exploding? v) (vehicle->stroke-to-mid v)
-      (vehicle/moving? v) (vehicle->arc v)))))
+      (vehicle/moving? v) (case (vehicle->rel-direction v)
+                            :straight (vehicle->straight v)
+                            :clock-wise (vehicle->arc v)
+                            :counter-clock-wise (vehicle->arc v)
+                            :reverse (vehicle->straight v))))))
 
 (defn vehicle-scale
   "What scale should a vehicle-tile be scaled by?
