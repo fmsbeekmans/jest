@@ -99,7 +99,7 @@ stroke itself."
                  (:indexed-sub-strokes (meta composed)))
       (= 1 p') (keep
                (fn [[[start end] sub-stroke]]
-                 (if (= 1 start)
+                 (if (zero? (- 1 end))
                    sub-stroke))
                (:indexed-sub-strokes (meta composed)))
       :default (keep

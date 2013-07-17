@@ -181,8 +181,8 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn exploding-animation [v d]
   (let [progress (util/vehicle->progress v)
-        col-gradient (points/stroke [255 255 255]
-                                    [32 0 0])]
+        col-gradient (points/->Linear [255 255 255]
+                                      [32 0 0])]
     (->
      (drawable/->Floating d
                           [0.5 0.5]

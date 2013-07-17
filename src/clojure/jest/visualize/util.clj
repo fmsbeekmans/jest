@@ -11,7 +11,7 @@
             [brick.drawable :as drawable])
   (:require [clojure.algo.generic.math-functions :as m]))
 
-(def corner-rel 0.5)
+(def corner-rel 0.25)
 
 (def dirs
   {:east 0
@@ -112,23 +112,17 @@
 (defn vehicle->arc
   [v]
   (let [points (cell-points-p (world/cell (:coords v)) corner-rel)
-         from-key (hyphenate-keywords (:entry-direction v) :p)
-         to-key (hyphenate-keywords (:exit-direction v) :p)
-         rel-dir (rel-direction (:entry-direction v)
-                                (:exit-direction v))]
+        from-key (hyphenate-keywords (:entry-direction v) :p)
+        to-key (hyphenate-keywords (:exit-direction v) :p)
+        rel-dir (rel-direction (:entry-direction v)
+                               (:exit-direction v))]
     (->ComposedStroke
      [(points->stroke points
                       (:entry-direction v)
                       (hyphenate-keywords (:entry-direction v) :p))
-      (->Arc
-       (arc-center points
-                   from-key
-                   to-key)
-       (- (first (points :east-p))
-          (first (points :center)))
-       (* (dirs (:entry-direction v)) 0.5 Math/PI)
-       (* (dirs (:exit-direction v)) 0.5 Math/PI)
-       rel-dir)
+      (points->stroke points
+                      (hyphenate-keywords (:entry-direction v) :p)
+                      (hyphenate-keywords (:exit-direction v) :p))
       (points->stroke points
                       (hyphenate-keywords (:exit-direction v) :p)
                       (:exit-direction v))])))
