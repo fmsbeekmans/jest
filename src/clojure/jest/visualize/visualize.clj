@@ -201,6 +201,10 @@ cell-draw-fn is a function that returns a Drawable."
           (vec
            (map (fn [v]
                   (cond
+                   (and (vehicle/spawning? v)
+                        (vehicle/exploding? v))
+                   (brick.drawable/->Nothing)
+                   
                    (vehicle/moving? v) (moving-vehicle v image)
                    (vehicle/spawning? v) (spawning-vehicle v image)
                    (vehicle/despawning? v) (despawning-vehicle v image)
