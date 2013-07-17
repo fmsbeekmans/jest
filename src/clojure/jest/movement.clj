@@ -4,7 +4,7 @@
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
-                             exploding? moving? map->Vehicle]]
+                             exploding? moving? spawning? map->Vehicle]]
         [jest.color :only [<=delta? hue hue-matches?]]
         [jest.world :only [cell alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
@@ -152,7 +152,9 @@
 (defn start-exploding
   "Modifies the state of the vehicle with the given id to :exploding."
   [id]
-  (set-end-state id :exploding)
+  (if (spawning? (vehicle id))
+    (set-end-state id :spawning-exploding)
+    (set-end-state id :exploding))
   (score-vehicle :explode (vehicle id)))
 
 (defn vehicle-transition-state-dispatch
