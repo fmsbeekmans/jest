@@ -1,11 +1,11 @@
 (ns jest.input.interaction
   (:require [jest.input.core :refer [set-input-handler!]]
-            [jest.world :refer [directions direction cell direction-exists?]]
+            [jest.world :refer [directions direction cell direction-exists? coords]]
             [jest.world.building :refer [spawn? vehicle-type]]
-            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path]]
+            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
-            [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle]]
-            [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? pickup-color]]
+            [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle vehicle-cell moving?]]
+            [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? outgoing? pickup-color]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
 (def ^:private inv-directions (clojure.set/map-invert directions))
@@ -18,9 +18,21 @@
       (pause!))
     nil))
 
+(defn in-connected-cells [c]
+  (map to (in-paths c)))
+
+(defn routable-vehicles [c]
+  (concat 
+   (filter incoming? (vehicles c))
+   (filter #(and (outgoing? %)
+                 (moving? %)
+                 (= (coords (to (path (vehicle-cell %) (:exit-direction %))))
+                    (coords c)))
+           (mapcat vehicles (in-connected-cells c)))))
+
 (defn- maybe-build-route [c dir]
   (dosync
-   (if-let [v (first (filter incoming? (vehicles c)))]
+   (if-let [v (first (routable-vehicles c))]
      (let [vehicle-type (:type v)
            color (pickup-color v)]
        (when (= (path-type (path c dir))
