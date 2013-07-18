@@ -147,15 +147,16 @@
    schedules removal from the map."
   [id]
   {:pre [(spawn? (vehicle-cell (vehicle id)))]}
-  (set-end-state id :despawning))
+  (dosync
+   (score-vehicle :despawn (vehicle id))
+   (set-end-state id :despawning)))
 
 (defn start-exploding
   "Modifies the state of the vehicle with the given id to :exploding."
   [id]
   (if (spawning? (vehicle id))
     (set-end-state id :spawning-exploding)
-    (set-end-state id :exploding))
-  (score-vehicle :explode (vehicle id)))
+    (set-end-state id :exploding)))
 
 (defn vehicle-transition-state-dispatch
   "Dispatch function for the vehicle-transition-state multimethod.
@@ -182,8 +183,6 @@
 (defmethod vehicle-transition-state
   [true :spawn]
   [id]
-  (score-vehicle :despawn-with-cargo (vehicle id))
-  ;;TODO add penalty for despawning with cargo
   (start-despawning id))
 
 (defn resource-hue [cell]
@@ -214,7 +213,8 @@
                             (set-cargo id
                                        (resource-hue (vehicle-cell (vehicle id)))
                                        (cargo-capacity (:type (vehicle id))))
-                            (update-vehicle-exit id))))
+                            (update-vehicle-exit id)
+                            (score-vehicle :get-cargo (vehicle id)))))
 
 (defmethod vehicle-transition-state
   [false :mixer]
@@ -253,8 +253,7 @@
      v
      #(when (hue-matches? (cargo-color v)
                           (hue (:resource-type c)))
-        ;;TODO this should also update some score
-        (score-vehicle :deliver v)
+        (score-vehicle :drop-cargo v)
         (dropoff-resource c (cargo-count v))
         (clear-cargo id)
         (update-vehicle-exit id)))))
@@ -319,7 +318,6 @@
                                     :state :spawning})))
 
      (when-not (:exit-direction (vehicle id))
-       (score-vehicle :explode (vehicle id))
        (vehicle-state-change id :spawning-exploding))
      (vehicle id))))
 
@@ -330,6 +328,7 @@
   (dosync
    (let [vehicle (load-vehicle-on-spawn c)]
      (schedule-move (:id vehicle))
+     (score-vehicle :spawn vehicle)
      vehicle)))
 
 (defn valid-out-direction? [v dir]

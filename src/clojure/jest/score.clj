@@ -16,9 +16,10 @@
   (alter current-score + n))
 
 (def scoring
-  {:deliver [90 10]
-   :explode [-50 -10]
-   :despawn-with-cargo [-20 -10]})
+  {:get-cargo [0 -10]
+   :drop-cargo [0 20]
+   :spawn [-10 0]
+   :despawn [10 0]})
 
 (defn get-scoring [event]
   (get scoring event [0 0]))
