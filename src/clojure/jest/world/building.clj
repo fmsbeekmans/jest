@@ -184,3 +184,6 @@
    amount with the given amount."
   [cell amount]
   (alter-cell cell reduce-resource' amount))
+
+(defn all-depots-filled? []
+  (every? #(>= (:amount %) (:quotum %)) (all-depots)))

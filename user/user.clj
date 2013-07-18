@@ -304,6 +304,3 @@
                            [{:w (:command-queue wb) :t "Command-queue" :tf count}])))})
 
 ;; usage: (temp-gui (create-control-panel (demo-conf)))
-
-(defn filled-depots? []
-  (every? #(>= %1 1.0) (map (comp first building-resource-rate) (all-depots))))
