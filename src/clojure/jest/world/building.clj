@@ -186,4 +186,4 @@
   (alter-cell cell reduce-resource' amount))
 
 (defn all-depots-filled? []
-  (every? #(>= (:amount %) (:quotum %)) (all-depots)))
+  (every? #((fnil >= 0 0) (:amount %) (:quotum %)) (all-depots)))
