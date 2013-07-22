@@ -4,7 +4,8 @@
   (:use jest.visualize.arrow)
   (:use jest.visualize.junction)
   (:use jest.visualize.building)
-  (:require [jest.score :as score :refer [set-visualize-score-fn!]])
+  (:require [jest.score :as score :refer [set-visualize-score-fn!]]
+            [jest.visualize.score-screen :refer [score-screen]])
   (:require [brick.drawable :as drawable :refer [square-borders-size]]
             [quil.core :as quil])
   (:require [jest.world :as world :refer [world-size]]
@@ -21,6 +22,7 @@
 (def cell-bg :background)
 
 (def min-borders [0.1 0.1])
+(def visible (atom false))
 
 (declare sketch-size)
 (declare world-bricklet)
@@ -239,9 +241,13 @@ cell-draw-fn is a function that returns a Drawable."
                 (draw [this [w h]]
                   (quil/background 200)
                   (drawable/.draw
-                   (world->drawable
-                    tile-fn
-                    path-fn)
+                   (drawable/->Stack
+                    [(world->drawable
+                      tile-fn
+                      path-fn)
+                     (drawable/->Toggle
+                      (score-screen)
+                      visible)])
                    [w h]))))
              (atom [])
              :decor false
