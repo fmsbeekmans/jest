@@ -249,6 +249,9 @@
 (defn set-done-callback! [f]
   (reset! done-callback f))
 
+(defn reset-done-callback! []
+  (reset! done-callback (fn [])))
+
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
