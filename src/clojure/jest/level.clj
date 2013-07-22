@@ -30,17 +30,16 @@
   (scheduler-reset!)
   (reset-score))
 
-(defn reset-level []
-  (start-level @current-level))
-
 (defn start-level [level-fn]
   (reset! current-level level-fn)
   (initialize-level)
 
   (level-fn)
   (start!)
-  (start-spawning)
-  )
+  (start-spawning))
+
+(defn reset-level []
+  (start-level @current-level))
 
 (defn stop-level []
   (stop-spawning))
