@@ -400,5 +400,4 @@ This function should be called from within a transaction."
         (schedule (partial spawn-and-reschedule time) time)))))
 
 (defn stop-spawning []
-  (doseq [s @active-spawners]
-    (deactivate-spawner (cell s))))
+  (reset! active-spawners #{}))
