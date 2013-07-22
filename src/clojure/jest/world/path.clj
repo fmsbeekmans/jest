@@ -9,7 +9,7 @@
 ; be used for the transportation of any resource. In other words, every path
 ; has an implied :any color.
 
-(defrecord Path [type coords direction inout resources routes])
+(defrecord Path [type coords direction inout routes])
 
 (defn path-type
   "Returns the type of the given path."
