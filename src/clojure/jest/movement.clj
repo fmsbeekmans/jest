@@ -262,7 +262,6 @@
         (dropoff-resource c (cargo-count v))
         (clear-cargo id)
         (update-vehicle-exit id)
-
         (if (all-depots-filled?)
           (@done-callback))))))
 
@@ -387,13 +386,15 @@ This function should be called from within a transaction."
 (defn start-spawning []
   (doseq [{:keys [coord spawn-rate spawn-offset] :as s} (spawning-spawners)]
     (println coord)
-    (letfn [(spawn-and-reschedule []
-              (let [s (cell coord)]
+    (letfn [(spawn-and-reschedule [time]
+              (let [s (cell coord)
+                    time (+ time (:spawn-rate s))]
                 (when (active? s)
                   (spawn s)
-                  (schedule spawn-and-reschedule (offset (:spawn-rate s))))))]
+                  (schedule (partial spawn-and-reschedule time) time))))]
       (activate-spawner s)
-      (schedule spawn-and-reschedule (offset (:spawn-offset s))))))
+      (let [time (offset (:spawn-offset s))]
+        (schedule (partial spawn-and-reschedule time) time)))))
 
 (defn stop-spawning []
   (doseq [s @active-spawners]
