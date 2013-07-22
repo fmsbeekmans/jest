@@ -1,7 +1,10 @@
 (ns jest.level
   (:require [jest.tiled.validation :as validation]
             [jest.tiled.import :as import]
-            [jest.world :as world]
+            [jest.world :as world :refer [reset-world]]
+            [jest.scheduler :refer [scheduler-reset! start!]]
+            [jest.movement :refer [start-spawning stop-spawning]]
+            [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]))
 
 (def valid-schema?
@@ -18,3 +21,26 @@
              valid-level?
              import/parse-world)]
     level))
+
+(def current-level (atom nil))
+
+(defn initialize-level []
+  (stop-spawning)
+  (reset-world {})
+  (scheduler-reset!)
+  (reset-score))
+
+(defn reset-level []
+  (start-level @current-level))
+
+(defn start-level [level-fn]
+  (reset! current-level level-fn)
+  (initialize-level)
+
+  (level-fn)
+  (start!)
+  (start-spawning)
+  )
+
+(defn stop-level []
+  (stop-spawning))

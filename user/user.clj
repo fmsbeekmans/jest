@@ -228,13 +228,8 @@
   (interaction-setup)
   ;(load-level "levels/alpha_ugly.json")
   (setup (load-tileset "tileset.json"))
-  (scheduler-reset!)
-  ((get-in levels [:tutorial 0]))
 
-  (build-spawn (cell [4 2]) :truck)
-  (start!)
-  (start-spawning)
-  (pause!))
+  (start-level (get-in levels [:tutorial 0])))
 
 (defn user-setup []
   (setup-quil-mouse-input)
