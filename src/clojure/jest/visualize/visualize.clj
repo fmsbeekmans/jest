@@ -250,6 +250,7 @@ cell-draw-fn is a function that returns a Drawable."
                       visible)])
                    [w h]))))
              (atom [])
+             :title "Traffic"
              :decor false
              :size [800 600]
              :renderer :java2d
