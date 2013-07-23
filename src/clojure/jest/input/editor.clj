@@ -6,7 +6,8 @@
                                          supply? build-supply unbuild-supply
                                          depot? build-depot unbuild-depot
                                          mixer? build-mixer unbuild-mixer
-                                         building-type]]))
+                                         building-type build-restricted
+                                         unbuild-restricted]]))
 
 (defn disable-editor []
   (i/interaction-setup))
@@ -39,6 +40,7 @@
 (building-editor supply color)
 (building-editor depot color goal)
 (building-editor mixer)
+(building-editor restricted)
 
 (defmacro edit [type & args]
   `(set-editor (~(symbol "jest.input.editor" (str type "-editor")) ~@args)))

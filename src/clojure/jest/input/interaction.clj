@@ -1,7 +1,7 @@
 (ns jest.input.interaction
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell direction-exists? coords]]
-            [jest.world.building :refer [spawn? vehicle-type]]
+            [jest.world.building :refer [spawn? vehicle-type restricted?]]
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle vehicle-cell moving?]]
@@ -96,20 +96,22 @@
                         (update-vehicles-for-cell-changes c2))
                       type)
                     (fn on-empty []
-                      (if-let [in-paths (seq (in-paths c1))]
-                        (let [type (or (pointer-track-type id)
-                                       (first (sort path-type-sort
-                                                    (map path-type
-                                                         in-paths))))]
-                          (build-path c1 direction
-                                      type)
-                          (update-vehicles-for-cell-changes c1)
-                          type)
-                        (if (spawn? c1)
-                          (let [type (vehicle->path (vehicle-type c1))]
-                            (build-path c1 direction type)
+                      (if (restricted? c2)
+                        :invalid
+                        (if-let [in-paths (seq (in-paths c1))]
+                          (let [type (or (pointer-track-type id)
+                                         (first (sort path-type-sort
+                                                      (map path-type
+                                                           in-paths))))]
+                            (build-path c1 direction
+                                        type)
+                            (update-vehicles-for-cell-changes c1)
                             type)
-                          :invalid)))))))
+                          (if (spawn? c1)
+                            (let [type (vehicle->path (vehicle-type c1))]
+                              (build-path c1 direction type)
+                              type)
+                            :invalid))))))))
 
 (defn on-up [id _]
   (let [[type count tile direction] (@pointer-track id)]

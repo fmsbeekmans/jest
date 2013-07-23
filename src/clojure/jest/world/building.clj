@@ -102,6 +102,7 @@
 (defbuilding supply :resource-type)
 (defbuilding depot :resource-type :quotum)
 (defbuilding mixer)
+(defbuilding restricted)
 
 (defn enable-spawner [spawn offset rate]
   (dosync

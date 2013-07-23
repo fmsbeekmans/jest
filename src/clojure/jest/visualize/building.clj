@@ -20,5 +20,11 @@
         :supply (drawable/->Stack [(tile-fn :supply)
                                    (resource-vis c)])
         :depot (drawable/->Stack [(tile-fn :depot)
-                                  (resource-vis c)])))
+                                  (resource-vis c)])
+        :restricted (reify drawable/Drawable
+                      (draw [this [w h]]
+                        (quil/push-style)
+                        (quil/fill 0 0 0)
+                        (quil/rect 0 0 w h)
+                        (quil/pop-style)))))
     (tile-fn nil)))
