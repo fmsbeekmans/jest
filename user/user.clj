@@ -296,6 +296,7 @@
               :spawn [(:vehicle-type c)]
               :supply [(:resource-type c)]
               :mixer []
+              :restricted []
               :depot [(:resource-type c) (:quotum c)]))]
     (if (and (spawn? c)
              (:spawning? c))
@@ -306,7 +307,8 @@
   (map building-for (concat (all-spawns)
                             (all-supplies)
                             (all-mixers)
-                            (all-depots))))
+                            (all-depots)
+                            (all-restricteds))))
 
 (defn print-level []
   (doseq [e (concat (extract-building-definitions)
