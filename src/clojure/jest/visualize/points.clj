@@ -119,8 +119,10 @@ stroke itself."
     (let [{offset :offset
            p' :progress
            sub-stroke :stroke} (sub-stroke this (progress p))
-           p'' (progress (/ (- (progress p) offset)
-                            (progress p')))]
+           p'' (if (zero? p')
+                 0
+                 (progress (/ (- (progress p) offset)
+                              (progress p'))))]
       (.point sub-stroke (cond
                           (> p'' 1) 1
                           (< p'' 0) 0
