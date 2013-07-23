@@ -344,3 +344,11 @@
                            [{:w (:command-queue wb) :t "Command-queue" :tf count}])))})
 
 ;; usage: (temp-gui (create-control-panel (demo-conf)))
+
+(defn clear-level
+  "empty all buildings and unload all vehicles"
+  []
+  (dosync
+   (doseq [v (all-vehicles)] (unload-vehicle v))
+   (doseq [m (all-mixers)] (alter-cell m assoc :resource nil))
+   (doseq [d (all-depots)] (alter-cell d assoc :amount 0))))
