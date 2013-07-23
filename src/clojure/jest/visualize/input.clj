@@ -1,13 +1,25 @@
 (ns jest.visualize.input
   "input handlers for a quil window that can be set from elsewhere.")
 
-(defn on-down-handler [])
-(defn on-up-handler [])
-(defn on-move-handler [])
-
-(def handlers {:on-down #'on-down-handler
-               :on-up #'on-up-handler
-               :on-move #'on-move-handler})
+(defonce handlers (atom  {:on-down (fn [])
+                          :on-up (fn [])
+                          :on-move (fn [])
+                          :on-key-typed (fn [])}))
 
 (defn set-input-handler! [on fn]
-  (alter-var-root (handlers on) (constantly fn)))
+  (swap! handlers assoc on fn))
+
+(defn- call-handler [on]
+  ((@handlers on)))
+
+(defn on-down-handler []
+  (call-handler :on-down))
+
+(defn on-up-handler []
+  (call-handler :on-up))
+
+(defn on-move-handler []
+  (call-handler :on-move))
+
+(defn on-key-typed-handler []
+  (call-handler :on-key-typed))
