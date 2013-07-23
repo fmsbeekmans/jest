@@ -39,15 +39,19 @@
   (reset-done-callback!)
   (reset! visible false))
 
-(defn start-level [level-fn]
-  (reset! current-level level-fn)
-  (initialize-level)
-  (set-done-callback! #(send (agent nil) (fn [_] (win-level))))
+(defn start-level
+  ([level-fn]
+     (start-level level-fn false))
+  ([level-fn edit-mode?]
+     (reset! current-level level-fn)
+     (initialize-level)
+     (when-not edit-mode?
+       (set-done-callback! #(send (agent nil) (fn [_] (win-level)))))
 
-  (level-fn)
+     (level-fn)
 
-  (start!)
-  (start-spawning))
+     (start!)
+     (start-spawning)))
 
 (defn reset-level []
   (start-level @current-level))
