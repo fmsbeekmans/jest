@@ -34,10 +34,8 @@
   (if-let [type (building/building-type c)]
     (let [resource-vis (comp resource/drawable-from-resource-rate
                              resource/building-resource-rate)]
-      (case type
-        :spawn (tile-fn
+      (if (= type :spawn)
+        (tile-fn
                 (hyphenate-keywords :spawn (building/vehicle-type c)))
-        :mixer (drawable/->Nothing)
-        :supply (drawable/->Nothing)
-        :depot (drawable/->Nothing)))
+        (drawable/->Nothing)))
     (tile-fn nil)))
