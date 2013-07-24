@@ -57,7 +57,7 @@
   {:tutorial
    [(fn level1 []
       (initialize-world 21 17)
-      (enable-spawner (build-spawn (cell [3 6]) :truck) 0 1000)
+      (enable-spawner (build-spawn (cell [3 6]) :truck) 0 2000)
       (dotimes [i 4]
         (build-path (cell [4 (+ 6 i)]) :south :road))
       (dotimes [i 3]
