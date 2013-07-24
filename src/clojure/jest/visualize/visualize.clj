@@ -223,7 +223,11 @@ cell-draw-fn is a function that returns a Drawable."
    [
     (world-state->Grid (comp tile-fn (constantly :grass)))
     (world-state->Grid path-fn)
-    (world-state->Grid (partial cell-spawn tile-fn))
+    (world-state->Grid (partial cell-spawn
+                                (comp (fn [keyword]
+                                        (println keyword)
+                                        (drawable/->Tint keyword
+                                                         [255 128])) tile-fn)))
     (vehicles->Stack :truck (tile-fn :truck))
     (world-state->Grid paths-to-arrows)
     (world-state->Grid (partial cell-building tile-fn))
