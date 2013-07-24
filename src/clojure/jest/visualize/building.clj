@@ -13,8 +13,7 @@
     (let [resource-vis (comp resource/drawable-from-resource-rate
                              resource/building-resource-rate)]
       (case type
-        :spawn (tile-fn
-                (hyphenate-keywords :spawn (building/vehicle-type c)))
+        :spawn (drawable/->Nothing)
         :mixer (drawable/->Stack [(tile-fn :mixer)
                                   (resource-vis c)])
         :supply (drawable/->Stack [(tile-fn :supply)
@@ -27,4 +26,18 @@
                         (quil/fill 0 0 0)
                         (quil/rect 0 0 w h)
                         (quil/pop-style)))))
+    (tile-fn nil)))
+
+(defn cell-spawn
+  "Which building tile-key fits this cell?"
+  [tile-fn c]
+  (if-let [type (building/building-type c)]
+    (let [resource-vis (comp resource/drawable-from-resource-rate
+                             resource/building-resource-rate)]
+      (case type
+        :spawn (tile-fn
+                (hyphenate-keywords :spawn (building/vehicle-type c)))
+        :mixer (drawable/->Nothing)
+        :supply (drawable/->Nothing)
+        :depot (drawable/->Nothing)))
     (tile-fn nil)))
