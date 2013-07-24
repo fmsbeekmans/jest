@@ -24,8 +24,8 @@
            [[:south :in]] :road-end-n
            [[:east :in]] :road-end-w
 
-           [[:north :in] [:south :in]] :road-blocked
-           [[:west :in] [:east :in]] :road-blocked
+;           [[:north :in] [:south :in]] :road-blocked
+;           [[:west :in] [:east :in]] :road-blocked
            ;; double
            [[:north _] [:west _]] :turn-nw
            [[:north _] [:south _]] :road-s

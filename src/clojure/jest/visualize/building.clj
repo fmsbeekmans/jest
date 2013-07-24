@@ -36,6 +36,6 @@
                              resource/building-resource-rate)]
       (if (= type :spawn)
         (tile-fn
-                (hyphenate-keywords :spawn (building/vehicle-type c)))
+         (hyphenate-keywords :spawn (building/vehicle-type c)))
         (drawable/->Nothing)))
     (tile-fn nil)))
