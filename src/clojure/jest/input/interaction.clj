@@ -23,7 +23,6 @@
   (map to (in-paths c)))
 
 (defn routable-vehicles [c]
-  ""
   (concat 
    (filter incoming? (vehicles c))
    (filter #(and (outgoing? %)
@@ -49,36 +48,41 @@
 
 (defn track-pointer [id type tile direction on-same on-empty]
   "Track the pointenters."
-  (let [[path-type count] (@pointer-track id)]
+  (let [{:keys [path-type count]} (@pointer-track id)]
     (swap! pointer-track assoc id
            (if path-type
-             [(cond (= :invalid path-type)
-                    :invalid
-
-                    (= type path-type)
-                    (on-same)
-                    
-                    (nil? type)
-                    (on-empty)
-                    
-                    :default
-                    :invalid)
-              (inc count) tile direction]
-             [(if type
-                (on-same)
-                (on-empty)) 1 tile direction]))))
+             {:path-type (cond (= :invalid path-type)
+                               :invalid
+                               
+                               (= type path-type)
+                               (on-same)
+                               
+                               (nil? type)
+                               (on-empty)
+                               
+                               :default
+                               :invalid)
+              :count (inc count)
+              :tile tile
+              :direction direction}
+             {:path-type (if type
+                           (on-same)
+                           (on-empty))
+              :count 1
+              :tile tile
+              :direction direction}))))
 
 (defn untrack-pointer [id]
   (swap! pointer-track dissoc id))
 
 (defn pointer-track-type [id]
-  (first (@pointer-track id)))
+  (:path-type (@pointer-track id)))
 
 (defn pointer-track-tile [id]
-  ((@pointer-track id) 2))
+  (:tile (@pointer-track id)))
 
 (defn pointer-track-direction [id]
-  ((@pointer-track id) 3))
+  (:direction (@pointer-track id)))
 
 (let [paths [:road :rails :canal]]
   ;; Waar is deze let voor?
@@ -149,18 +153,18 @@
                             :invalid))))))))
 
 (defn on-up [id _]
-  (let [[type count tile direction] (@pointer-track id)]
+  (let [{:keys [path-type count tile direction]} (@pointer-track id)]
     (if (and count
              (= count 1)
-             (not= type :invalid))
+             (not= path-type :invalid))
       (maybe-build-route (cell tile) direction)))
   (untrack-pointer id))
 
 (defn on-up-opt-2 [id _]
-  (let [[type count tile direction] (@pointer-track id)]
+  (let [{:keys [path-type count tile direction]} (@pointer-track id)]
     (if (and count
              (= count 1)
-             (not= type :invalid))
+             (not= path-type :invalid))
       (maybe-build-route (cell tile) direction)))
   (untrack-pointer id))
 
