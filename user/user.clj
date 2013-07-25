@@ -494,6 +494,9 @@
   (undecorate-sketch @world-sketch)
   (ensure-wm-touch-input-setup!))
 
+(defn world-size-definition []
+  `(initialize-world ~(world-width) ~(world-height)))
+
 (defn path-definition-for [p]
   `(build-path (cell ~(:coords p)) ~(:direction p) ~(:type p)))
 
@@ -527,9 +530,13 @@
                             (all-restricteds))))
 
 (defn print-level []
-  (doseq [e (concat (extract-building-definitions)
-                    (extract-path-definitions))]
-    (println e)))
+  (println "(do")
+  (doseq [e (concat [(world-size-definition)]
+             (extract-building-definitions)
+             (extract-path-definitions))]
+    (println e))
+  (println ")"))
+
 
 (defmacro at-pointer-cell [[c] & body]
   `(let [~c (cell (first (vals (all-pointers))))]
@@ -570,3 +577,24 @@
    (doseq [v (all-vehicles)] (unload-vehicle v))
    (doseq [m (all-mixers)] (alter-cell m assoc :resource nil))
    (doseq [d (all-depots)] (alter-cell d assoc :amount 0))))
+
+
+(defn serialize
+  "Serializes data-structure to a file called file-name. File file-name
+will be created if it doesn't exist and overwritten if it already exists."
+  [data-structure file-name]
+  (with-open [output (-> (java.io.File. file-name) java.io.FileOutputStream. java.io.ObjectOutputStream.)]
+    (.writeObject output data-structure)))
+
+(defn deserialize
+  "De-serializes a data-structure from a file called file-name."
+  [file-name]
+  (with-open [input (-> (java.io.File. file-name) java.io.FileInputStream. java.io.ObjectInputStream.)]
+    (.readObject input )))
+
+(defn save-world [file-name]
+  (spit file-name (with-out-str (print-level))))
+
+;; This is probably the most evil thing I have ever done. So happy my name is still not correctly tied to this commit ~J
+(defn load-world [file-name]
+  (eval (read-string (slurp file-name))))
