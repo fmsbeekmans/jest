@@ -19,9 +19,11 @@
     nil))
 
 (defn in-connected-cells [c]
+  "All cells with a path to c."
   (map to (in-paths c)))
 
 (defn routable-vehicles [c]
+  ""
   (concat 
    (filter incoming? (vehicles c))
    (filter #(and (outgoing? %)
@@ -46,6 +48,7 @@
 (def pointer-track ( atom {}))
 
 (defn track-pointer [id type tile direction on-same on-empty]
+  "Track the pointenters."
   (let [[path-type count] (@pointer-track id)]
     (swap! pointer-track assoc id
            (if path-type
@@ -78,11 +81,43 @@
   ((@pointer-track id) 3))
 
 (let [paths [:road :rails :canal]]
+  ;; Waar is deze let voor?
   (defn path-type-sort [p1 p2]
     (< (.indexOf paths p1)
        (.indexOf paths p2))))
 
 (defn on-move [id pos1 pos2]
+  (dosync 
+   (let [c1 (cell pos1)
+         c2 (cell pos2)
+         direction (inv-directions (map - pos2 pos1))
+         path (path c1 direction)
+         type (path-type path)]
+     (track-pointer id type pos1 direction
+                    (fn on-same []
+                      (when (in-path? path)
+                        (unbuild-path c1 direction)
+                        (update-vehicles-for-cell-changes c2))
+                      type)
+                    (fn on-empty []
+                      (if (restricted? c2)
+                        :invalid
+                        (if-let [in-paths (seq (in-paths c1))]
+                          (let [type (or (pointer-track-type id)
+                                         (first (sort path-type-sort
+                                                      (map path-type
+                                                           in-paths))))]
+                            (build-path c1 direction
+                                        type)
+                            (update-vehicles-for-cell-changes c1)
+                            type)
+                          (if (spawn? c1)
+                            (let [type (vehicle->path (vehicle-type c1))]
+                              (build-path c1 direction type)
+                              type)
+                            :invalid))))))))
+
+(defn on-move-opt-2 [id pos1 pos2]
   (dosync 
    (let [c1 (cell pos1)
          c2 (cell pos2)
@@ -121,7 +156,15 @@
       (maybe-build-route (cell tile) direction)))
   (untrack-pointer id))
 
+(defn on-up-opt-2 [id _]
+  (let [[type count tile direction] (@pointer-track id)]
+    (if (and count
+             (= count 1)
+             (not= type :invalid))
+      (maybe-build-route (cell tile) direction)))
+  (untrack-pointer id))
+
 (defn interaction-setup []
-  (set-input-handler! :on-move on-move)
+  (set-input-handler! :on-move on-move-opt-2)
   (set-input-handler! :on-down on-down)
-  (set-input-handler! :on-up on-up))
+  (set-input-handler! :on-up on-up-opt-2))
