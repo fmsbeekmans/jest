@@ -36,12 +36,8 @@
 applying transform-fn on the absolute delta"
   [transform-fn points]
   (fn [point]
-    (let [delta (comp (fn [x] (println (str "transformed delta: " x)) x)
-                      transform-fn #(Math/abs %)
-                      (fn [x] (println (str "diff: " x)) x)
-                      (partial - point)
-                      (fn [x] (println (str "input: " x)) x)
-                      )]
+    (let [delta (comp transform-fn #(Math/abs %)
+                      (partial - point))]
       (apply min-key delta points))))
 
 (let [circle-arc (* 2 Math/PI)]
@@ -49,7 +45,15 @@ applying transform-fn on the absolute delta"
     (mod angle circle-arc)))
 
 (defn circle-delta-wrap [angle-delta]
-  (min (Math/abs (- Math/PI angle-delta)) angle-delta))
+  (if (> (Math/abs (- angle-delta Math/PI)) Math/PI)
+    (- (* 2 Math/PI) angle-delta)
+    angle-delta))
+
+(defn circle-divider [pieces]
+  (let [piece-arc (/ (* Math/PI 2)
+                     pieces)]
+
+    (take pieces (iterate (partial + piece-arc) 0))))
 
 (def bla
   (comp
