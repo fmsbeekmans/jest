@@ -52,7 +52,6 @@ applying transform-fn on the absolute delta"
 (defn circle-divider [pieces]
   (let [piece-arc (/ (* Math/PI 2)
                      pieces)]
-
     (take pieces (iterate (partial + piece-arc) 0))))
 
 (def bla
