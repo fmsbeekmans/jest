@@ -31,6 +31,32 @@
   ([h]
      (hue-snap h 32)))
 
+(defn snapper
+  "Returns an fn that snaps values to the nearest of the given points, after
+applying transform-fn on the absolute delta"
+  [transform-fn points]
+  (fn [point]
+    (let [delta (comp (fn [x] (println (str "transformed delta: " x)) x)
+                      transform-fn #(Math/abs %)
+                      (fn [x] (println (str "diff: " x)) x)
+                      (partial - point)
+                      (fn [x] (println (str "input: " x)) x)
+                      )]
+      (apply min-key delta points))))
+
+(let [circle-arc (* 2 Math/PI)]
+  (defn circle-overflow [angle]
+    (mod angle circle-arc)))
+
+(defn circle-delta-wrap [angle-delta]
+  (min (Math/abs (- Math/PI angle-delta)) angle-delta))
+
+(def bla
+  (comp
+   (snapper circle-delta-wrap
+            (take 4 (iterate (partial + (/ Math/PI 2)) 0)))
+   circle-overflow))
+
 (defmulti hue
   "Given either an amount of integer degrees or a keyword, return a color."
   type)
@@ -89,4 +115,3 @@
      (if hue
        [(hue->int hue) 255 255]
        alt)))
-
