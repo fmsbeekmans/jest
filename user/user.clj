@@ -554,10 +554,17 @@
   {:fn-s (vec (concat [{:f pause! :t "Pause"}
                        {:f resume! :t "Resume"}
                        {:f start-spawning :t "Start spawning"}
-                       {:f stop-spawning :t "Stop spawning"}]
+                       {:f stop-spawning :t "Stop spawning"}
+                       {:f disable-editor :t "Disable editor"}
+                       {:f #(edit restricted) :t "edit restricted"}
+                       {:f #(edit mixer) :t "edit mixer"}
+                       {:f #(edit spawn :truck) :t "edit spawn (truck)"}
+                       ]
                       (map-indexed
                        (fn [i f] {:f f :t (str "Level " i)})
-                       (:tutorial levels))))
+                       (map #(fn [] (start-level %))
+                            (concat (:tutorial levels)
+                                    (:easy levels))))))
    :watches (vec (concat (if-let [wb @world-bricklet]
                            [{:w (:command-queue wb) :t "Command-queue" :tf count}])))})
 
