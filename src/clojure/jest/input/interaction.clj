@@ -46,8 +46,7 @@
 
 (defn set-route
   [c dir color path-kind]
-  (when (and color
-           path-type)
+  (when path-type
     (println (:coords c))
     (dosync
      (when (= (path-type (path c dir)) path-kind)
