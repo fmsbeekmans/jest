@@ -120,7 +120,8 @@ traversing such a path"}
   (update-path c (map->Path {:type type
                              :coords (coords c)
                              :direction direction
-                             :inout inout})))
+                             :inout inout
+                             :routes #{}})))
 
 (defn- remove-path
   "removes the path from the cell for the given direction"
