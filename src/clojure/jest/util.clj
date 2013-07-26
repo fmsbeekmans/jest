@@ -87,3 +87,12 @@
             (mapcat (fn [f]
                       [f (eval (f target))])
                     fns))))
+
+(defn snapper
+  "Returns an fn that snaps values to the nearest of the given points, after
+applying transform-fn on the absolute delta"
+  [transform-fn points]
+  (fn [point]
+    (let [delta (comp transform-fn #(Math/abs %)
+                      (partial - point))]
+      (apply min-key delta points))))

@@ -23,23 +23,6 @@
   (vector->hue (apply map +
                       (map hue->vector hs))))
 
-(defn hue-snap
-  ([h n]
-     (let [divisor (/ (* 2 Math/PI) n)]
-       (* divisor (int (+ (/ h divisor)
-                          0.5)))))
-  ([h]
-     (hue-snap h 32)))
-
-(defn snapper
-  "Returns an fn that snaps values to the nearest of the given points, after
-applying transform-fn on the absolute delta"
-  [transform-fn points]
-  (fn [point]
-    (let [delta (comp transform-fn #(Math/abs %)
-                      (partial - point))]
-      (apply min-key delta points))))
-
 (let [circle-arc (* 2 Math/PI)]
   (defn circle-overflow [angle]
     (mod angle circle-arc)))
@@ -54,11 +37,14 @@ applying transform-fn on the absolute delta"
                      pieces)]
     (take pieces (iterate (partial + piece-arc) 0))))
 
-(def bla
-  (comp
-   (snapper circle-delta-wrap
-            (take 4 (iterate (partial + (/ Math/PI 2)) 0)))
-   circle-overflow))
+(let [hue-snapper #(comp
+                    (util/snapper circle-delta-wrap (circle-divider %))
+                    circle-overflow)]
+  (defn hue-snap
+    ([h n]
+       ((hue-snapper n) h))
+    ([h]
+       (hue-snap h 32))))
 
 (defmulti hue
   "Given either an amount of integer degrees or a keyword, return a color."
