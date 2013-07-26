@@ -73,7 +73,7 @@ stroke itself."
       (if (seq ss')
         (let [sub-stroke (first ss')
               length' (/ (length sub-stroke) total-length)
-              sum' (if (empty? ss)
+              sum' (if (empty? (rest ss))
                        1
                        (+ sum length'))]
           (recur
