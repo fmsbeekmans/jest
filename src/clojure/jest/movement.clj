@@ -4,7 +4,8 @@
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?
-                             exploding? moving? spawning? map->Vehicle]]
+                             exploding? moving? spawning? map->Vehicle
+                             all-vehicles]]
         [jest.color :only [<=delta? hue hue-matches?]]
         [jest.world :only [cell alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
@@ -244,13 +245,13 @@
                             (clear-cargo id)
                             (update-vehicle-exit id))))
 
-(def done-callback (atom (fn [])))
+(def depots-filled-callback (atom (fn [])))
 
-(defn set-done-callback! [f]
-  (reset! done-callback f))
+(defn set-depots-filled-callback! [f]
+  (reset! depots-filled-callback f))
 
-(defn reset-done-callback! []
-  (reset! done-callback (fn [])))
+(defn reset-depots-filled-callback! []
+  (reset! depots-filled-callback (fn [])))
 
 (defmethod vehicle-transition-state
   [true :depot]
@@ -266,7 +267,7 @@
         (clear-cargo id)
         (update-vehicle-exit id)
         (if (all-depots-filled?)
-          (@done-callback))))))
+          (@depots-filled-callback))))))
 
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
@@ -301,6 +302,19 @@
        (doseq [v incoming]
          (start-exploding (:id v)))))))
 
+(def no-more-vehicles-callback (atom (fn [])))
+
+(defn set-no-more-vehicles-callback! [f]
+  (reset! no-more-vehicles-callback f))
+
+(defn reset-no-more-vehicles-callback! []
+  (reset! no-more-vehicles-callback (fn [])))
+
+(defn end-vehicle [id]
+  (unload-vehicle id)
+  (when-not (seq (all-vehicles))
+    (@no-more-vehicles-callback)))
+
 (defn- schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
    entered a spawn point, no move is scheduled."
@@ -308,7 +322,7 @@
   (schedule (fn []
               (dosync
                (if (not (:exit-direction (vehicle id)))
-                 (unload-vehicle (vehicle id))
+                 (end-vehicle (vehicle id))
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))
                    (schedule-move id)))))

@@ -4,7 +4,8 @@
             [jest.world :as world :refer [reset-world]]
             [jest.scheduler :refer [scheduler-reset! start! pause!]]
             [jest.movement :refer [start-spawning stop-spawning
-                                   set-done-callback! reset-done-callback!]]
+                                   set-depots-filled-callback! reset-depots-filled-callback!
+                                   set-no-more-vehicles-callback! reset-no-more-vehicles-callback!]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
             [jest.visualize.visualize :refer [visible]]))
@@ -26,9 +27,14 @@
 
 (defonce current-level (atom nil))
 
-(defn win-level []
-  (reset! visible true)
+(defn all-depots-filled []
   (stop-spawning)
+  (set-no-more-vehicles-callback! win-level))
+
+(defn win-level []
+  (reset-depots-filled-callback!)
+  (reset-no-more-vehicles-callback!)
+  (reset! visible true)
   (pause!))
 
 (defn initialize-level []
@@ -36,7 +42,8 @@
   (reset-world {})
   (scheduler-reset!)
   (reset-score)
-  (reset-done-callback!)
+  (reset-depots-filled-callback!)
+  (reset-no-more-vehicles-callback!)
   (reset! visible false))
 
 (defn start-level
@@ -46,7 +53,7 @@
      (reset! current-level level-fn)
      (initialize-level)
      (when-not edit-mode?
-       (set-done-callback! #(send (agent nil) (fn [_] (win-level)))))
+       (set-depots-filled-callback! #(send (agent nil) (fn [_] (all-depots-filled)))))
 
      (level-fn)
 
