@@ -45,13 +45,12 @@
          (update-vehicles-for-cell-changes c))))))
 
 (defn set-route
-  [c dir color path]
+  [c dir color path-kind]
   (if (and color
            path-type)
+    (println (:coords c))
     (dosync
-     (println (path-type (path (cell [1 1]) :south)))
-     (when (= (path-type (path c dir)) path)
-
+     (when (= (path-type (path c dir)) path-kind)
        (doseq [p (filter #(= path-type (path-type %))
                          (paths-with-route c color))]
          (unbuild-route c (:direction p) color))
@@ -81,13 +80,14 @@
               :tile tile
               :direction direction}
              ;; initialize new pointer
-             {:path-type (if type
-                           (on-same)
-                           (on-empty))
-              :count 1
-              :route (:cargo (first (routable-vehicles tile)))
-              :tile tile
-              :direction direction}))))
+             (do
+               {:path-type (if type
+                             (on-same)
+                             (on-empty))
+                :count 1
+                :route (:cargo (first (routable-vehicles tile)))
+                :tile tile
+                :direction direction})))))
 
 (defn untrack-pointer [id]
   (swap! pointer-track dissoc id))
@@ -102,7 +102,6 @@
   (:direction (@pointer-track id)))
 
 (defn pointer-track-route [id]
-  (println (@pointer-track id))
   (:route (@pointer-track id)))
 
 (let [paths [:road :rails :canal]]
@@ -123,30 +122,31 @@
                       (when (in-path? path)
                         (unbuild-path c1 direction)
                         (update-vehicles-for-cell-changes c2))
-                      type
                       (set-route c1 direction
                                  (pointer-track-route id)
-                                 (pointer-track-path-type id)))
+                                 (pointer-track-path-type id))
+                      type)
                     (fn on-empty []
-                      (if (restricted? c2)
-                        :invalid
-                        (if-let [in-paths (seq (in-paths c1))]
-                          (let [type (or (pointer-track-path-type id)
-                                         (first (sort path-type-sort
-                                                      (map path-type
-                                                           in-paths))))]
-                            (build-path c1 direction
+                      (let [type' (if (restricted? c2)
+                                    :invalid
+                                    (if-let [in-paths (seq (in-paths c1))]
+                                      (let [type (or (pointer-track-path-type id)
+                                                     (first (sort path-type-sort
+                                                                  (map path-type
+                                                                       in-paths))))]
+                                        (build-path c1 direction
+                                                    type)
+                                        (update-vehicles-for-cell-changes c1)
                                         type)
-                            (update-vehicles-for-cell-changes c1)
-                            type)
-                          (if (spawn? c1)
-                            (let [type (vehicle->path (vehicle-type c1))]
-                              (build-path c1 direction type)
-                              type)
-                            :invalid)))
-                      (set-route c1 direction
+                                      (if (spawn? c1)
+                                        (let [type (vehicle->path (vehicle-type c1))]
+                                          (build-path c1 direction type)
+                                          type)
+                                        :invalid)))]
+                        (set-route c1 direction
                                  (pointer-track-route id)
-                                 (pointer-track-path-type id)))))))
+                                 (pointer-track-path-type id))
+                        type'))))))
 
 (defn on-up [id _]
   (untrack-pointer id))
