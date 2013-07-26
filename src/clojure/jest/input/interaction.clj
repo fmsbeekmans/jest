@@ -119,12 +119,13 @@
          type (path-type path)]
      (track-pointer id type pos1 direction
                     (fn on-same []
-                      (when (in-path? path)
-                        (unbuild-path c1 direction)
-                        (update-vehicles-for-cell-changes c2))
-                      (set-route c1 direction
-                                 (pointer-track-route id)
-                                 (pointer-track-path-type id))
+                      (if (in-path? path)
+                        (do
+                          (unbuild-path c1 direction)
+                          (update-vehicles-for-cell-changes c2))
+                        (set-route c1 direction
+                                   (pointer-track-route id)
+                                   (pointer-track-path-type id)))
                       type)
                     (fn on-empty []
                       (let [type' (if (restricted? c2)
