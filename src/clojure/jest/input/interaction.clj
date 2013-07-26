@@ -61,7 +61,7 @@
 
 (defn track-pointer [id type tile direction on-same on-empty]
   "Track the pointenters."
-  (let [{:keys [path-type count]} (@pointer-track id)]
+  (let [{:keys [path-type count route]} (@pointer-track id)]
     (swap! pointer-track assoc id
            (if path-type
              ;; update existing pointer
@@ -76,6 +76,7 @@
                                
                                :default
                                :invalid)
+              :route route
               :count (inc count)
               :tile tile
               :direction direction}
@@ -102,6 +103,7 @@
   (:direction (@pointer-track id)))
 
 (defn pointer-track-route [id]
+  (println (@pointer-track id))
   (:route (@pointer-track id)))
 
 (let [paths [:road :rails :canal]]
