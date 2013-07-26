@@ -73,7 +73,7 @@ stroke itself."
       (if (seq ss')
         (let [sub-stroke (first ss')
               length' (/ (length sub-stroke) total-length)
-              sum' (if (empty? (rest ss))
+              sum' (if (empty? (rest ss'))
                        1
                        (+ sum length'))]
           (recur
@@ -97,11 +97,11 @@ stroke itself."
                    (if (zero? start)
                      sub-stroke))
                  (:indexed-sub-strokes (meta composed)))
-      (= 1 p') (keep
-               (fn [[[start end] sub-stroke]]
-                 (if (zero? (- 1 end))
-                   sub-stroke))
-               (:indexed-sub-strokes (meta composed)))
+      (zero? (- 1 p')) (keep
+                        (fn [[[start end] sub-stroke]]
+                          (if (zero? (- 1 end))
+                            sub-stroke))
+                        (:indexed-sub-strokes (meta composed)))
       :default (keep
                 (fn [[[start end] sub-stroke]]
                   (if (and
