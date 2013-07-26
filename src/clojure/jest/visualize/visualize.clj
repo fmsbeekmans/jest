@@ -53,6 +53,12 @@
          (score-animation score-delta [x (dec y)] type (dec duration)))
         (quil/pop-style)))))
 
+(defn frame-count []
+  (fn []
+    (quil/text (str "Framerate: " (quil/current-frame-rate))
+               0 100)
+    (schedule-on-fps (frame-count))))
+
 (let [cardinal-arrow (memoize (partial arrow 0.5 0.5))
       arrow-stack (memoize (fn [dirs routes]
                              (drawable/->Stack
@@ -206,7 +212,7 @@ cell-draw-fn is a function that returns a Drawable."
                    (and (vehicle/spawning? v)
                         (vehicle/exploding? v))
                    (brick.drawable/->Nothing)
-                   
+
                    (vehicle/moving? v) (moving-vehicle v image)
                    (vehicle/spawning? v) (spawning-vehicle v image)
                    (vehicle/despawning? v) (despawning-vehicle v image)
