@@ -530,12 +530,10 @@
                             (all-restricteds))))
 
 (defn print-level []
-  (println "(do")
   (doseq [e (concat [(world-size-definition)]
              (extract-building-definitions)
              (extract-path-definitions))]
-    (println e))
-  (println ")"))
+    (println e)))
 
 
 (defmacro at-pointer-cell [[c] & body]
@@ -597,4 +595,4 @@ will be created if it doesn't exist and overwritten if it already exists."
 
 ;; This is probably the most evil thing I have ever done. So happy my name is still not correctly tied to this commit ~J
 (defn load-world [file-name]
-  (eval (read-string (slurp file-name))))
+  (load-file file-name))
