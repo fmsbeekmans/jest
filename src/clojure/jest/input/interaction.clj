@@ -2,13 +2,155 @@
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell direction-exists? coords]]
             [jest.world.building :refer [spawn? vehicle-type restricted?]]
-            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to]]
+            [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to paths]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
+            [jest.color :refer [hue-matches?]]
             [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle vehicle-cell moving?]]
             [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? outgoing? pickup-color]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
-(def ^:private inv-directions (clojure.set/map-invert directions))
+(def inv-directions (clojure.set/map-invert directions))
+(def pointers ( atom {}))
+
+(defn in-connected-cells [c]
+  "All cells with a path to c."
+  (map to (in-paths c)))
+
+(defn routable-vehicles [c]
+  (concat
+   (filter incoming? (vehicles c))
+   (filter #(and (outgoing? %)
+                 (moving? %)
+                 (= (coords (to (path (vehicle-cell %) (:exit-direction %))))
+                    (coords c)))
+           (mapcat vehicles (in-connected-cells c)))))
+
+(defrecord Pointer [path-type coord])
+
+(defn extract-path-type [cell]
+  (let [{:keys [building-type vehicle-type]} cell]
+    {:path-type
+     (if (= building-type :spawn)
+       vehicle-type
+       (let [types (set (map :type (paths cell)))]
+         ;; TODO only roads for now
+         (:road types)))}))
+
+(defn extract-route-info [cell]
+  (if-let [v (first (routable-vehicles cell))]
+    {:route (cargo-color v)}))
+
+(defn update-pointer [id pointer]
+  (swap! pointers assoc id pointer))
+
+(defn track-pointer [id cell]
+  (let [{:keys [coord]} cell]
+    (update-pointer id
+                    (map->Pointer
+                     (merge {:coord coord}
+                            (extract-path-type cell)
+                            (extract-route-info cell))))))
+
+(defn untrack-pointer [id]
+  (swap! pointers dissoc id))
+
+(def pointer-track ( atom {}))
+;;;
+(defn set-route
+  [c path color]
+  (doall
+   (map #(unbuild-route c (:direction %) color) (paths-with-route c color)))
+  (build-route c (:direction path) color))
+
+(defn on-down
+  [id pos]
+  (dosync
+   (if (= pos [0 0])
+     (if (paused?)
+       (resume!)
+       (pause!)))
+   (track-pointer id (cell pos))))
+
+;;;
+(defn on-move [id from-pos to-pos]
+  (dosync
+   (let [from (cell from-pos)
+         to (cell to-pos)
+         dir (inv-directions (map - to-pos from-pos))
+         inv-dir (inv-directions dir)
+         pointer (@pointers id)
+         new-pointer {assoc pointer :coord to-pos}]
+     (if-let [path-type (:path-type pointer)]
+       (let [fpath (dir (:paths from))
+             tpath (inv-dir (:paths to))]
+         (if fpath (unbuild-path from dir))
+         (if tpath (unbuild-path to inv-dir))
+         (if (not (and (every? #(= path-type (:type %)) [fpath tpath])
+                       (= :in (:inout fpath))
+                       (= :out (:inout tpath))))
+           (do
+             (build-path from dir path-type)
+             (if (contains? pointer :route)
+               (let [route (:route pointer)
+                     p ;(dir (:paths c))
+                     2]
+                 (set-route from p route)
+                 new-pointer)))
+           (assoc new-pointer :path-type nil))))
+     ;;CONTINUE
+     )))
+
+
+;;;;;; OLD CODE FROM HERE
+(defn track-pointer [id type tile direction on-same on-empty]
+  "Track the pointenters."
+  (let [{:keys [path-type count route]} (@pointer-track id)]
+    (swap! pointer-track assoc id
+           (if path-type
+             ;; update existing pointer
+             {:path-type (cond (= :invalid path-type)
+                               :invalid
+
+                               (= type path-type)
+                               (on-same)
+
+                               (nil? type)
+                               (on-empty)
+
+                               :default
+                               :invalid)
+              :route route
+              :count (inc count)
+              :tile tile
+              :direction direction}
+             ;; initialize new pointer
+             (do
+               {:path-type (if type
+                             (on-same)
+                             (on-empty))
+                :count 1
+                :route (:cargo (first (routable-vehicles tile)))
+                :tile tile
+                :direction direction})))))
+
+(defn untrack-pointer [id]
+  (swap! pointer-track dissoc id))
+
+(defn pointer-track-path-type [id]
+  (:path-type (@pointer-track id)))
+
+(defn pointer-track-tile [id]
+  (:tile (@pointer-track id)))
+
+(defn pointer-track-direction [id]
+  (:direction (@pointer-track id)))
+
+(defn pointer-track-route [id]
+  (println (@pointer-track id))
+  (:route (@pointer-track id)))
+
+
+
 
 (defn on-down [id pos]
   (case pos
@@ -18,18 +160,7 @@
       (pause!))
     nil))
 
-(defn in-connected-cells [c]
-  "All cells with a path to c."
-  (map to (in-paths c)))
 
-(defn routable-vehicles [c]
-  (concat 
-   (filter incoming? (vehicles c))
-   (filter #(and (outgoing? %)
-                 (moving? %)
-                 (= (coords (to (path (vehicle-cell %) (:exit-direction %))))
-                    (coords c)))
-           (mapcat vehicles (in-connected-cells c)))))
 
 (defn- maybe-build-route [c dir]
   (dosync
@@ -56,7 +187,6 @@
        (build-route c dir color)
        (update-vehicles-for-cell-changes c)))))
 
-(def pointer-track ( atom {}))
 
 (defn track-pointer [id type tile direction on-same on-empty]
   "Track the pointenters."
@@ -66,13 +196,13 @@
              ;; update existing pointer
              {:path-type (cond (= :invalid path-type)
                                :invalid
-                               
+
                                (= type path-type)
                                (on-same)
-                               
+
                                (nil? type)
                                (on-empty)
-                               
+
                                :default
                                :invalid)
               :route route
@@ -112,7 +242,7 @@
        (.indexOf paths p2))))
 
 (defn on-move [id pos1 pos2]
-  (dosync 
+  (dosync
    (let [c1 (cell pos1)
          c2 (cell pos2)
          direction (inv-directions (map - pos2 pos1))
