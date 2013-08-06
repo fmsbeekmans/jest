@@ -9,7 +9,7 @@
   (:require [brick.drawable :as drawable :refer [square-borders-size]]
             [quil.core :as quil])
   (:require [jest.world :as world :refer [world-size]]
-            [jest.vehicle :as vehicle
+            [jest.world.vehicle :as vehicle
              :refer [vehicle-cell]]
             [jest.world.path :as path
              :refer [opposite-dirs]])

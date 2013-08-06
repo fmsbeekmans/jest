@@ -6,7 +6,7 @@
             [jest.color :as color])
 
   (:use [jest.world :only [alter-cell all-cells cell]]
-        [jest.vehicle :only [cargo-capacity cargo-color cargo-count]]
+        [jest.world.vehicle :only [cargo-capacity cargo-color cargo-count]]
         [jest.world.building :only [resource-type resource-color resource-count]]))
 
 (def soft-cap 10)

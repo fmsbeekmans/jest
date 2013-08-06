@@ -7,7 +7,7 @@
             [jest.world.path :as p :refer [build-path]]
             [jest.world.cell :as c]
             [jest.world.route :as r :refer [build-route]]
-            [jest.vehicle :as v :refer [vehicle]]
+            [jest.world.vehicle :as v :refer [vehicle]]
             [jest.movement :as m]))
 
 (defn tick-move [vehicle-id]

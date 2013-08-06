@@ -1,6 +1,6 @@
 (ns jest.score
   (:require [jest.world :refer [coords]]
-            [jest.vehicle :refer [cargo-count vehicle-cell]]))
+            [jest.world.vehicle :refer [cargo-count vehicle-cell]]))
 
 (defonce current-score (ref nil))
 

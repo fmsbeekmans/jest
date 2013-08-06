@@ -1,7 +1,7 @@
 (ns jest.visualize.util
   (:require [jest.util :refer [hyphenate-keywords]])
   (:require [jest.world :as world]
-            [jest.vehicle :as vehicle]
+            [jest.world.vehicle :as vehicle]
             [jest.movement :as movement]
             [jest.world.cell :as cell]
             [jest.scheduler :as scheduler])

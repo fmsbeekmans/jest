@@ -2,7 +2,7 @@
   (:use [midje.sweet]
         [jest.testutils :only [world-fact vec-roughly]])
   (:require [jest.world :as world]
-            [jest.vehicle :as vehicle]
+            [jest.world.vehicle :as vehicle]
             [jest.scheduler :as scheduler])
   (:require [jest.visualize.util :as v-util]
             [jest.visualize.points :as points])

@@ -4,7 +4,7 @@
             [jest.world.building :refer [spawn? vehicle-type restricted?]]
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
-            [jest.vehicle :refer [vehicles cargo? cargo-color update-vehicle vehicle-cell moving?]]
+            [jest.world.vehicle :refer [vehicles cargo? cargo-color update-vehicle vehicle-cell moving?]]
             [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? outgoing? pickup-color]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
