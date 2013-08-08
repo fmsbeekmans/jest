@@ -1,6 +1,7 @@
 (ns jest.input.interaction
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell direction-exists? coords]]
+            [clojure.core.match :refer [match]]
             [jest.world.building :refer [spawn? vehicle-type restricted?]]
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to paths]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
@@ -26,12 +27,13 @@
            (mapcat vehicles (in-connected-cells c)))))
 
 (defrecord Pointer [path-type coord])
+(defrecord Movement [from to dir inv-dir])
 
 (defn extract-path-type [cell]
   (let [{:keys [building-type vehicle-type]} cell]
     {:path-type
      (if (= building-type :spawn)
-       vehicle-type
+       (vehicle->path vehicle-type)
        (let [types (set (map :type (paths cell)))]
          ;; TODO only roads for now
          (:road types)))}))
@@ -57,10 +59,17 @@
 (def pointer-track ( atom {}))
 ;;;
 (defn set-route
-  [c path color]
-  (doall
-   (map #(unbuild-route c (:direction %) color) (paths-with-route c color)))
-  (build-route c (:direction path) color))
+  ([c path color]
+     (doall
+      (map #(unbuild-route c (:direction %) color) (paths-with-route c color)))
+     (println "Paths is: " path)
+     (build-route c (:direction path) color))
+  ([c dir color path-kind]
+     (println ">>>>")
+     (println c dir)
+     (println "Path is: " (dir (:paths c)))
+     (println "<<<<")
+     (set-route c (dir (:paths c)) color)))
 
 (defn on-down
   [id pos]
@@ -71,217 +80,242 @@
        (pause!)))
    (track-pointer id (cell pos))))
 
-;;;
+;;;(defrecord Movement [from to dir inv-dir])
+(defn- from-path [m]
+  (let [{:keys [dir from]} m]
+    (dir (:paths from))))
+
+(defn- to-path [m]
+  (let [{:keys [inv-dir to]} m]
+    (inv-dir (:paths to))))
+
+(defn- unbuild-movement [m]
+  (let [{:keys [dir from]} m]
+    (unbuild-path from dir)))
+
+(defn- build-movement [m type]
+  (let [{:keys [dir from]} m]
+    (build-path from dir type)))
+
+(defn route-movement [m color path-type]
+  (let [{:keys [dir from]} m]
+    (println "from : " from "dir :" dir)
+    (set-route from dir color path-type)))
+
 (defn on-move [id from-pos to-pos]
   (dosync
-   (let [from (cell from-pos)
-         to (cell to-pos)
-         dir (inv-directions (map - to-pos from-pos))
-         inv-dir (inv-directions dir)
+   (let [dir (inv-directions (map - to-pos from-pos))
+         movement (map->Movement {:from (cell from-pos)
+                                  :to (cell to-pos)
+                                  :dir dir
+                                  :inv-dir (opposite-dirs dir)})
          pointer (@pointers id)
-         new-pointer {assoc pointer :coord to-pos}]
-     (if-let [path-type (:path-type pointer)]
-       (let [fpath (dir (:paths from))
-             tpath (inv-dir (:paths to))]
-         (if fpath (unbuild-path from dir))
-         (if tpath (unbuild-path to inv-dir))
-         (if (not (and (every? #(= path-type (:type %)) [fpath tpath])
-                       (= :in (:inout fpath))
-                       (= :out (:inout tpath))))
-           (do
-             (build-path from dir path-type)
-             (if (contains? pointer :route)
-               (let [route (:route pointer)
-                     p ;(dir (:paths c))
-                     2]
-                 (set-route from p route)
-                 new-pointer)))
-           (assoc new-pointer :path-type nil))))
-     ;;CONTINUE
-     )))
-
-
-;;;;;; OLD CODE FROM HERE
-(defn track-pointer [id type tile direction on-same on-empty]
-  "Track the pointenters."
-  (let [{:keys [path-type count route]} (@pointer-track id)]
-    (swap! pointer-track assoc id
-           (if path-type
-             ;; update existing pointer
-             {:path-type (cond (= :invalid path-type)
-                               :invalid
-
-                               (= type path-type)
-                               (on-same)
-
-                               (nil? type)
-                               (on-empty)
-
-                               :default
-                               :invalid)
-              :route route
-              :count (inc count)
-              :tile tile
-              :direction direction}
-             ;; initialize new pointer
-             (do
-               {:path-type (if type
-                             (on-same)
-                             (on-empty))
-                :count 1
-                :route (:cargo (first (routable-vehicles tile)))
-                :tile tile
-                :direction direction})))))
-
-(defn untrack-pointer [id]
-  (swap! pointer-track dissoc id))
-
-(defn pointer-track-path-type [id]
-  (:path-type (@pointer-track id)))
-
-(defn pointer-track-tile [id]
-  (:tile (@pointer-track id)))
-
-(defn pointer-track-direction [id]
-  (:direction (@pointer-track id)))
-
-(defn pointer-track-route [id]
-  (println (@pointer-track id))
-  (:route (@pointer-track id)))
-
-
-
-
-(defn on-down [id pos]
-  (case pos
-    [0 0]
-    (if (paused?)
-      (resume!)
-      (pause!))
-    nil))
-
-
-
-(defn- maybe-build-route [c dir]
-  (dosync
-   (if-let [v (first (routable-vehicles c))]
-     (let [vehicle-type (:type v)
-           color (pickup-color v)]
-       (when (= (path-type (path c dir))
-                (vehicle->path vehicle-type))
-         (doseq [p (filter #(= (vehicle->path vehicle-type) (path-type %))
-                           (paths-with-route c color))]
-           (unbuild-route c (:direction p) color))
-         (build-route c dir color)
-         (update-vehicles-for-cell-changes c))))))
-
-(defn set-route
-  [c dir color path-kind]
-  (when path-type
-    (println (:coords c))
-    (dosync
-     (when (= (path-type (path c dir)) path-kind)
-       (doseq [p (filter #(= path-type (path-type %))
-                         (paths-with-route c color))]
-         (unbuild-route c (:direction p) color))
-       (build-route c dir color)
-       (update-vehicles-for-cell-changes c)))))
-
-
-(defn track-pointer [id type tile direction on-same on-empty]
-  "Track the pointenters."
-  (let [{:keys [path-type count route]} (@pointer-track id)]
-    (swap! pointer-track assoc id
-           (if path-type
-             ;; update existing pointer
-             {:path-type (cond (= :invalid path-type)
-                               :invalid
-
-                               (= type path-type)
-                               (on-same)
-
-                               (nil? type)
-                               (on-empty)
-
-                               :default
-                               :invalid)
-              :route route
-              :count (inc count)
-              :tile tile
-              :direction direction}
-             ;; initialize new pointer
-             (do
-               {:path-type (if type
-                             (on-same)
-                             (on-empty))
-                :count 1
-                :route (:cargo (first (routable-vehicles tile)))
-                :tile tile
-                :direction direction})))))
-
-(defn untrack-pointer [id]
-  (swap! pointer-track dissoc id))
-
-(defn pointer-track-path-type [id]
-  (:path-type (@pointer-track id)))
-
-(defn pointer-track-tile [id]
-  (:tile (@pointer-track id)))
-
-(defn pointer-track-direction [id]
-  (:direction (@pointer-track id)))
-
-(defn pointer-track-route [id]
-  (println (@pointer-track id))
-  (:route (@pointer-track id)))
-
-(let [paths [:road :rails :canal]]
-  ;; Waar is deze let voor?
-  (defn path-type-sort [p1 p2]
-    (< (.indexOf paths p1)
-       (.indexOf paths p2))))
-
-(defn on-move [id pos1 pos2]
-  (dosync
-   (let [c1 (cell pos1)
-         c2 (cell pos2)
-         direction (inv-directions (map - pos2 pos1))
-         path (path c1 direction)
-         type (path-type path)]
-     (track-pointer id type pos1 direction
-                    (fn on-same []
-                      (if (in-path? path)
-                        (do
-                          (unbuild-path c1 direction)
-                          (update-vehicles-for-cell-changes c2))
-                        (set-route c1 direction
-                                   (pointer-track-route id)
-                                   (pointer-track-path-type id)))
-                      type)
-                    (fn on-empty []
-                      (let [type' (if (restricted? c2)
-                                    :invalid
-                                    (if-let [in-paths (seq (in-paths c1))]
-                                      (let [type (or (pointer-track-path-type id)
-                                                     (first (sort path-type-sort
-                                                                  (map path-type
-                                                                       in-paths))))]
-                                        (build-path c1 direction
-                                                    type)
-                                        (update-vehicles-for-cell-changes c1)
-                                        type)
-                                      (if (spawn? c1)
-                                        (let [type (vehicle->path (vehicle-type c1))]
-                                          (build-path c1 direction type)
-                                          type)
-                                        :invalid)))]
-                        (set-route c1 direction
-                                 (pointer-track-route id)
-                                 (pointer-track-path-type id))
-                        type'))))))
+         ;new-pointer {assoc pointer :coord to-pos}
+         ]
+     (let [fpath (from-path movement)
+           tpath (to-path movement)
+           matcher (vec (map :inout [fpath tpath]))
+           up (fn [] (unbuild-movement movement))
+           bp (fn [] (build-movement movement (:path-type pointer)))
+           br (fn [c] (println "start r")
+                (when (contains? pointer :route)
+                  (route-movement (assoc movement :from c)
+                                  (:route pointer)
+                                  (:path-type pointer)))
+                (println "done r"))]
+       (println matcher)
+       (match matcher
+             [nil nil]  (-> (bp) (br))
+             [:in :out] (do (up) ;(bp) (br)
+                            )
+             [:out :in] (do (br (:from movement)))
+             [_ _] (println "Default handler, should never come here..."))))))
 
 (defn on-up [id _]
-  (untrack-pointer id))
+  (dosync
+   (untrack-pointer id)))
+
+;; ;;;;;; OLD CODE FROM HERE
+;; (defn track-pointer [id type tile direction on-same on-empty]
+;;   "Track the pointenters."
+;;   (let [{:keys [path-type count route]} (@pointer-track id)]
+;;     (swap! pointer-track assoc id
+;;            (if path-type
+;;              ;; update existing pointer
+;;              {:path-type (cond (= :invalid path-type)
+;;                                :invalid
+
+;;                                (= type path-type)
+;;                                (on-same)
+
+;;                                (nil? type)
+;;                                (on-empty)
+
+;;                                :default
+;;                                :invalid)
+;;               :route route
+;;               :count (inc count)
+;;               :tile tile
+;;               :direction direction}
+;;              ;; initialize new pointer
+;;              (do
+;;                {:path-type (if type
+;;                              (on-same)
+;;                              (on-empty))
+;;                 :count 1
+;;                 :route (:cargo (first (routable-vehicles tile)))
+;;                 :tile tile
+;;                 :direction direction})))))
+
+;; (defn untrack-pointer [id]
+;;   (swap! pointer-track dissoc id))
+
+;; (defn pointer-track-path-type [id]
+;;   (:path-type (@pointer-track id)))
+
+;; (defn pointer-track-tile [id]
+;;   (:tile (@pointer-track id)))
+
+;; (defn pointer-track-direction [id]
+;;   (:direction (@pointer-track id)))
+
+;; (defn pointer-track-route [id]
+;;   (println (@pointer-track id))
+;;   (:route (@pointer-track id)))
+
+
+
+
+;; (defn on-down [id pos]
+;;   (case pos
+;;     [0 0]
+;;     (if (paused?)
+;;       (resume!)
+;;       (pause!))
+;;     nil))
+
+
+
+;; (defn- maybe-build-route [c dir]
+;;   (dosync
+;;    (if-let [v (first (routable-vehicles c))]
+;;      (let [vehicle-type (:type v)
+;;            color (pickup-color v)]
+;;        (when (= (path-type (path c dir))
+;;                 (vehicle->path vehicle-type))
+;;          (doseq [p (filter #(= (vehicle->path vehicle-type) (path-type %))
+;;                            (paths-with-route c color))]
+;;            (unbuild-route c (:direction p) color))
+;;          (build-route c dir color)
+;;          (update-vehicles-for-cell-changes c))))))
+
+;; (defn set-route
+;;   [c dir color path-kind]
+;;   (when path-type
+;;     (println (:coords c))
+;;     (dosync
+;;      (when (= (path-type (path c dir)) path-kind)
+;;        (doseq [p (filter #(= path-type (path-type %))
+;;                          (paths-with-route c color))]
+;;          (unbuild-route c (:direction p) color))
+;;        (build-route c dir color)
+;;        (update-vehicles-for-cell-changes c)))))
+
+
+;; (defn track-pointer [id type tile direction on-same on-empty]
+;;   "Track the pointenters."
+;;   (let [{:keys [path-type count route]} (@pointer-track id)]
+;;     (swap! pointer-track assoc id
+;;            (if path-type
+;;              ;; update existing pointer
+;;              {:path-type (cond (= :invalid path-type)
+;;                                :invalid
+
+;;                                (= type path-type)
+;;                                (on-same)
+
+;;                                (nil? type)
+;;                                (on-empty)
+
+;;                                :default
+;;                                :invalid)
+;;               :route route
+;;               :count (inc count)
+;;               :tile tile
+;;               :direction direction}
+;;              ;; initialize new pointer
+;;              (do
+;;                {:path-type (if type
+;;                              (on-same)
+;;                              (on-empty))
+;;                 :count 1
+;;                 :route (:cargo (first (routable-vehicles tile)))
+;;                 :tile tile
+;;                 :direction direction})))))
+
+;; (defn untrack-pointer [id]
+;;   (swap! pointer-track dissoc id))
+
+;; (defn pointer-track-path-type [id]
+;;   (:path-type (@pointer-track id)))
+
+;; (defn pointer-track-tile [id]
+;;   (:tile (@pointer-track id)))
+
+;; (defn pointer-track-direction [id]
+;;   (:direction (@pointer-track id)))
+
+;; (defn pointer-track-route [id]
+;;   (println (@pointer-track id))
+;;   (:route (@pointer-track id)))
+
+;; (let [paths [:road :rails :canal]]
+;;   ;; Waar is deze let voor?
+;;   (defn path-type-sort [p1 p2]
+;;     (< (.indexOf paths p1)
+;;        (.indexOf paths p2))))
+
+;; (defn on-move [id pos1 pos2]
+;;   (dosync
+;;    (let [c1 (cell pos1)
+;;          c2 (cell pos2)
+;;          direction (inv-directions (map - pos2 pos1))
+;;          path (path c1 direction)
+;;          type (path-type path)]
+;;      (track-pointer id type pos1 direction
+;;                     (fn on-same []
+;;                       (if (in-path? path)
+;;                         (do
+;;                           (unbuild-path c1 direction)
+;;                           (update-vehicles-for-cell-changes c2))
+;;                         (set-route c1 direction
+;;                                    (pointer-track-route id)
+;;                                    (pointer-track-path-type id)))
+;;                       type)
+;;                     (fn on-empty []
+;;                       (let [type' (if (restricted? c2)
+;;                                     :invalid
+;;                                     (if-let [in-paths (seq (in-paths c1))]
+;;                                       (let [type (or (pointer-track-path-type id)
+;;                                                      (first (sort path-type-sort
+;;                                                                   (map path-type
+;;                                                                        in-paths))))]
+;;                                         (build-path c1 direction
+;;                                                     type)
+;;                                         (update-vehicles-for-cell-changes c1)
+;;                                         type)
+;;                                       (if (spawn? c1)
+;;                                         (let [type (vehicle->path (vehicle-type c1))]
+;;                                           (build-path c1 direction type)
+;;                                           type)
+;;                                         :invalid)))]
+;;                         (set-route c1 direction
+;;                                  (pointer-track-route id)
+;;                                  (pointer-track-path-type id))
+;;                         type'))))))
+
+;; (defn on-up [id _]
+;;   (untrack-pointer id))
 
 (defn interaction-setup []
   (set-input-handler! :on-move on-move)
