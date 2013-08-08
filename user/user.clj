@@ -8,7 +8,7 @@
         jest.visualize.resource
         [jest.visualize.visualize :exclude [min-borders]]
         jest.visualize.util
-        jest.tiled.validation
+        ;jest.tiled.validation
         jest.world
         jest.world.building
         jest.movement
