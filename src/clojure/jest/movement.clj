@@ -1,6 +1,6 @@
 (ns jest.movement
   "Vehicle movement actions. This includes picking up and dropping off cargo."
-  (:use [jest.vehicle :only [vehicle vehicle-cell cargo-color vehicles
+  (:use [jest.world.vehicle :only [vehicle vehicle-cell cargo-color vehicles
                              vehicle-state-change update-vehicle unload-vehicle
                              vehicle->duration cargo? set-cargo cargo-capacity
                              cargo-count clear-cargo load-vehicle despawning?

@@ -31,7 +31,7 @@
         jest.input.wm-touch
         jest.input.core
         jest.input.interaction
-        jest.vehicle
+        jest.world.vehicle
         jest.world.route)
   (:require [jest.input.editor :refer [disable-editor edit]]))
 

@@ -1,4 +1,4 @@
-(ns jest.vehicle
+(ns jest.world.vehicle
   "Code for vehicle manipulation"
   (:use [jest.world :only [cell alter-cell coords all-cells]]
         [jest.world.building :only [vehicle-type spawn?]]
