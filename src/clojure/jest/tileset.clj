@@ -1,6 +1,5 @@
 (ns jest.tileset
-  (:require [jest.tiled.validation :as validation]
-            [brick.image :as image]
+  (:require [brick.image :as image]
             [jest.visualize.visualize :as visualize]
             [jest.util :as util]
             [clojure.core.incubator :refer [-?>]]))
@@ -28,7 +27,7 @@
   (if-let [level
         (-?> tileset-name
              clojure.java.io/resource
-             validation/read-json
+             util/read-json
              parse-tileset
              )]
     level))

@@ -1,5 +1,13 @@
 (ns jest.util
-  "Miscellaneous utility functions.")
+  "Miscellaneous utility functions."
+  (:require [clojure.data.json :as json]))
+
+(defn read-json
+  "Reads json-data as a clojure data-structure from json-path, which
+  should be a valid path or URL object"
+  [json-path]
+  (json/read-str (slurp json-path)
+                 :key-fn keyword))
 
 (defn derefable?
   "Returns true if d can be dereferenced, false otherwise."
