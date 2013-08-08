@@ -6,7 +6,7 @@
             [jest.world.cell :as cell]
             [jest.scheduler :as scheduler])
   (:require [jest.visualize.points :as points
-                                   :refer [->Linear ->ComposedStroke ->Arc]])
+                                   :refer [->Linear ->ComposedStroke]])
   (:require [quil.core :as quil]
             [brick.drawable :as drawable])
   (:require [clojure.algo.generic.math-functions :as m]))
