@@ -138,7 +138,9 @@
                             )
              [:out :in] (do (br))
              [_ _] (println "Default handler, should never come here...")))
-     (update-pointer id (assoc pointer :coord (:to movement))))))
+     (update-pointer id (assoc pointer :coord (:to movement)))
+     (update-vehicles-for-cell-changes (cell from-pos))
+     (update-vehicles-for-cell-changes (cell to-pos)))))
 
 (defn on-up [id _]
   (dosync
