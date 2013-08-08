@@ -2,4 +2,5 @@
   (:use midje.sweet
         jest.testutils
         [clojure.test :only [deftest]])
-  (:require [jest.tiled.validation :as validation]))
+  ;(:require [jest.tiled.validation :as validation])
+  )
