@@ -102,6 +102,14 @@
     (println "from : " from "dir :" dir)
     (set-route from dir color path-type)))
 
+(defn u-cell [m]
+  (let [{:keys [to from]} m
+        to (cell (:coord to))
+        from (cell (:coord from))]
+    (-> m
+        (assoc :to to)
+        (assoc :from from))))
+
 (defn on-move [id from-pos to-pos]
   (dosync
    (let [dir (inv-directions (map - to-pos from-pos))
@@ -117,19 +125,20 @@
            matcher (vec (map :inout [fpath tpath]))
            up (fn [] (unbuild-movement movement))
            bp (fn [] (build-movement movement (:path-type pointer)))
-           br (fn [c] (println "start r")
+           br (fn []
                 (when (contains? pointer :route)
-                  (route-movement (assoc movement :from c)
+                  (route-movement (u-cell movement)
                                   (:route pointer)
                                   (:path-type pointer)))
                 (println "done r"))]
        (println matcher)
        (match matcher
-             [nil nil]  (-> (bp) (br))
+             [nil nil]  (do (bp) (br))
              [:in :out] (do (up) ;(bp) (br)
                             )
-             [:out :in] (do (br (:from movement)))
-             [_ _] (println "Default handler, should never come here..."))))))
+             [:out :in] (do (br))
+             [_ _] (println "Default handler, should never come here...")))
+     (update-pointer id (assoc pointer :coord (:to movement))))))
 
 (defn on-up [id _]
   (dosync
