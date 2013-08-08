@@ -139,6 +139,9 @@
   [cell amount]
   (alter-cell cell dropoff-resource' amount))
 
+(defn all-depots-filled? []
+  (every? #((fnil >= 0 0) (:amount %) (:quotum %)) (all-depots)))
+
 ;; functions for mixers
 (defn resource-color
   "Returns the color of the resource at this cell."
@@ -186,5 +189,3 @@
   [cell amount]
   (alter-cell cell reduce-resource' amount))
 
-(defn all-depots-filled? []
-  (every? #((fnil >= 0 0) (:amount %) (:quotum %)) (all-depots)))
