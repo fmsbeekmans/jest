@@ -120,24 +120,25 @@
          pointer (@pointers id)
          ;new-pointer {assoc pointer :coord to-pos}
          ]
-     (let [fpath (from-path movement)
-           tpath (to-path movement)
-           matcher (vec (map :inout [fpath tpath]))
-           up (fn [] (unbuild-movement movement))
-           bp (fn [] (build-movement movement (:path-type pointer)))
-           br (fn []
-                (when (contains? pointer :route)
-                  (route-movement (u-cell movement)
-                                  (:route pointer)
-                                  (:path-type pointer)))
-                (println "done r"))]
-       (println matcher)
-       (match matcher
-             [nil nil]  (do (bp) (br))
-             [:in :out] (do (up) ;(bp) (br)
-                            )
-             [:out :in] (do (br))
-             [_ _] (println "Default handler, should never come here...")))
+     (when (:path-type pointer)
+       (let [fpath (from-path movement)
+             tpath (to-path movement)
+             matcher (vec (map :inout [fpath tpath]))
+             up (fn [] (unbuild-movement movement))
+             bp (fn [] (build-movement movement (:path-type pointer)))
+             br (fn []
+                  (when (contains? pointer :route)
+                    (route-movement (u-cell movement)
+                                    (:route pointer)
+                                    (:path-type pointer)))
+                  (println "done r"))]
+         (println matcher)
+         (match matcher
+                [nil nil]  (do (bp) (br))
+                [:in :out] (do (up) ;(bp) (br)
+                               )
+                [:out :in] (do (br))
+                [_ _] (println "Default handler, should never come here..."))))
      (update-pointer id (assoc pointer :coord (:to movement)))
      (update-vehicles-for-cell-changes (cell from-pos))
      (update-vehicles-for-cell-changes (cell to-pos)))))
