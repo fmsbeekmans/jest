@@ -6,7 +6,7 @@
             [jest.world.path :refer [path in-path? build-path unbuild-path in-paths path-type opposite-dirs vehicle->path from to paths]]
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.color :refer [hue-matches?]]
-            [jest.world.vehicle :refer [vehicles cargo? cargo-color update-vehicle vehicle-cell moving?]]
+            [jest.world.vehicle :refer [vehicles cargo? update-vehicle vehicle-cell moving?]]
             [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? outgoing? pickup-color]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
@@ -40,7 +40,7 @@
 
 (defn extract-route-info [cell]
   (if-let [v (first (routable-vehicles cell))]
-    {:route (cargo-color v)}))
+    {:route (pickup-color v)}))
 
 (defn update-pointer [id pointer]
   (swap! pointers assoc id pointer))
