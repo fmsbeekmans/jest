@@ -146,25 +146,25 @@
 (defn resource-color
   "Returns the color of the resource at this cell."
   [cell]
-  (first (:resource cell)))
+  (let [resource-seq (seq (or (:resource cell) {}))
+        color-list (apply concat (map #(repeat (second %) (first %))
+                              resource-seq))]
+    (if (seq color-list)
+      (apply average-hue color-list))))
 
 (defn resource-count
   "Returns the amount of resource at this cell."
   [cell]
-  (or
-   (second (:resource cell))
-   0))
+  (apply + (vals (or (:resource cell) {}))))
 
 (defn- mix-colors'
   "Given a cell, returns a cell with the given color mixed with existing color
    there. Magnitude represents how much color should be mixed."
   [cell color magnitude]
-  (let [[existing-color existing-magnitude] (or (:resource cell)
-                                                [nil 0])
-        new-color (apply average-hue (concat (repeat magnitude color)
-                                   (repeat existing-magnitude existing-color)))
-        new-magnitude (+ magnitude existing-magnitude)]
-    (assoc cell :resource [new-color new-magnitude])))
+  (let [resource-map (or (:resource cell) {})]
+    (assoc cell :resource
+           (assoc resource-map color
+                  (+ (or (resource-map color) 0) magnitude)))))
 
 (defn mix-colors
   "Given a cell, alters this cell in the world state to mix the given color
@@ -176,12 +176,15 @@
   "Given a cell, returns a cell with the resource amount reduced with the given
    amount."
   [cell amount]
-  {:post [(or (nil? (:resource cell))
-              (>= (resource-count cell) 0))]}
-  (assoc cell :resource (when-not (= amount (resource-count cell))
-                          [(resource-color cell)
-                           (- (resource-count cell)
-                              amount)])))
+  (let [cnt (resource-count cell)
+        resource-seq (seq (or (:resource cell) {}))]
+    (assoc cell :resource (if (= amount cnt)
+                            {}
+                            (let [ratio (/ (- cnt amount) cnt)]
+                              (reduce conj {}
+                                      (map (fn [[color amount]]
+                                             [color (* amount ratio)])
+                                           resource-seq)))))))
 
 (defn reduce-resource
   "Given a cell, alters this cell in the world state to reduce the resource

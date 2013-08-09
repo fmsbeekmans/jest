@@ -3,7 +3,8 @@
         jest.testutils
         jest.color)
   (:require [jest.world :as w :refer [cell]]
-            [jest.world.building :as b :refer [build-spawn build-supply build-depot build-mixer]]
+            [jest.world.building :as b :refer [build-spawn build-supply build-depot build-mixer
+                                               resource-color resource-count]]
             [jest.world.path :as p :refer [build-path]]
             [jest.world.cell :as c]
             [jest.world.route :as r :refer [build-route]]
@@ -209,6 +210,10 @@ a supply with another resource drops its resource."
    (tick 1) ;at depot, should not drop cargo
    (v/cargo? (v/vehicle id)) => true))
 
+(defn resource-vector [cell]
+  [(resource-color cell)
+   (resource-count cell)])
+
 (spawn-fact
  "A vehicle that passes through a mixer while carrying cargo drops
 off the cargo"
@@ -219,10 +224,10 @@ off the cargo"
    (v/cargo-color  (v/vehicle id)) => (roughly (hue :green) 0.1)
    (tick 1)
    (v/cargo-color (v/vehicle id)) => nil
-   (:resource (w/cell [6 6])) => (just [(roughly (hue :green) 0.1) 1])
+   (resource-vector (w/cell [6 6])) => (just [(roughly (hue :green) 0.1) 1])
    (tick +truck-speed+)
    (v/cargo-color (v/vehicle id)) => nil
-   (:resource (w/cell [6 6])) => (just [(roughly (hue :green) 0.1) 1])
+   (resource-vector (w/cell [6 6])) => (just [(roughly (hue :green) 0.1) 1])
    ))
 
 (world-fact [10 10]
@@ -241,7 +246,7 @@ off the cargo"
  (m/spawn (w/cell [5 5]))
  (m/spawn (w/cell [7 3]))
  (tick (* 2.5 +truck-speed+))
- (:resource (w/cell [7 5])) => (just [(roughly (hue :yellow) 0.1) 2])
+ (resource-vector (w/cell [7 5])) => (just [(roughly (hue :yellow) 0.1) 2])
  )
 
 (world-fact [10 10]
@@ -261,7 +266,7 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (m/spawn (w/cell [5 5]))
  (m/spawn (w/cell [7 3]))
  (tick (* 2.5 +truck-speed+))
- (:resource (w/cell [7 5]))
+ (resource-vector (w/cell [7 5]))
    => (just [(roughly (hue :yellow) 0.1) (* 2 (v/cargo-capacity :truck))]))
 
 (spawn-fact
