@@ -22,6 +22,7 @@
              (quil/line len 0 (- len fat) (quil/ceil (- fat)))
              (quil/line len 0 (- len fat) (quil/ceil fat))
              (quil/color-mode :hsb)
+             (quil/stroke-weight (/ len 6))
              (loop [ls (drawable/ranges (max amount fat) len)
                     cs colors]
                (if (and (seq ls) (seq cs))
