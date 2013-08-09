@@ -24,6 +24,7 @@
 (def min-borders [0.1 0.1])
 (def visible (atom false))
 
+
 (declare sketch-size)
 (declare world-bricklet)
 
@@ -35,9 +36,19 @@
       (quil/text (str "Score: " score) 10 10)
       (quil/pop-style))))
 
+
+
 (defn schedule-on-fps [f]
   (swap! (:command-queue @world-bricklet)
          conj (fn [_] (f))))
+
+(defn img-overlay [img position]
+  (fn []
+    (quil/push-style)
+    (quil/tint 255 128)
+    (apply quil/image img position)
+    (quil/pop-style)
+    (schedule-on-fps (img-overlay img position))))
 
 (defn score-animation [score-delta location type duration]
   (let [[x y] location]
@@ -147,7 +158,7 @@ cell-draw-fn is a function that returns a Drawable."
                           (min 1 (* 2 (util/vehicle->progress vehicle)))
                           0)
      (drawable/->Tint
-       ,,, [255 (min 255 (* progress 510))]))))
+      ,,, [255 (min 255 (* progress 510))]))))
 
 (def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-animation))
 
@@ -242,7 +253,7 @@ cell-draw-fn is a function that returns a Drawable."
 (declare animate-score-on-tile)
 
 (defn setup [tile-fn]
-  ;init een bricklet met tile-set
+                                        ;init een bricklet met tile-set
   (let [path-fn (nice-lookup)]
     (reset! world-bricklet
             (drawable/->Bricklet
