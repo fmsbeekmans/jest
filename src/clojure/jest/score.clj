@@ -17,9 +17,9 @@
 
 (def scoring
   {:get-cargo [0 -10]
-   :drop-cargo [0 20]
-   :spawn [-10 0]
-   :despawn [10 0]})
+   :drop-cargo [0 100]
+   :spawn [-5 0]
+   :despawn [5 0]})
 
 (defn get-scoring [event]
   (get scoring event [0 0]))
