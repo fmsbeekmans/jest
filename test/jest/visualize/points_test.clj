@@ -49,7 +49,7 @@ distance between it's ends."
       (points/.tangent l1 0.2) => (roughly-angle (* Math/PI 1.5) 1)
       (points/.tangent l2 0.2) => (roughly (* Math/PI 0.25) 0.1))))
 
-(facts "Indexing sub-strokes by progress intervals."
+(facts :substroke "Indexing sub-strokes by progress intervals."
   (let [s0 (points/->Linear [0 0]
                             [0 1])
         s1 (points/->Linear [0 1]
@@ -61,7 +61,7 @@ distance between it's ends."
         ss' [s0 s1 s2 s3]
         c (points/index-sub-strokes ss')]
     (fact "Check intervals"
-      (set (keys c)) => #{[0 0.25]
+      (set (keys c)) => #{[0.0 0.25]
                           [0.25 0.5]
                           [0.5 0.75]
                           [0.75 1.0]})
@@ -73,7 +73,7 @@ distance between it's ends."
     (fact "Check lenghts"
           (set (map :progress (vals c))) => #{0.25})
     (facts "In the right order"
-           (:stroke (c [0 0.25])) => (fn [actual] (= actual s0))
+           (:stroke (c [0.0 0.25])) => (fn [actual] (= actual s0))
            (:stroke (c [0.25 0.5])) => (fn [actual] (= actual s1))
            (:stroke (c [0.5 0.75])) => (fn [actual] (= actual s2))
            (:stroke (c [0.75 1.0])) => (fn [actual] (= actual s3)))))

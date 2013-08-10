@@ -17,10 +17,11 @@
 
 (defn progress
   [p]
-  (cond
-   (> 0 p) 0
-   (< 1 p) 1
-   :default p))
+  (double
+   (cond
+    (> 0 p) 0
+    (< 1 p) 1
+    :default p)))
 
 ;; Stroke protocol
 
@@ -67,21 +68,21 @@ starts in absolute? progress, relative, how long is this sub-stroke? and the
 stroke itself."
   [ss]
   (let [total-length (apply + (map length ss))]
-    (loop [sum 0
+    (loop [sum (progress 0)
            ss' ss
            m {}]
       (if (seq ss')
         (let [sub-stroke (first ss')
               length' (/ (length sub-stroke) total-length)
               sum' (if (empty? (rest ss'))
-                       1
-                       (+ sum length'))]
+                     (progress 1)
+                     (+ sum length'))]
           (recur
            sum'
            (rest ss')
            (assoc m [sum sum']
-                  {:offset sum
-                   :progress length'
+                  {:offset (progress sum)
+                   :progress (progress length')
                    :stroke sub-stroke})))
         m))))
 
