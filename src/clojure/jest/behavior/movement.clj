@@ -4,17 +4,11 @@
                                    vehicle-state-change update-vehicle unload-vehicle
                                    vehicle->duration cargo? set-cargo cargo-capacity
                                    cargo-count clear-cargo load-vehicle despawning?
-                                   exploding? moving? spawning? map->Vehicle
-                                   vehicle-enter vehicle-clear-exit half-duration]]
-        [jest.color :only [<=delta? hue hue-matches?]]
-        [jest.world :only [cell alter-cell coords]]
-        [jest.world.path :only [out-paths path->duration vehicle->path
-                                opposite-dirs path path-type to
-                                out-path?]]
-        [jest.world.building :only [spawn? vehicle-type resource-color resource-type
+                                   exploding? moving? spawning? vehicle-enter]]
+        [jest.color :only [hue hue-matches?]]
+        [jest.world.path :only [vehicle->path path path-type to]]
+        [jest.world.building :only [resource-color resource-type
                                     resource-count reduce-resource mix-colors
-                                    supply? mixer? depot? all-spawns
-                                    spawning-spawners
                                     dropoff-resource all-depots-filled?]]
         [jest.scheduler :only [schedule offset game-time]]
         [jest.score :only [score-vehicle]])
