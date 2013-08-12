@@ -48,13 +48,8 @@
   (swap! active-spawners
          conj (coords s)))
 
-(defn- deactivate-spawner [s]
-  (swap! active-spawners
-         disj (coords s)))
-
 (defn active? [s]
   (@active-spawners (coords s)))
-
 
 (defn start-spawning []
   (doseq [{:keys [coord spawn-rate spawn-offset] :as s} (spawning-spawners)]

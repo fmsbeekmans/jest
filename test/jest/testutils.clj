@@ -132,3 +132,7 @@ running all scheduled tasks in order.By default n is 1"
       (on-move id prev p)
       (recur p points)))
   (on-up id (last points)))
+
+(defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
+  `(let [~vehicle (:id (s/spawn (w/cell ~spawn-location)))]
+     ~@body))

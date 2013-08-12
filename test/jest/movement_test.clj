@@ -25,10 +25,6 @@
                (build-spawn-circle)
                ~@body))
 
-(defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
-  `(let [~vehicle (:id (s/spawn (w/cell ~spawn-location)))]
-     ~@body))
-
 (def +truck-speed+ (p/path->duration :road))
 (def +train-speed+ (p/path->duration :rails))
 (def +boat-speed+ (p/path->duration :canal))
