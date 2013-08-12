@@ -6,7 +6,7 @@
             [jest.world.building :refer [build-spawn build-supply]]
             [jest.world.path :refer [path->duration build-path paths path]]
             [jest.world.vehicle :refer [vehicles moving? exploding?]]
-            [jest.movement :refer [spawn]]
+            [jest.behavior.movement :refer [spawn]]
             [jest.scheduler :refer [game-time]]
             [jest.color :refer [hue]]))
 

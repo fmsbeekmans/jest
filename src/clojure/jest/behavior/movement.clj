@@ -1,4 +1,4 @@
-(ns jest.movement
+(ns jest.behavior.movement
   "Vehicle movement actions. This includes picking up and dropping off cargo."
   (:use [jest.world.vehicle :only [vehicle vehicle-cell cargo-color vehicles
                              vehicle-state-change update-vehicle unload-vehicle

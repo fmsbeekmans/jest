@@ -7,7 +7,7 @@
             [jest.world.route :refer [paths-with-route build-route unbuild-route]]
             [jest.color :refer [hue-matches?]]
             [jest.world.vehicle :refer [vehicles cargo? update-vehicle vehicle-cell moving?]]
-            [jest.movement :refer [spawn preferred-path update-vehicles-for-cell-changes incoming? outgoing? pickup-color]]
+            [jest.behavior.movement :refer [update-vehicles-for-cell-changes incoming? outgoing? pickup-color]]
             [jest.scheduler :refer [paused? resume! pause!]]))
 
 (def inv-directions (clojure.set/map-invert directions))

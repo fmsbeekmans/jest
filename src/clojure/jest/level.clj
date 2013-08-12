@@ -6,9 +6,9 @@
               spawn? building-type all-spawns all-supplies all-mixers all-depots
               all-restricteds]]
             [jest.scheduler :refer [scheduler-reset! start! pause!]]
-            [jest.movement :refer [start-spawning stop-spawning
-                                   set-done-callback! reset-done-callback!]]
             [jest.world.path :refer [out-paths build-path]]
+            [jest.behavior.movement :refer [start-spawning stop-spawning
+                                            set-done-callback! reset-done-callback!]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
             [jest.visualize.visualize :refer [visible]]))

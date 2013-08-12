@@ -11,7 +11,7 @@
         ;jest.tiled.validation
         jest.world
         jest.world.building
-        jest.movement
+        jest.behavior.movement
         jest.util
         jest.world.path
         jest.level
