@@ -64,7 +64,7 @@
          ([~'c]
             (= (building-type ~'c) ~(keyword type)))
          ([~'x ~'y]
-            (~pred (cell ~'x ~'y))))
+            (~pred (cell [~'x ~'y]))))
 
        (defn- ~add
          ~(format "adds a %s to the given cell." type)
