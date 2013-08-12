@@ -16,7 +16,7 @@
   (tick (v/vehicle->duration (v/vehicle vehicle-id))))
 
 (defn half-move [vehicle-id]
-  (tick (m/half-duration (v/vehicle vehicle-id))))
+  (tick (v/half-duration (v/vehicle vehicle-id))))
 
 
 (defmacro spawn-fact [doc & body]

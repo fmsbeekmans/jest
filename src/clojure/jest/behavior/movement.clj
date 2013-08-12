@@ -1,16 +1,17 @@
 (ns jest.behavior.movement
   "Vehicle movement actions. This includes picking up and dropping off cargo."
   (:use [jest.world.vehicle :only [vehicle vehicle-cell cargo-color vehicles
-                             vehicle-state-change update-vehicle unload-vehicle
-                             vehicle->duration cargo? set-cargo cargo-capacity
-                             cargo-count clear-cargo load-vehicle despawning?
-                             exploding? moving? spawning? map->Vehicle]]
+                                   vehicle-state-change update-vehicle unload-vehicle
+                                   vehicle->duration cargo? set-cargo cargo-capacity
+                                   cargo-count clear-cargo load-vehicle despawning?
+                                   exploding? moving? spawning? map->Vehicle
+                                   vehicle-enter vehicle-clear-exit half-duration]]
         [jest.color :only [<=delta? hue hue-matches?]]
         [jest.world :only [cell alter-cell coords]]
         [jest.world.path :only [out-paths path->duration vehicle->path
                                 opposite-dirs path path-type to
                                 out-path?]]
-        [jest.world.building :only [spawn? vehicle-type resource-color
+        [jest.world.building :only [spawn? vehicle-type resource-color resource-type
                                     resource-count reduce-resource mix-colors
                                     supply? mixer? depot? all-spawns
                                     spawning-spawners
@@ -33,20 +34,6 @@
 
 (defn outgoing? [v]
   (= (vehicle-state-in-cell v) :outgoing))
-
-(defn- vehicle-enter
-  "Returns a Vehicle record that is the vehicle record with an entry time and
-   entry direction attached to it. Both are based on the exit values for the
-   given vehicle."
-  [v]
-  (assoc v
-    :entry-time (:exit-time v)
-    :entry-direction (opposite-dirs (:exit-direction v))))
-
-(defn- vehicle-clear-exit
-  "Returns a Vehicle record with the exit information cleared."
-  [v]
-  (assoc v :exit-direction nil))
 
 (defn set-end-state [id state]
   (dosync
@@ -96,12 +83,6 @@
   [id]
   (start-despawning id))
 
-(defn resource-hue [cell]
-  (hue (:resource-type cell)))
-
-(defn half-duration [v]
-  (/ (vehicle->duration v) 2))
-
 (defn schedule-half-duration [v f]
   (schedule #(dosync (f))
             (+ (:entry-time v)
@@ -122,7 +103,7 @@
   (schedule-half-duration (vehicle id)
                           (fn []
                             (set-cargo id
-                                       (resource-hue (vehicle-cell (vehicle id)))
+                                       (hue (resource-type (vehicle-cell (vehicle id))))
                                        (cargo-capacity (:type (vehicle id))))
                             (update-vehicle-exit id)
                             (score-vehicle :get-cargo (vehicle id)))))
@@ -217,12 +198,6 @@
                    (schedule-move id)))))
             (:exit-time (vehicle id))))
 
-(defn valid-out-direction? [v dir]
-  (let [path (path (vehicle-cell v) dir)]
-    (and path
-         (out-path? path)
-         (= (:type path) (vehicle->path (:type v))))))
-
 (defn update-vehicles-for-cell-changes
   "Ensures all vehicles on a particular cell are in a consistent state with the
 paths and routes on this cell. If no exit exists for this path anymore, explode.
@@ -237,14 +212,4 @@ This function should be called from within a transaction."
     (doseq [{:keys [id type exit-direction] :as v} outgoing]
       (when-not (= (vehicle->path type) (:type (path (vehicle-cell v) exit-direction)))
         (start-exploding id)))))
-
-(defn pickup-color [v]
-  (let [c (vehicle-cell v)]
-    (cond
-     (supply? c) (hue (:resource-type c))
-     (mixer? c) (if (cargo-color v)
-                  nil
-                  (resource-color c))
-     (depot? c) nil
-     :default (cargo-color v))))
 

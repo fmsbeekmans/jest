@@ -1,10 +1,11 @@
 (ns jest.world.vehicle
   "Code for vehicle manipulation"
   (:use [jest.world :only [cell alter-cell coords all-cells]]
-        [jest.world.building :only [vehicle-type spawn?]]
+        [jest.world.building :only [vehicle-type spawn? supply? depot? mixer? resource-color]]
         [jest.world.path :only [in-paths out-paths from to path-type
                                 vehicle->path path->duration path
-                                opposite-dirs]]))
+                                opposite-dirs]]
+        [jest.color :only [hue]]))
 
 (defrecord Vehicle [id type coords entry-time entry-direction
                     exit-time exit-direction cargo state])
@@ -170,3 +171,30 @@
   (if (map? t?)
     (= :train (:type t?))
     false))
+
+(defn pickup-color [v]
+  (let [c (vehicle-cell v)]
+    (cond
+     (supply? c) (hue (:resource-type c))
+     (mixer? c) (if (cargo-color v)
+                  nil
+                  (resource-color c))
+     (depot? c) nil
+     :default (cargo-color v))))
+
+(defn vehicle-enter
+  "Returns a Vehicle record that is the vehicle record with an entry time and
+   entry direction attached to it. Both are based on the exit values for the
+   given vehicle."
+  [v]
+  (assoc v
+    :entry-time (:exit-time v)
+    :entry-direction (opposite-dirs (:exit-direction v))))
+
+(defn vehicle-clear-exit
+  "Returns a Vehicle record with the exit information cleared."
+  [v]
+  (assoc v :exit-direction nil))
+
+(defn half-duration [v]
+  (/ (vehicle->duration v) 2))
