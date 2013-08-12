@@ -1,9 +1,36 @@
 (ns jest.behavior.spawn
   (:require [jest.world :refer [coords cell]]
-            [jest.world.building :refer [spawning-spawners spawn?]]
-            [jest.scheduler :refer [schedule offset]]
-            [jest.behavior.movement :refer [load-vehicle-on-spawn schedule-move]]
+            [jest.world.building :refer [spawning-spawners spawn? vehicle-type]]
+            [jest.world.vehicle :refer [vehicle-state-change load-vehicle
+                                        map->Vehicle vehicle]]
+            [jest.scheduler :refer [schedule offset game-time]]
+            [jest.behavior.movement :refer [schedule-move]]
+            [jest.behavior.routing :refer [select-exit]]
             [jest.score :refer [score-vehicle]]))
+
+(defonce ^:private idc (atom 0))
+
+(defn- next-idc
+  "Generates a unique id using a counter."
+  []
+  (swap! idc inc))
+
+(defn load-vehicle-on-spawn
+  "Loads a vehicle on a spawn point, setting all initial state."
+  [c]
+  {:pre [(spawn? c)]}
+  (dosync
+   (let [id (next-idc)]
+     (load-vehicle c (select-exit (map->Vehicle
+                                   {:id id
+                                    :type (vehicle-type c)
+                                    :coords (coords c)
+                                    :entry-time @game-time
+                                    :state :spawning})))
+
+     (when-not (:exit-direction (vehicle id))
+       (vehicle-state-change id :spawning-exploding))
+     (vehicle id))))
 
 (defn spawn
   "Spawns a vehicle on the given cell."

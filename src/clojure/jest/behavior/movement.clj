@@ -21,13 +21,6 @@
             [jest.behavior.routing :refer [update-preferred-path select-exit]]
             [jest.behavior.callback :as callback]))
 
-(defonce ^:private idc (atom 0))
-
-(defn- next-idc
-  "Generates a unique id using a counter."
-  []
-  (swap! idc inc))
-
 (defn vehicle-state-in-cell [v]
   (let [halfpoint (+ (:entry-time v)
                      (/ (vehicle->duration v) 2))]
@@ -40,8 +33,6 @@
 
 (defn outgoing? [v]
   (= (vehicle-state-in-cell v) :outgoing))
-
-
 
 (defn- vehicle-enter
   "Returns a Vehicle record that is the vehicle record with an entry time and
@@ -225,23 +216,6 @@
                    (move-vehicle id (:exit-direction (vehicle id)))
                    (schedule-move id)))))
             (:exit-time (vehicle id))))
-
-(defn load-vehicle-on-spawn
-  "Loads a vehicle on a spawn point, setting all initial state."
-  [c]
-  {:pre [(spawn? c)]}
-  (dosync
-   (let [id (next-idc)]
-     (load-vehicle c (select-exit (map->Vehicle
-                                   {:id id
-                                    :type (vehicle-type c)
-                                    :coords (coords c)
-                                    :entry-time @game-time
-                                    :state :spawning})))
-
-     (when-not (:exit-direction (vehicle id))
-       (vehicle-state-change id :spawning-exploding))
-     (vehicle id))))
 
 (defn valid-out-direction? [v dir]
   (let [path (path (vehicle-cell v) dir)]
