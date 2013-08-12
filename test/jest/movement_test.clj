@@ -9,7 +9,8 @@
             [jest.world.cell :as c]
             [jest.world.route :as r :refer [build-route]]
             [jest.world.vehicle :as v :refer [vehicle]]
-            [jest.behavior.movement :as m]))
+            [jest.behavior.movement :as m]
+            [jest.behavior.spawn :as s]))
 
 (defn tick-move [vehicle-id]
   (tick (v/vehicle->duration (v/vehicle vehicle-id))))
@@ -25,7 +26,7 @@
                ~@body))
 
 (defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
-  `(let [~vehicle (:id (m/spawn (w/cell ~spawn-location)))]
+  `(let [~vehicle (:id (s/spawn (w/cell ~spawn-location)))]
      ~@body))
 
 (def +truck-speed+ (p/path->duration :road))
@@ -34,7 +35,7 @@
 
 (spawn-fact
  "Spawn returns the vehicle just spawned. This vehicle is also inside the cell."
- (let [vehicle (m/spawn (w/cell [5 5]))]
+ (let [vehicle (s/spawn (w/cell [5 5]))]
    (:vehicles (w/cell [5 5])) => (just [vehicle])))
 
 (world-fact [10 10]
@@ -49,7 +50,7 @@
   (let [vehicles (doall (for [x (range 2)
                               y (range 3)
                               i (range 10)]
-                          (m/spawn (w/cell [x y]))))]
+                          (s/spawn (w/cell [x y]))))]
     (v/all-vehicles) => (just vehicles :in-any-order)))
 
 (world-fact [10 10]
@@ -64,7 +65,7 @@
   (let [vehicles (doall (for [x (range 2)
                               y (range 3)
                               i (range 10)]
-                          (m/spawn (w/cell [x y]))))]
+                          (s/spawn (w/cell [x y]))))]
 
     (v/all-vehicles v/truck?) => (just (filter v/truck? vehicles) :in-any-order)
     (count (v/all-vehicles v/truck?)) => 20))
@@ -80,7 +81,7 @@
 
   (let [vehicles (doall (for [x (range 2)
                               y (range 3)]
-                          (m/spawn (w/cell [x y]))))]
+                          (s/spawn (w/cell [x y]))))]
     (doseq [v (v/vehicles (w/cell [0 0]))]
       (v/truck? v) => truthy
       (v/boat? v) => falsey
@@ -98,13 +99,13 @@
  "After spawning, entry time is the spawn time, exit time is spawn +
 path duration."
  (tick 5)                               ; game time is now 5
- (let [vehicle (m/spawn (w/cell [5 5]))]
+ (let [vehicle (s/spawn (w/cell [5 5]))]
    (:entry-time vehicle) => 5
    (:exit-time vehicle) => (+ +truck-speed+ 5)))
 
 (spawn-fact
  "After spawning, a vehicle is in state :spawning"
- (:state (m/spawn (w/cell [5 5]))) => :spawning)
+ (:state (s/spawn (w/cell [5 5]))) => :spawning)
 
 (spawn-fact
  "After spawning and the path duration has passed,
@@ -120,7 +121,7 @@ a vehicle is in state :moving"
   (b/build-spawn (w/cell [5 5]) :boat)
   (p/build-path (w/cell [5 5]) :east :canal)
   (p/build-path (w/cell [6 5]) :east :canal)
-  (let [id (:id (m/spawn (w/cell [5 5])))]
+  (let [id (:id (s/spawn (w/cell [5 5])))]
     (tick (dec +boat-speed+))
     (:coords (v/vehicle id)) => [5 5]
     (tick 1)
@@ -132,7 +133,7 @@ has moved"
   (b/build-spawn (w/cell [5 5]) :train)
   (p/build-path (w/cell [5 5]) :east :rails)
   (p/build-path (w/cell [6 5]) :east :rails)
-  (let [id (:id (m/spawn (w/cell [5 5])))]
+  (let [id (:id (s/spawn (w/cell [5 5])))]
     (tick (dec +train-speed+))
     (:coords (v/vehicle id)) => [5 5]
     (tick 1)
@@ -141,7 +142,7 @@ has moved"
 (spawn-fact
  "After spawning and the whole path duration has passed,
 a vehicle has moved in its preferred direction. It then keeps moving."
- (let [v  (m/spawn (w/cell [5 5]))
+ (let [v  (s/spawn (w/cell [5 5]))
        id (:id v)
        exit-direction (:exit-direction v)]
    (tick (dec +truck-speed+)) ;time is just before move
@@ -155,7 +156,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
 
 (spawn-fact
  "A vehicle that enters a spawn point starts despawning."
- (let [id (:id (m/spawn (w/cell [5 5])))]
+ (let [id (:id (s/spawn (w/cell [5 5])))]
    (tick (dec (* 6 +truck-speed+))) ;vehicle should now be west of spawn, after
                                     ;having moved 5 cells
    (:coords (v/vehicle id)) => [4 5]
@@ -172,7 +173,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
 (spawn-fact
  "A vehicle that passes through a supply picks up a resource."
  (let [resource (hue :red)
-       id (:id (m/spawn (w/cell [5 5])))]
+       id (:id (s/spawn (w/cell [5 5])))]
    (b/build-supply (w/cell [6 6]) :red)
    (tick (dec (* 2.5 +truck-speed+))) ; just before entering cell 6 6,
                                     ; should have nothing
@@ -184,7 +185,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
  "A vehicle that passes through a depot without having cargo does nothing."
  (b/build-depot (w/cell [6 6]) :red 1000)
  (tick 20)
- (let [id (:id (m/spawn (w/cell [5 5])))]
+ (let [id (:id (s/spawn (w/cell [5 5])))]
    (v/cargo? (v/vehicle id))) => false)
 
 
@@ -193,7 +194,7 @@ a vehicle has moved in its preferred direction. It then keeps moving."
 through a supply with the same resource drops its resource."
  (b/build-supply (w/cell [6 6]) :green)
  (b/build-depot (w/cell [4 6]) :green 1000)
- (let [id (:id (m/spawn (w/cell [5 5])))]
+ (let [id (:id (s/spawn (w/cell [5 5])))]
    (tick (dec (* 4.5 +truck-speed+))) ; should have cargo
    (v/cargo-color (v/vehicle id)) => (roughly (hue :green) 0.1)
    (tick 1) ;at depot, should drop cargo
@@ -204,7 +205,7 @@ through a supply with the same resource drops its resource."
 a supply with another resource drops its resource."
  (b/build-supply (w/cell [6 6]) :green)
  (b/build-depot (w/cell [4 6]) :red 1000)
- (let [id (:id (m/spawn (w/cell [5 5])))]
+ (let [id (:id (s/spawn (w/cell [5 5])))]
    (tick (dec (* 4 +truck-speed+))) ; should have cargo
    (v/cargo-color (v/vehicle id)) => (roughly (hue :green) 0.1)
    (tick 1) ;at depot, should not drop cargo
@@ -219,7 +220,7 @@ a supply with another resource drops its resource."
 off the cargo"
  (b/build-supply (w/cell [6 5]) :green)
  (b/build-mixer (w/cell [6 6]))
- (let [id (:id (m/spawn (w/cell [5 5])))]
+ (let [id (:id (s/spawn (w/cell [5 5])))]
    (tick (dec (* 2.5 +truck-speed+)))
    (v/cargo-color  (v/vehicle id)) => (roughly (hue :green) 0.1)
    (tick 1)
@@ -243,8 +244,8 @@ off the cargo"
  (b/build-supply (w/cell [7 4]) :green)
  (p/build-path (w/cell [7 4]) :south :road)
  (p/build-path (w/cell [7 5]) :south :road)
- (m/spawn (w/cell [5 5]))
- (m/spawn (w/cell [7 3]))
+ (s/spawn (w/cell [5 5]))
+ (s/spawn (w/cell [7 3]))
  (tick (* 2.5 +truck-speed+))
  (resource-vector (w/cell [7 5])) => (just [(roughly (hue :yellow) 0.1) 2])
  )
@@ -263,8 +264,8 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (p/build-path (w/cell [7 3]) :south :road)
  (b/build-supply (w/cell [7 4]) :green)
  (p/build-path (w/cell [7 4]) :south :road)
- (m/spawn (w/cell [5 5]))
- (m/spawn (w/cell [7 3]))
+ (s/spawn (w/cell [5 5]))
+ (s/spawn (w/cell [7 3]))
  (tick (* 2.5 +truck-speed+))
  (resource-vector (w/cell [7 5]))
    => (just [(roughly (hue :yellow) 0.1) (* 2 (v/cargo-capacity :truck))]))
@@ -272,7 +273,7 @@ the magnitude at the mixer should be the sum of the cargo counts"
 (spawn-fact
  "A vehicle that enters a spawn point with cargo incurs a penalty."
  (b/build-supply (w/cell [6 5]) :red)
- (let [id (:id (m/spawn (w/cell [5 5])))]
+ (let [id (:id (s/spawn (w/cell [5 5])))]
    (tick (* 6 +truck-speed+))
    (:coords (v/vehicle id)) => [5 5]
    (v/despawning? (v/vehicle id)) => truthy
@@ -286,7 +287,7 @@ the magnitude at the mixer should be the sum of the cargo counts"
  (b/build-spawn (w/cell [0 0]) :truck)
  (b/build-spawn (w/cell [1 0]) :truck)
  (p/build-path (w/cell [0 0]) :east :road)
- (m/spawn (w/cell [0 0]))
+ (s/spawn (w/cell [0 0]))
  (tick 100) =not=> (throws Exception))
 
 (defn build-crossroad [west-east-type north-south-type]
@@ -310,11 +311,11 @@ the magnitude at the mixer should be the sum of the cargo counts"
 up resources"
   (build-crossroad :canal :canal)
 
-  (m/spawn (w/cell [3 5]))
+  (s/spawn (w/cell [3 5]))
   (tick (* 3 +boat-speed+)) ;boat dropped off cargo
   (b/resource-color (w/cell [5 5])) => (roughly 0.0 0.01)
   (b/resource-count (w/cell [5 5])) => 10
-  (let [id (:id (m/spawn (w/cell [5 4])))]
+  (let [id (:id (s/spawn (w/cell [5 4])))]
     (tick (dec (* 1.5 +boat-speed+)))
     (v/cargo-count (v/vehicle id)) => 0
     (b/resource-count (w/cell [5 5])) => 10
@@ -326,10 +327,10 @@ up resources"
   "When a vehicle can't pick up all the available content at a resource,
 it only picks up as much as it can carry"
   (build-crossroad :canal :rails)
-  (m/spawn (w/cell [3 5]))
+  (s/spawn (w/cell [3 5]))
   (tick (* 3 (p/path->duration :canal))) ; cargo dropped off
 
-  (let [id (:id (m/spawn (w/cell [5 4])))]
+  (let [id (:id (s/spawn (w/cell [5 4])))]
     (tick (* 1.5 (p/path->duration :rails)))
     (v/cargo-count (v/vehicle id)) => (v/cargo-capacity :train)
     (b/resource-count (w/cell [5 5])) => (- (v/cargo-capacity :boat)
@@ -339,10 +340,10 @@ it only picks up as much as it can carry"
   "When a vehicle can't pick up all the available content at a resource,
 it only picks up as much as it can carry"
             (build-crossroad :rails :canal)
-            (m/spawn (w/cell [3 5]))
+            (s/spawn (w/cell [3 5]))
             (tick (* 3 (p/path->duration :rails))) ;cargo dropped off
 
-            (let [id (:id (m/spawn (w/cell [5 4])))]
+            (let [id (:id (s/spawn (w/cell [5 4])))]
               (tick (p/path->duration :canal))
               (half-move id)
               (v/cargo-count (v/vehicle id)) => (v/cargo-capacity :train)
