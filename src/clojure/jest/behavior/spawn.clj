@@ -58,7 +58,6 @@
 
 (defn start-spawning []
   (doseq [{:keys [coord spawn-rate spawn-offset] :as s} (spawning-spawners)]
-    (println coord)
     (letfn [(spawn-and-reschedule [time]
               (let [s (cell coord)
                     time (+ time (:spawn-rate s))]

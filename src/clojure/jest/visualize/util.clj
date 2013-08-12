@@ -166,7 +166,6 @@ Returns an x-scale y-scale vector."
       sketch-decorator
       (fn [sketch decorate]
         (let [frame-atom (get-frame-atom sketch)]
-          (println frame-atom)
           (swap! frame-atom
                  #(doto %
                     (.dispose)

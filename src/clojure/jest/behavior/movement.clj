@@ -85,7 +85,6 @@
                             (mix-colors (vehicle-cell (vehicle id))
                                         (cargo-color (vehicle id))
                                         (cargo-count (vehicle id)))
-                            (println (resource-color (vehicle-cell (vehicle id))))
                             (clear-cargo id)
                             (update-vehicle-exit id))))
 
