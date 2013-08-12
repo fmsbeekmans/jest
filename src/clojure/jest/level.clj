@@ -1,10 +1,14 @@
 (ns jest.level
-  (:require [jest.world :as world :refer [all-cells reset-world world-width world-height]]
-            [jest.world.building :refer [spawn? building-type all-spawns all-supplies all-mixers all-depots all-restricteds]]
+  (:require [jest.world :as world :refer [cell all-cells reset-world world-width world-height]]
+            [jest.world.cell :refer [initialize-world]]
+            [jest.world.building :refer
+             [enable-spawner build-restricted build-mixer build-supply build-depot build-spawn
+              spawn? building-type all-spawns all-supplies all-mixers all-depots
+              all-restricteds]]
             [jest.scheduler :refer [scheduler-reset! start! pause!]]
             [jest.movement :refer [start-spawning stop-spawning
                                    set-done-callback! reset-done-callback!]]
-            [jest.world.path :refer [out-paths]]
+            [jest.world.path :refer [out-paths build-path]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
             [jest.visualize.visualize :refer [visible]]))
@@ -87,8 +91,12 @@
   (spit file-name (with-out-str (print-level))))
 
 ;; This is probably the most evil thing I have ever done. So happy my name is still not correctly tied to this commit ~J
-(defn load-world [file-name]
-  (load-file file-name))
+(let [this-ns *ns*]
+  (defn load-world [file-name]
+    (binding [*ns* this-ns]
+      (load-file file-name))))
 
 (defn level-helper [level]
   (partial load-world (str "levels/" level ".level")))
+
+
