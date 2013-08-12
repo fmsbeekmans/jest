@@ -7,8 +7,8 @@
               all-restricteds]]
             [jest.scheduler :refer [scheduler-reset! start! pause!]]
             [jest.world.path :refer [out-paths build-path]]
-            [jest.behavior.movement :refer [set-done-callback! reset-done-callback!]]
             [jest.behavior.spawn :refer [start-spawning stop-spawning]]
+            [jest.behavior.callback :refer [set-done-callback reset-done-callback]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
             [jest.visualize.visualize :refer [visible]]))
@@ -25,7 +25,7 @@
   (reset-world {})
   (scheduler-reset!)
   (reset-score)
-  (reset-done-callback!)
+  (reset-done-callback)
   (reset! visible false))
 
 (defn start-level
@@ -35,7 +35,7 @@
      (reset! current-level level-fn)
      (initialize-level)
      (when-not edit-mode?
-       (set-done-callback! #(send (agent nil) (fn [_] (win-level)))))
+       (set-done-callback #(send (agent nil) (fn [_] (win-level)))))
 
      (level-fn)
 

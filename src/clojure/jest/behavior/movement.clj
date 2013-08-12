@@ -17,7 +17,8 @@
                                     dropoff-resource all-depots-filled?]]
         [jest.scheduler :only [schedule offset game-time]]
         [jest.score :only [score-vehicle]])
-  (:require [jest.util :as util]))
+  (:require [jest.util :as util]
+            [jest.behavior.callback :as callback]))
 
 (defonce ^:private idc (atom 0))
 
@@ -244,14 +245,6 @@
                             (clear-cargo id)
                             (update-vehicle-exit id))))
 
-(def done-callback (atom (fn [])))
-
-(defn set-done-callback! [f]
-  (reset! done-callback f))
-
-(defn reset-done-callback! []
-  (reset! done-callback (fn [])))
-
 (defmethod vehicle-transition-state
   [true :depot]
   [id]
@@ -266,7 +259,7 @@
         (clear-cargo id)
         (update-vehicle-exit id)
         (if (all-depots-filled?)
-          (@done-callback))))))
+          (callback/on-done))))))
 
 ;;BIG FAT TODO update-preferred-path does double work now
 ;;reason to do preferred path last is cause the vehicle might have picked something up
