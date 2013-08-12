@@ -62,23 +62,19 @@
   ([c path color]
      (doall
       (map #(unbuild-route c (:direction %) color) (paths-with-route c color)))
-     (println "Paths is: " path)
      (build-route c (:direction path) color))
   ([c dir color path-kind]
-     (println ">>>>")
-     (println c dir)
-     (println "Path is: " (dir (:paths c)))
-     (println "<<<<")
      (set-route c (dir (:paths c)) color)))
 
 (defn on-down
   [id pos]
-  (dosync
-   (if (= pos [0 0])
-     (if (paused?)
-       (resume!)
-       (pause!)))
-   (track-pointer id (cell pos))))
+  (when-not (apply restricted? pos)
+    (dosync
+     ;; (if (= pos [0 0])
+     ;;   (if (paused?)
+     ;;     (resume!)
+     ;;     (pause!)))
+     (track-pointer id (cell pos)))))
 
 ;;;(defrecord Movement [from to dir inv-dir])
 (defn- from-path [m]
@@ -99,7 +95,6 @@
 
 (defn route-movement [m color path-type]
   (let [{:keys [dir from]} m]
-    (println "from : " from "dir :" dir)
     (set-route from dir color path-type)))
 
 (defn u-cell [m]
@@ -118,7 +113,10 @@
                                   :dir dir
                                   :inv-dir (opposite-dirs dir)})
          pointer (@pointers id)
-         ;new-pointer {assoc pointer :coord to-pos}
+         ptype (:path-type pointer)
+         pointer (if (apply restricted? to-pos)
+                   (assoc pointer :path-type nil)
+                   pointer)
          ]
      (when (:path-type pointer)
        (let [fpath (from-path movement)
@@ -130,9 +128,7 @@
                   (when (contains? pointer :route)
                     (route-movement (u-cell movement)
                                     (:route pointer)
-                                    (:path-type pointer)))
-                  (println "done r"))]
-         (println matcher)
+                                    (:path-type pointer))))]
          (match matcher
                 [nil nil]  (do (bp) (br))
                 [:in :out] (do (up) ;(bp) (br)
