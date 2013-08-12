@@ -1,0 +1,26 @@
+(initialize-world 21 17)
+(enable-spawner (build-spawn (cell [3 6]) :truck) 0 4000)
+(enable-spawner (build-spawn (cell [3 10]) :truck) 2000 4000)
+(dotimes [i 4]
+  (build-path (cell [(+ 3 i) 6]) :east :road)
+  (build-path (cell [(+ 3 i) 10]) :east :road))
+(dotimes [i 4]
+  (build-path (cell [(+ 10 i) 6]) :east :road)
+  (build-path (cell [(+ 10 i) 10]) :east :road))
+
+(dotimes [i 2]
+  (build-path (cell [7 (+ 6 i)]) :south :road)
+  (build-path (cell [7 (- 10 i)]) :north :road)
+  (build-path (cell [10 (+ 8 i)]) :south :road)
+  (build-path (cell [10 (- 8 i)]) :north :road)
+  )
+(dotimes [i 3]
+  (build-path (cell [(+ 7 i) 8]) :east :road))
+
+(build-supply (cell [4 6]) :red)
+(build-supply (cell [4 10]) :blue)
+(build-depot (cell [13 6]) :blue 10)
+(build-depot (cell [13 10]) :red 10)
+
+(build-spawn (cell [14 6]) :truck)
+(build-spawn (cell [14 10]) :truck)
