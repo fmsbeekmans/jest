@@ -12,6 +12,7 @@
         jest.world
         jest.world.building
         jest.behavior.movement
+        jest.behavior.spawn
         jest.util
         jest.world.path
         jest.level

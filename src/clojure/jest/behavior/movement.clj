@@ -301,7 +301,7 @@
        (doseq [v incoming]
          (start-exploding (:id v)))))))
 
-(defn- schedule-move
+(defn schedule-move
   "Schedules the next move for the vehicle with the given id. If the vehicle has
    entered a spawn point, no move is scheduled."
   [id]
@@ -314,7 +314,7 @@
                    (schedule-move id)))))
             (:exit-time (vehicle id))))
 
-(defn- load-vehicle-on-spawn
+(defn load-vehicle-on-spawn
   "Loads a vehicle on a spawn point, setting all initial state."
   [c]
   {:pre [(spawn? c)]}
@@ -330,16 +330,6 @@
      (when-not (:exit-direction (vehicle id))
        (vehicle-state-change id :spawning-exploding))
      (vehicle id))))
-
-(defn spawn
-  "Spawns a vehicle on the given cell."
-  [c]
-  {:pre [(spawn? c)]}
-  (dosync
-   (let [vehicle (load-vehicle-on-spawn c)]
-     (schedule-move (:id vehicle))
-     (score-vehicle :spawn vehicle)
-     vehicle)))
 
 (defn valid-out-direction? [v dir]
   (let [path (path (vehicle-cell v) dir)]
@@ -372,32 +362,3 @@ This function should be called from within a transaction."
      (depot? c) nil
      :default (cargo-color v))))
 
-(def active-spawners (atom #{}))
-
-(defn- activate-spawner [s]
-  (swap! active-spawners
-         conj (coords s)))
-
-(defn- deactivate-spawner [s]
-  (swap! active-spawners
-         disj (coords s)))
-
-(defn active? [s]
-  (@active-spawners (coords s)))
-
-
-(defn start-spawning []
-  (doseq [{:keys [coord spawn-rate spawn-offset] :as s} (spawning-spawners)]
-    (println coord)
-    (letfn [(spawn-and-reschedule [time]
-              (let [s (cell coord)
-                    time (+ time (:spawn-rate s))]
-                (when (active? s)
-                  (spawn s)
-                  (schedule (partial spawn-and-reschedule time) time))))]
-      (activate-spawner s)
-      (let [time (offset (:spawn-offset s))]
-        (schedule (partial spawn-and-reschedule time) time)))))
-
-(defn stop-spawning []
-  (reset! active-spawners #{}))

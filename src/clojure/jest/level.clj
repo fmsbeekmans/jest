@@ -7,8 +7,8 @@
               all-restricteds]]
             [jest.scheduler :refer [scheduler-reset! start! pause!]]
             [jest.world.path :refer [out-paths build-path]]
-            [jest.behavior.movement :refer [start-spawning stop-spawning
-                                            set-done-callback! reset-done-callback!]]
+            [jest.behavior.movement :refer [set-done-callback! reset-done-callback!]]
+            [jest.behavior.spawn :refer [start-spawning stop-spawning]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
             [jest.visualize.visualize :refer [visible]]))
