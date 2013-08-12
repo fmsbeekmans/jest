@@ -15,7 +15,7 @@
   []
   (swap! idc inc))
 
-(defn load-vehicle-on-spawn
+(defn- load-vehicle-on-spawn
   "Loads a vehicle on a spawn point, setting all initial state."
   [c]
   {:pre [(spawn? c)]}
