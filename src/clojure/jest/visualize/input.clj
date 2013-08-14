@@ -2,7 +2,7 @@
   "input handlers for a quil window that can be set from elsewhere.")
 
 (defonce handlers
-;  #^{:doc"The mapping from event to handler."}
+  #^{:doc"The mapping from event to handler."}
   (atom  {:on-down (fn [])
           :on-up (fn [])
           :on-move (fn [])

@@ -16,6 +16,7 @@
   (.point l 1))
 
 (defn progress
+  "Ensure thap progress is a double from 0.0 to 1.0"
   [p]
   (double
    (cond
@@ -26,6 +27,7 @@
 ;; Stroke protocol
 
 (defprotocol Stroke
+  "A continuous stroke with a begining and an end."
   (length [this])
   (point [this p])
   (tangent [this p]))
@@ -33,6 +35,7 @@
 ;; Linear stroke
 
 (defrecord Linear [start end]
+  #^{:doc "A straight stroke between the start and end."}
   Stroke
   (length [this]
     (Math/sqrt
@@ -111,7 +114,9 @@ stroke itself."
                     sub-stroke))
                 (:indexed-sub-strokes (meta composed)))))))
 
-(defrecord ComposedStroke [sub]
+(defrecord ComposedStroke
+    #^{:doc "A sequence of strokes that acts as one."}
+  [sub]
   Stroke
   (length [this]
     (apply + (map (comp length :stroke)
@@ -136,6 +141,8 @@ stroke itself."
                (/ (- (progress p) offset)
                   (progress p'))))))
 
-(defn ->ComposedStroke [sub]
+(defn ->ComposedStroke
+  "Create a stroke out of 1 or more strokes to act as one."
+  [sub]
   (with-meta (ComposedStroke. sub)
     {:indexed-sub-strokes (index-sub-strokes sub)}))
