@@ -35,7 +35,7 @@
     [(min 1.0 (/ count soft-cap))
      color]))
 
-(defmethod building-resource-rate :default [c]
+(defmethod building-resource-rate :default [_]
   [0 nil])
 
 (defn vehicle-resource-rate

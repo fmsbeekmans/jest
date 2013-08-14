@@ -1,6 +1,5 @@
 (ns jest.visualize.visualize
   "Functions to facilitate the visualisation of the world state."
-  (:use jest.util)
   (:use jest.visualize.arrow)
   (:use jest.visualize.junction)
   (:use jest.visualize.building)

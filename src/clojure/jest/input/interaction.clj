@@ -13,11 +13,14 @@
 (def inv-directions (clojure.set/map-invert directions))
 (def pointers ( atom {}))
 
-(defn in-connected-cells [c]
+(defn in-connected-cells
   "All cells with a path to c."
+  [c]
   (map to (in-paths c)))
 
 (defn routable-vehicles [c]
+  "All the vehicles whose color can be selected for route markings from cell c
+with the current world state."
   (concat
    (filter incoming? (vehicles c))
    (filter #(and (outgoing? %)
@@ -63,7 +66,7 @@
      (doall
       (map #(unbuild-route c (:direction %) color) (paths-with-route c color)))
      (build-route c (:direction path) color))
-  ([c dir color path-kind]
+  ([c dir color _] ;path-kind renamed to _
      (set-route c (dir (:paths c)) color)))
 
 (defn on-down

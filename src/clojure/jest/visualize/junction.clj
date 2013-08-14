@@ -1,6 +1,5 @@
 (ns jest.visualize.junction
   "Functions to facilitate the visualisation of the world state."
-  (:use jest.util)
   (:use [clojure.core.match :only [match]])
   (:require [brick.image :as image]
             [brick.drawable :as drawable])

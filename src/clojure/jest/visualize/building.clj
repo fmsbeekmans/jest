@@ -1,6 +1,6 @@
 (ns jest.visualize.building
   "Functions to facilitate the visualisation of the world state."
-  (:use jest.util)
+  (:require [jest.util :as u])
   (:require [brick.drawable :as drawable]
             [quil.core :as quil])
   (:require [jest.world.building :as building])
@@ -36,6 +36,6 @@
                              resource/building-resource-rate)]
       (if (= type :spawn)
         (tile-fn
-         (hyphenate-keywords :spawn (building/vehicle-type c)))
+         (u/hyphenate-keywords :spawn (building/vehicle-type c)))
         (drawable/->Nothing)))
     (tile-fn nil)))
