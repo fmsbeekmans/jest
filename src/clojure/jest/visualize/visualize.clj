@@ -19,10 +19,15 @@
             [jest.visualize.resource :as resource])
   (:require [jest.visualize.input :as input]))
 
-(def cell-bg :background)
+(def cell-bg
+  "fn to get the bg-sprite from the sprite-dictionary"
+  :background)
 
-(def min-borders [0.1 0.1])
-(def visible (atom false))
+(def min-borders
+  "The minimum size of the borders around the game."
+  [0.1 0.1])
+
+(def win-screen-visible "win-" (atom false))
 
 
 (declare sketch-size)
@@ -133,24 +138,27 @@ cell-draw-fn is a function that returns a Drawable."
 (defn vehicle-center [v]
   (absolute->relative (:center (cell-points (vehicle-cell v)))))
 
-(def lols
+(def direction-to-angle
   {:north (* 1.5 Math/PI)
    :south (* 0.5 Math/PI)
    :west Math/PI
    :east 0.0})
 
 (defn spawning-vehicle->location
+  "Spawning vehicle placement"
   [v]
   (let [progress (util/vehicle->progress v)
         stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
     (if (< progress 0.5)
       {:position (vehicle-center v)
-       :rotation (lols (:exit-direction v))}
+       :rotation (direction-to-angle (:exit-direction v))}
       {:position (absolute->relative
                   (points/.point stroke (* 2 (- progress 0.5))))
-       :rotation (lols (:exit-direction v))})))
+       :rotation (direction-to-angle (:exit-direction v))})))
 
-(defn spawning-animation [vehicle drawable]
+(defn spawning-animation
+  "Spawning animation modifier"
+  [vehicle drawable]
   (let [progress (util/vehicle->progress vehicle)]
     (drawable/->Tint
      (drawable/->Floating drawable
@@ -159,20 +167,25 @@ cell-draw-fn is a function that returns a Drawable."
                           0)
      [255 (min 255 (* progress 510))])))
 
-(def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-animation))
+(def spawning-vehicle
+  "Defining the animation for a spawning vehicle."
+  (vehicle-animation spawning-vehicle->location spawning-animation))
 
 (defn despawning-vehicle->location
+  "Placement of a despawning vehicle"
   [v]
   (let [progress (util/vehicle->progress v)
         stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
     (if (< progress 0.5)
       {:position (absolute->relative
                   (points/.point stroke (* 2 progress)))
-       :rotation (lols (opposite-dirs (:entry-direction v)))}
+       :rotation (direction-to-angle (opposite-dirs (:entry-direction v)))}
       {:position (vehicle-center v)
-       :rotation (lols (opposite-dirs (:entry-direction v)))})))
+       :rotation (direction-to-angle (opposite-dirs (:entry-direction v)))})))
 
-(defn despawning-animation [v d]
+(defn despawning-animation
+  "Animation modifier for a despawning vehicle."
+  [v d]
   (let [progress (util/vehicle->progress v)]
     (drawable/->Tint
      (drawable/->Floating
@@ -183,20 +196,25 @@ cell-draw-fn is a function that returns a Drawable."
       0)
      [255 (* 255 (max 0 (- 1 (* 2 (- progress 0.5)))))])))
 
-(def despawning-vehicle (vehicle-animation despawning-vehicle->location despawning-animation))
+(def despawning-vehicle
+  "Define the animation for a despawning vehicle."
+  (vehicle-animation despawning-vehicle->location despawning-animation))
 
 (defn exploding-vehicle->location
+  "placement of an exploding vehicle."
   [v]
   (let [progress (util/vehicle->progress v)
         stroke (util/vehicle->stroke v [(quil/width) (quil/height)])]
     (if (< progress 0.5)
       {:position (absolute->relative
                   (points/point stroke (* 2 progress)))
-       :rotation (lols (opposite-dirs (:entry-direction v)))}
+       :rotation (direction-to-angle (opposite-dirs (:entry-direction v)))}
       {:position (vehicle-center v)
-       :rotation (lols (opposite-dirs (:entry-direction v)))})))
+       :rotation (direction-to-angle (opposite-dirs (:entry-direction v)))})))
 
-(defn exploding-animation [v d]
+(defn exploding-animation
+  "Modify d to be exploding"
+  [v d]
   (let [progress (util/vehicle->progress v)
         col-gradient (points/->Linear [255 255 255]
                                       [32 0 0])]
@@ -208,9 +226,12 @@ cell-draw-fn is a function that returns a Drawable."
                           (- (* Math/PI 4 progress)))
      (points/point col-gradient progress))))
 
-(def exploding-vehicle (vehicle-animation exploding-vehicle->location exploding-animation))
+(def exploding-vehicle
+  "Animation for an exploding vehicle"
+  (vehicle-animation exploding-vehicle->location exploding-animation))
 
 (defn vehicles->Stack
+  "Create a stack of all vehicles."
   [image]
   (apply drawable/->Border
          (drawable/->Stack
@@ -232,6 +253,8 @@ cell-draw-fn is a function that returns a Drawable."
           min-borders)))
 
 (defn world->drawable
+  "Create the mapping from the world state to a drawable
+with a tile-set and a tile-set for paths."
   [tile-fn path-fn]
   (drawable/->Stack
    [
@@ -249,8 +272,9 @@ cell-draw-fn is a function that returns a Drawable."
 
 (declare animate-score-on-tile)
 
-(defn setup [tile-fn]
-                                        ;init een bricklet met tile-set
+(defn setup
+  "Setup the visualization of the game."
+  [tile-fn]
   (let [path-fn (nice-lookup)]
     (reset! world-bricklet
             (drawable/->Bricklet
@@ -265,7 +289,7 @@ cell-draw-fn is a function that returns a Drawable."
                       path-fn)
                      (drawable/->Toggle
                       (score-screen)
-                      visible)])
+                      win-screen-visible)])
                    [w h]))))
              (atom [])
              :title "Traffic"
@@ -278,25 +302,34 @@ cell-draw-fn is a function that returns a Drawable."
              :mouse-dragged input/on-move-handler)))
   (set-visualize-score-fn! #(animate-score-on-tile %1 %2 %3 60)))
 
-(defn sketch! []
+(defn sketch!
+  "Show the visualization as a sketch."
+  []
   (reset! world-sketch (drawable/drawable->sketch! @world-bricklet)))
 
-(defn sketch-width []
+(defn sketch-width
+  "Return the width of the sketch. If none exists return 0"
+  []
   (try
     (.getWidth @world-sketch)
     (catch NullPointerException e
       0)))
 
-(defn sketch-height []
+(defn sketch-height
+  "Return the height of the sketch. If none exists return 0"
+  []
   (try
     (.getHeight @world-sketch)
     (catch NullPointerException e
       0)))
 
-(defn sketch-size []
+(defn sketch-size
+  "Return the size of the sketch. [0 0] if there's no sketch."
+  []
   [(sketch-width) (sketch-height)])
 
 (defn tl
+  "Define where the top-left of the play-field is (relative)."
   []
   (try
     (square-borders-size
@@ -308,26 +341,32 @@ cell-draw-fn is a function that returns a Drawable."
       [0 0])))
 
 (defn br
+  "Define where the bottom-right of the play-field is (relative)."
   []
   (map
    (partial - 1)
    (tl)))
 
 (defn abs-tl []
+  "Define where the top-left of the play-field is (absolute)."
   (map * (tl) (sketch-size)))
 
 (defn abs-br []
+  "Define where the bottom-right of the play-field is (absolute)."
   (map * (br) (sketch-size)))
 
 (defn map-size []
+  "Return the size of the map in pixels."
   (map - (abs-br) (abs-tl)))
 
 (defn cell-size []
+  "Return the average size of a cell."
   (map /
        (map-size)
        (world-size)))
 
 (defn pixel->tile
+  "In what tile is cell [x y]? "
   [x y]
   (let [tl (map * (tl) (sketch-size))
         br (map * (br) (sketch-size))
@@ -340,11 +379,12 @@ cell-draw-fn is a function that returns a Drawable."
     tpos))
 
 (defn tile->pixel
+  "Find a pixel in a tile."
   ([[tx ty] [dx dy]]
      (let [tl (map * (tl) (sketch-size))
            br (map * (br) (sketch-size))
            map-size (map - br tl)
-           cell-size (map / map-size (world-size))]
+           cell-size (map nn/ map-size (world-size))]
        (map +
             tl
             (map #(/ % 2) cell-size)
@@ -355,11 +395,15 @@ cell-draw-fn is a function that returns a Drawable."
   ([[tx ty]]
      (tile->pixel [tx ty] [0 0])))
 
-(defmacro with-tile [[t c] & body]
+(defmacro with-tile
+  "Do the actions of body with the cell on c bound to the symbol ~t."
+  [[t c] & body]
   `(let [~t (apply pixel->tile ~c)]
      ~@body))
 
-(defn animate-score-on-tile [score-delta [tx ty] type duration]
+(defn animate-score-on-tile
+  "Start a score animation on tile [tx ty]."
+  [score-delta [tx ty] type duration]
   (schedule-on-fps #((score-animation score-delta
                                       (tile->pixel [tx ty] [-0.4 -0.1])
                                       type

@@ -11,12 +11,12 @@
             [jest.behavior.callback :refer [set-done-callback reset-done-callback]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
-            [jest.visualize.visualize :refer [visible]]))
+            [jest.visualize.visualize :refer [win-screen-visible]]))
 
 (defonce current-level (atom nil))
 
 (defn win-level []
-  (reset! visible true)
+  (reset! win-screen-visible true)
   (stop-spawning)
   (pause!))
 
@@ -26,7 +26,7 @@
   (scheduler-reset!)
   (reset-score)
   (reset-done-callback)
-  (reset! visible false))
+  (reset! win-screen-visible false))
 
 (defn start-level
   ([level-fn]
