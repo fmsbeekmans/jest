@@ -156,7 +156,8 @@
   (reset! touch-input-state
           (invoke-void-method (fn []
                                 (let [handle (get-quil-sketch-handle)
-                                      proxy-fn #(handle-touch-event %1 %2 %3)]
+                                      proxy-fn handle-touch-event]
+                                        ;#(handle-touch-event %1 %2 %3)
                                   (register-touch-window handle)
                                   [(set-hook! handle :wh-getmessage proxy-fn)
                                    (set-hook! handle :wh-callwnd proxy-fn)])))))

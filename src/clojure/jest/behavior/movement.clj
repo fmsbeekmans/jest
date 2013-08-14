@@ -143,7 +143,7 @@
   [id]
   (schedule (fn []
               (dosync
-               (if (not (:exit-direction (vehicle id)))
+               (if-not (:exit-direction (vehicle id))
                  (unload-vehicle (vehicle id))
                  (do
                    (move-vehicle id (:exit-direction (vehicle id)))

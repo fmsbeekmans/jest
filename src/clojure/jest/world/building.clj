@@ -147,8 +147,8 @@
   "Returns the color of the resource at this cell."
   [cell]
   (let [resource-seq (seq (or (:resource cell) {}))
-        color-list (apply concat (map #(repeat (second %) (first %))
-                              resource-seq))]
+        color-list (mapcat #(repeat (second %) (first %))
+                        resource-seq)]
     (if (seq color-list)
       (apply average-hue color-list))))
 

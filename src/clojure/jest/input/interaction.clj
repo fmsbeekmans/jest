@@ -131,9 +131,9 @@
                                     (:path-type pointer))))]
          (match matcher
                 [nil nil]  (do (bp) (br))
-                [:in :out] (do (up) ;(bp) (br)
-                               )
-                [:out :in] (do (br))
+                [:in :out] (up);(do  ;(bp) (br)
+                               ;)
+                [:out :in] (br)
                 [_ _] (println "Default handler, should never come here..."))))
      (update-pointer id (assoc pointer :coord (:to movement)))
      (update-vehicles-for-cell-changes (cell from-pos))

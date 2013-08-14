@@ -176,8 +176,7 @@
   (let [c (vehicle-cell v)]
     (cond
      (supply? c) (hue (:resource-type c))
-     (mixer? c) (if (cargo-color v)
-                  nil
+     (mixer? c) (when-not (cargo-color v)
                   (resource-color c))
      (depot? c) nil
      :default (cargo-color v))))

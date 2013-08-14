@@ -98,7 +98,7 @@ stroke itself."
                    (if (zero? start)
                      sub-stroke))
                  (:indexed-sub-strokes (meta composed)))
-      (zero? (- 1 p')) (keep
+      (= p' 1.0) (keep
                         (fn [[[start end] sub-stroke]]
                           (if (zero? (- 1 end))
                             sub-stroke))
@@ -126,7 +126,7 @@ stroke itself."
                               (progress p'))))]
       (.point sub-stroke (cond
                           (> p'' 1) 1
-                          (< p'' 0) 0
+                          (neg? p'') 0
                           :default p''))))
   (tangent [this p]
     (let [{offset :offset

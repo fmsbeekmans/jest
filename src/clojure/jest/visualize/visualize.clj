@@ -152,13 +152,12 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn spawning-animation [vehicle drawable]
   (let [progress (util/vehicle->progress vehicle)]
-    (->
+    (drawable/->Tint
      (drawable/->Floating drawable
                           [0.5 0.5]
                           (min 1 (* 2 (util/vehicle->progress vehicle)))
                           0)
-     (drawable/->Tint
-      ,,, [255 (min 255 (* progress 510))]))))
+     [255 (min 255 (* progress 510))])))
 
 (def spawning-vehicle (vehicle-animation spawning-vehicle->location spawning-animation))
 
@@ -175,15 +174,14 @@ cell-draw-fn is a function that returns a Drawable."
 
 (defn despawning-animation [v d]
   (let [progress (util/vehicle->progress v)]
-    (->
+    (drawable/->Tint
      (drawable/->Floating
       d
       [0.5 0.5]
       (min (- 2 (* 2 progress))
            1)
       0)
-     (drawable/->Tint
-      ,,, [255 (* 255 (max 0 (- 1 (* 2 (- progress 0.5)))))]))))
+     [255 (* 255 (max 0 (- 1 (* 2 (- progress 0.5)))))])))
 
 (def despawning-vehicle (vehicle-animation despawning-vehicle->location despawning-animation))
 
@@ -202,14 +200,13 @@ cell-draw-fn is a function that returns a Drawable."
   (let [progress (util/vehicle->progress v)
         col-gradient (points/->Linear [255 255 255]
                                       [32 0 0])]
-    (->
+    (drawable/->Tint
      (drawable/->Floating d
                           [0.5 0.5]
                           (min (- 2 (* 2 progress))
                                1)
                           (- (* Math/PI 4 progress)))
-     (drawable/->Tint
-      ,,, (points/point col-gradient progress)))))
+     (points/point col-gradient progress))))
 
 (def exploding-vehicle (vehicle-animation exploding-vehicle->location exploding-animation))
 
