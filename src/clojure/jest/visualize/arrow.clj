@@ -4,7 +4,9 @@
             [quil.core :as quil])
   (:require [jest.color :as color]))
 
-(defn arrow [cx cy angle colors]
+(defn arrow
+  "Create an arrow with route-markings."
+  [cx cy angle colors]
   (let [amount (count colors)]
     (drawable/->Floating
      (reify drawable/Drawable

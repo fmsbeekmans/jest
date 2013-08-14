@@ -5,12 +5,16 @@
             [brick.drawable :as drawable])
   (:require [jest.world.path :as path]))
 
-(def direction-order {:north 1 ;;first
-                        :west 2
-                        :south 3
-                        :east 4})
+(def direction-order
+  "a sequential ordering of the cardinal directions."
+  {:north 1 ;;first
+   :west 2
+   :south 3
+   :east 4})
 
-(defn match-roads [roads]
+(defn match-roads
+  "match the in and out paths to a sprite-key"
+  [roads]
   (let [sorted-roads (sort-by (comp direction-order :direction) roads)
         road-tuples (map (juxt :direction :inout) sorted-roads)]
     (match (vec road-tuples)
@@ -54,7 +58,9 @@
            [[:north _] [:west _] [:south _] [:east _]] :cross
            :else nil)))
 
-(defn nice-lookup []
+(defn nice-lookup
+  "Lookup map for road-sprites."
+  []
   (let [loader (comp
                 drawable/->Image
                 image/path->PImage
