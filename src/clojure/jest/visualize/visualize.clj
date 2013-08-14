@@ -1,8 +1,9 @@
 (ns jest.visualize.visualize
   "Functions to facilitate the visualisation of the world state."
-  (:use jest.visualize.arrow)
-  (:use jest.visualize.junction)
-  (:use jest.visualize.building)
+  (:require [jest.visualize.arrow :refer [arrow]]
+            [jest.visualize.junction :refer [nice-lookup]]
+            [jest.visualize.building :refer [cell-spawn
+                                             cell-building]])
   (:require [jest.score :as score :refer [set-visualize-score-fn!]]
             [jest.visualize.score-screen :refer [score-screen]])
   (:require [brick.drawable :as drawable :refer [square-borders-size]]
@@ -210,7 +211,7 @@ cell-draw-fn is a function that returns a Drawable."
 (def exploding-vehicle (vehicle-animation exploding-vehicle->location exploding-animation))
 
 (defn vehicles->Stack
-  [vehicle-type image]
+  [image]
   (apply drawable/->Border
          (drawable/->Stack
           (vec
@@ -240,7 +241,7 @@ cell-draw-fn is a function that returns a Drawable."
                                 (comp (fn [keyword]
                                         (drawable/->Tint keyword
                                                          [255 128])) tile-fn)))
-    (vehicles->Stack :truck (tile-fn :truck))
+    (vehicles->Stack (tile-fn :truck))
     (world-state->Grid paths-to-arrows)
     (world-state->Grid (partial cell-building tile-fn))
     (score->drawable @score/current-score)

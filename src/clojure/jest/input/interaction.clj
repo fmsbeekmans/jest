@@ -18,9 +18,10 @@
   [c]
   (map to (in-paths c)))
 
-(defn routable-vehicles [c]
+(defn routable-vehicles
   "All the vehicles whose color can be selected for route markings from cell c
 with the current world state."
+  [c]
   (concat
    (filter incoming? (vehicles c))
    (filter #(and (outgoing? %)
