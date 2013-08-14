@@ -384,7 +384,7 @@ with a tile-set and a tile-set for paths."
      (let [tl (map * (tl) (sketch-size))
            br (map * (br) (sketch-size))
            map-size (map - br tl)
-           cell-size (map nn/ map-size (world-size))]
+           cell-size (map / map-size (world-size))]
        (map +
             tl
             (map #(/ % 2) cell-size)
