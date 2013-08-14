@@ -1,6 +1,5 @@
 (ns jest.visualize.arrow
   "Functions to facilitate the visualisation of the world state."
-  (:use jest.util)
   (:require [brick.drawable :as drawable]
             [quil.core :as quil])
   (:require [jest.color :as color]))

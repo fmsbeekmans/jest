@@ -31,7 +31,10 @@
   (+ (scoring-base event)
                    (* multiplier (scoring-extra event))))
 
-(def visualize-score-fn (atom (fn [score tile type])))
+(def visualize-score-fn
+  "should be a 3-arity fn where the args are the score, tile and type"
+  (atom (fn [_ _ _])))
+
 (defn set-visualize-score-fn! [f]
   (reset! visualize-score-fn f))
 

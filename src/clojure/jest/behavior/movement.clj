@@ -33,7 +33,7 @@
   vehicle-transition-state-dispatch)
 
 (defmethod vehicle-transition-state :default
-  [id])
+  [_])
 
 (defmethod vehicle-transition-state
   [false :spawn]
