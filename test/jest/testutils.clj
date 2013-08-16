@@ -136,3 +136,9 @@ running all scheduled tasks in order.By default n is 1"
 (defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
   `(let [~vehicle (:id (s/spawn (w/cell ~spawn-location)))]
      ~@body))
+
+(defmacro with-game-time
+  "While the body is running, set the game time to x."
+  [x & body]
+  `(with-redefs [jest.scheduler/calculate-game-time (constantly ~x)]
+     ~@body))
