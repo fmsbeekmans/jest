@@ -1,23 +1,26 @@
 (ns jest.input.wm-touch
   (:require [jest.input.core :refer [receive-down receive-up receive-move]]
             [jest.visualize.visualize :refer [world-sketch]]
-            [jest.visualize.util :refer [get-frame-offset get-pane-offset]])
+            [jest.visualize.util :refer [get-frame-offset get-pane-offset]]
+            [clojure.core.incubator :refer [defmacro-]])
   (:import IUser IKernel IAWTCallback Hooks$IGetMsgProc Hooks$ICallWndProc TouchInput
            [com.sun.jna Native Pointer Callback]
            [com.sun.jna.win32 StdCallLibrary StdCallLibrary$StdCallCallback]
            [com.sun.jna.platform.win32 WinUser WinDef$HWND WinDef$WPARAM WinDef$LPARAM BaseTSD$LONG_PTR WinDef$LRESULT WinNT$HANDLE]
            java.util.Date))
 
-(defn setup-native [] 
+(defn- setup-native [] 
   (def nativeuser (Native/loadLibrary "user32" IUser))
   (def nativekernel (Native/loadLibrary "kernel32" IKernel)))
 
-(defn get-awt-window []
+(defn- get-awt-window []
   (.FindWindowA nativeuser "SunAwtToolkit" "theAwtToolkitWindow"))
 
-(def invoke-void-method-msg 0x982a) ;;HAX
+(def ^{:private true
+       :doc "Message identifier corresponding with WM_AWT_INVOKE_VOID_METHOD."}
+  invoke-void-method-msg 0x982a)
 
-(defn invoke-void-method [f]
+(defn- invoke-void-method [f]
   (let [result (promise)
         callback (reify IAWTCallback
                    (callback [this]
@@ -30,36 +33,33 @@
                    (WinDef$LPARAM.))
     @result))
 
-(defn register-touch-window [handle]
+(defn- register-touch-window [handle]
   (.RegisterTouchWindow nativeuser
                         handle
                         0))
         
-(defn handle [component]
+(defn- handle [component]
   (-> (.. component getPeer getHWnd)
       Pointer.
       WinDef$HWND.))
 
 
-(def wh-getmessage 3)
-(def wh-callwnd 4)
+(def ^:private hooks {:wh-getmessage [3 'Hooks$IGetMsgProc]
+                      :wh-callwnd [4 'Hooks$ICallWndProc]})
 
-(def hooks {:wh-getmessage [3 'Hooks$IGetMsgProc]
-            :wh-callwnd [4 'Hooks$ICallWndProc]})
-
-(defn hook-num [key]
+(defn- hook-num [key]
   (first (hooks key)))
 
-(defn hook-type [key]
+(defn- hook-type [key]
   (second (hooks key)))
 
 
-(defn window-thread [handle]
+(defn- window-thread [handle]
   (.GetWindowThreadProcessId nativeuser
                              handle
                              nil))
 
-(defmacro create-callback [hook f]
+(defmacro- create-callback [hook f]
   `(reify ~(hook-type hook)
      (~'callback [this# nCode# wParam# msg#]
        (let [result# (~f (.message msg#) (.wParam msg#) (.lParam msg#))]
@@ -72,7 +72,7 @@
                             wParam#
                             msg#))))))
 
-(defmacro set-hook! [handle hook f]
+(defmacro- set-hook! [handle hook f]
   `(let [callback# (create-callback ~hook ~f)]
      [(.SetWindowsHookExA nativeuser
                           (hook-num ~hook)
@@ -81,23 +81,23 @@
                           (window-thread ~handle))
       callback#]))
 
-(defn remove-hook! [hook]
+(defn- remove-hook! [hook]
   (.UnhookWindowsHookEx nativeuser hook))
 
-(defn low-word [num]
+(defn- low-word [num]
   (bit-and 0xFFFF num))
 
-(defn as-handle [param]
+(defn- as-handle [param]
   (WinNT$HANDLE. (.toPointer param)))
 
-(def wmtouch 0x240)
+(def ^:private wmtouch 0x240)
 
-(defn make-touch-array [size]
+(defn- make-touch-array [size]
   (.toArray (TouchInput.) size))
 
-(def touch-array (make-touch-array 6))
+(def ^:private touch-array (make-touch-array 6))
 
-(defn get-touch-array
+(defn- get-touch-array
   "Returns a touch array that is at least as big as size.
    Reuses previous touch array if possible"
   [size]
@@ -107,7 +107,7 @@
     (alter-var-root #'touch-array
                     (constantly (make-touch-array size)))))
 
-(defn get-filled-touch-array
+(defn- get-filled-touch-array
   "Returns a touch array with touch input retrieved."
   [count handle]
   (let [inputs (get-touch-array count)
@@ -115,12 +115,12 @@
     (.GetTouchInputInfo nativeuser handle count inputs size)
     inputs))
 
-(defn decode-dwflags [dwflags]
+(defn- decode-dwflags [dwflags]
   (cond (bit-test dwflags 2) :up
         (bit-test dwflags 1) :down
         (bit-test dwflags 0) :move))
 
-(defn handle-touch-event [code wparam lparam]
+(defn- handle-touch-event [code wparam lparam]
   (when (= wmtouch code)
     (let [touch-count (-> wparam
                           .intValue
@@ -144,10 +144,10 @@
             :move (receive-move id [x y])
             nil))))))
 
-(defn get-quil-sketch-handle []
+(defn- get-quil-sketch-handle []
   (handle @world-sketch))
 
-(defonce touch-input-state (atom nil))
+(defonce ^:private touch-input-state (atom nil))
 
 (defn setup-wm-touch-input! []
   {:pre [(not @touch-input-state)
