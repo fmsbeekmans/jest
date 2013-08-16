@@ -1,4 +1,4 @@
-(ns jest.movement-test
+(ns jest.behavior.movement-test
   (:use midje.sweet
         jest.testutils
         jest.color)
