@@ -40,12 +40,18 @@
   [v]
   (cell (:coords v)))
 
-(def ^:private id->vehicle (ref {}))
+(def ^{:private true
+       :doc "Map from vehicle id to vehicle record, containing all vehicles currently in the game."}
+  id->vehicle (ref {}))
 
-(defn- add-to-vehicle-map [v]
+(defn- add-to-vehicle-map
+  "Adds the given vehicle to the id->vehicle map."
+  [v]
   (alter id->vehicle assoc (:id v) v))
 
-(defn- remove-from-vehicle-map [v]
+(defn- remove-from-vehicle-map
+  "Removes the given vehicle from the id->vehicle map."
+  [v]
   (alter id->vehicle dissoc (:id v)))
 
 (defn vehicle
@@ -172,7 +178,9 @@
     (= :train (:type t?))
     false))
 
-(defn pickup-color [v]
+(defn pickup-color
+  "Returns the color that vehicle will have upon exiting this cell."
+  [v]
   (let [c (vehicle-cell v)]
     (cond
      (supply? c) (hue (:resource-type c))
@@ -195,5 +203,7 @@
   [v]
   (assoc v :exit-direction nil))
 
-(defn half-duration [v]
+(defn half-duration
+  "Returns half the vehicle->duration for the given vehicle."
+  [v]
   (/ (vehicle->duration v) 2))

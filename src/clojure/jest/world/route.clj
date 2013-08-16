@@ -45,6 +45,8 @@
         :when (seq (:routes p))]
     [d (:type p) (:routes p)]))
 
-(defn paths-with-route [c color]
+(defn paths-with-route
+  "Returns all paths at the given cell that contain the given hue."
+  [c color]
   (filter #(contains-hue? (:routes %) color)
           (paths c)))

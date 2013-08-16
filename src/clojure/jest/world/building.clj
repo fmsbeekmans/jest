@@ -94,16 +94,20 @@
 (defbuilding mixer)
 (defbuilding restricted)
 
-(defn enable-spawner [spawn offset rate]
+(defn enable-spawner
+  "Sets a spawn point to be able to spawn vehicles, rather than just consume them.
+   When the spawn process is started, vehicles will spawn from the given cell with
+   the given rate, starting at the given offset."
+  [spawn offset rate]
   (dosync
    (alter-cell spawn assoc :spawning? true)
    (alter-cell spawn assoc :spawn-offset offset)
    (alter-cell spawn assoc :spawn-rate rate)))
 
-(defn spawning-spawners []
+(defn spawning-spawners
+  "Returns all enabled spawners."
+  []
   (filter :spawning? (all-spawns)))
-
-(def resource-soft-cap 500)
 
 (defn resource-type
   "Returns the type of resource handled on this supply or depot."
@@ -121,15 +125,19 @@
 
 ;; functions for depots
 (defn- dropoff-resource'
+  "Returns a new cell with the given amount of cargo added to it. The cell should contain a depot."
   [cell amount]
   {:pre [(depot? cell)]}
   (update-in cell [:amount] (fnil + 0) amount))
 
 (defn dropoff-resource
+  "Adds the given amount of cargo to this cell. The cell should contain a depot."
   [cell amount]
   (alter-cell cell dropoff-resource' amount))
 
-(defn all-depots-filled? []
+(defn all-depots-filled?
+  "Returns true if all depots in the loaded world have reached full capacity, and returns false otherwise."
+  []
   (every? #((fnil >= 0 0) (:amount %) (:quotum %)) (all-depots)))
 
 ;; functions for mixers
