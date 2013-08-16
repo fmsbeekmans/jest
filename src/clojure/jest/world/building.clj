@@ -5,15 +5,6 @@
         [jest.world :only [alter-cell all-cells cell]]
         [jest.color :only [average-hue]]))
 
-(def ^:private constructor-atom (atom {}))
-
-;; TODO: Make empty fn generate warnings
-(defn get-build-function
-  "Given a keyword, returns a function used to construct this building type."
-  [k]
-  (or (@constructor-atom k)
-      nil))
-
 (defn building-type
   "Returns the building type for the given cell."
   [c]
@@ -95,8 +86,7 @@
        (defn ~all
          ~(format "returns all cells with building type %s." type)
          []
-         (all-cells-type ~(keyword type)))
-       (swap! constructor-atom #(assoc % ~(keyword type) ~build)))))
+         (all-cells-type ~(keyword type))))))
 
 (defbuilding spawn :vehicle-type)
 (defbuilding supply :resource-type)

@@ -6,21 +6,6 @@
         [clojure.test :only [deftest]])
   (:require [jest.world.building :as building]))
 
-(fact "Spawn should be buildable"
-      (building/get-build-function :spawn) =not=> nil)
-
-(fact "Supply should be buildable"
-      (building/get-build-function :supply) =not=> nil)
-
-(fact "Mixers should be buildable"
-      (building/get-build-function :mixer) =not=> nil)
-
-(fact "Depots should be buildable"
-      (building/get-build-function :depot) =not=> nil)
-
-(fact "Transmogrifier should not be buildable"
-      (building/get-build-function :transmogrifier) => nil)
-
 (world-fact [10 10]
             "After initialization, there are no buildings."
             (map building/building-type (all-cells)) => (n-of nil 100))
