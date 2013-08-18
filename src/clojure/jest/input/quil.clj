@@ -11,7 +11,9 @@
 (defn- on-move-handler []
   (receive-move 1 [(mouse-x) (mouse-y)]))
 
-(defn setup-quil-mouse-input []
+(defn setup-quil-mouse-input
+  "Ensures that mouse events in the game window will be passed on to the hardware-agnostic input layer."
+  []
   (set-input-handler! :on-down on-down-handler)
   (set-input-handler! :on-up on-up-handler)
   (set-input-handler! :on-move on-move-handler))
