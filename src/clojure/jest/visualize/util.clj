@@ -1,4 +1,5 @@
 (ns jest.visualize.util
+  "Functions that are useful in all visualization code."
   (:require [jest.util :refer [hyphenate-keywords]])
   (:require [jest.world :as world]
             [jest.world.vehicle :as vehicle]

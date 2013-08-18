@@ -1,4 +1,5 @@
 (ns jest.visualize.score-screen
+  "All visualization code for the score-screen."
   (:require [brick.drawable :as d]
             [quil.core :refer [text push-style pop-style fill rect]])
   (:require [jest.score :refer [current-score]]))
