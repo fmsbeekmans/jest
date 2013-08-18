@@ -1,4 +1,5 @@
 (ns jest.input.interaction
+  "Interaction with the game through touch events. Maps gestures to road building and route specification."
   (:require [jest.input.core :refer [set-input-handler!]]
             [jest.world :refer [directions direction cell direction-exists? coords]]
             [clojure.core.match :refer [match]]
@@ -147,7 +148,9 @@ with the current world state."
   (dosync
    (untrack-pointer id)))
 
-(defn interaction-setup []
+(defn interaction-setup
+  "Sets up the interaction input handlers."
+  []
   (set-input-handler! :on-move on-move)
   (set-input-handler! :on-down on-down)
   (set-input-handler! :on-up on-up))
