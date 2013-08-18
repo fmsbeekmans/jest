@@ -4,12 +4,18 @@
 
 (fact "The average of red and green is yellow"
       (c/average-hue (c/hue :red) (c/hue :green))
-      => (roughly (c/hue :yellow) 0.01))
+      => (roughly (c/hue :yellow) 0.1))
 
-(fact "The hue difference between 0.1*pi and pi is 0.9*pi"
-      (c/hue-difference (* 0.1 Math/PI) Math/PI)
-      => (roughly (* 0.9 Math/PI) 0.01))
+(fact "hue->int translates a hue to a 255-normalized int"
+  (c/hue->int 360) => 0
+  (c/hue->int 180) => (roughly 127 1)
+  (c/hue->int 720) => 0)
 
-(fact "The hue difference between 0.1*pi and 1.9*pi is 0.2*pi"
-      (c/hue-difference (* 0.1 Math/PI) (* 1.9 Math/PI))
-      => (roughly (* 0.2 Math/PI) 0.01))
+(fact "hue->hsb gives the wanted color vec"
+  (c/hue->hsb 360) => [0 255 255]
+  (c/hue->hsb 180) => [127 255 255]
+  (c/hue->hsb 720) => [0 255 255]
+
+  (c/hue->hsb nil) => [255 0 255]
+  (c/hue->hsb :red) => [0 255 255])
+

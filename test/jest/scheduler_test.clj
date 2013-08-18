@@ -64,14 +64,14 @@ the scheduler is stopped and not paused"
   (provided (s/calculate-game-time) => ..game-time..))
 
 (scheduler-fact
-  "A fact that is scheduled is run"
+  "A task that is scheduled is run"
   (s/start!)
   (let [returned (promise)]
     (s/schedule #(deliver returned :done) 0)
     @returned => :done))
 
 (scheduler-fact
-  "facts that are scheduled while paused are run after resuming."
+  "tasks that are scheduled while paused are run after resuming."
   (s/start!)
   (s/pause!)
   (let [results (for [i (range 3)] (promise))]

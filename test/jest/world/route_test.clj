@@ -4,7 +4,9 @@
         [jest.world.cell :only [with-initialized-temp-world]]
         [jest.world :only [cell all-cells]])
   (:require [jest.world.route :as route]
-            [jest.world.path :as path]))
+            [jest.world.path :as path]
+            [jest.util :as util]
+            [jest.color :refer [hue-matches?]]))
 
 (fact "all-routes should return an empty seq if there are no valid routes"
   (route/all-routes {}) => '()
@@ -37,13 +39,13 @@ already included in the path"
         (#'route/add-route p ..new-route..)
           =>{:routes #{..new-route.. ..existing-route..}}
         (provided
-         (jest.color/hue-difference ..new-route.. ..existing-route..) => 1)))
+         (hue-matches? ..new-route.. ..existing-route..) => false)))
 
 (fact "remove-route should remove existing routes from a path"
   (#'route/remove-route {:routes #{..some-route..}} ..some-route..)
     => {:routes #{}}
   (provided
-   (jest.color/hue-difference ..some-route.. ..some-route..) => 0))
+   (hue-matches? ..some-route.. ..some-route..) => true))
 
 (with-initialized-temp-world [2 1]
   (fact "A route can be added and removed from paths on cells"

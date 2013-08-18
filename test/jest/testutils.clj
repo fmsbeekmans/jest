@@ -4,6 +4,8 @@
         [jest.world.cell :only [with-initialized-temp-world]]
         [jest.world.path :only [build-path complete-paths]]
         [jest.world.building :only [build-spawn]]
+        [jest.score :only [reset-score]]
+        [jest.input.interaction :only [interaction-setup on-down on-move on-up]]
         midje.sweet))
 
 
@@ -17,8 +19,14 @@
 
 (defmacro world-fact [[sx sy] fact-text & body]
   `(with-initialized-temp-world [~sx ~sy]
+     (reset-score)
      (with-mock-scheduler
        (fact ~fact-text ~@body))))
+
+(defmacro interaction-fact [[sx sy] fact-text & body]
+  `(world-fact [~sx ~sy] ~fact-text
+               (interaction-setup)
+               ~@body))
 
 (defn build-spawn-circle []
   {:post [(seq (complete-paths (cell [5 5])))]}
@@ -114,3 +122,23 @@ running all scheduled tasks in order.By default n is 1"
       (mod (+ (* 2 Math/PI) actual) (* 2 Math/PI)))
      ((roughly (mod (+ (* 3 Math/PI) target) (* 2 Math/PI)) margin)
       (mod (+ (* 3 Math/PI) actual) (* 2 Math/PI))))))
+
+
+(defn gesture [id & [fp & points]]
+  (on-down id fp)
+  (loop [prev fp
+         [p & points] points]
+    (when-not (nil? p)
+      (on-move id prev p)
+      (recur p points)))
+  (on-up id (last points)))
+
+(defmacro with-spawned-vehicle [[vehicle spawn-location] & body]
+  `(let [~vehicle (:id (s/spawn (w/cell ~spawn-location)))]
+     ~@body))
+
+(defmacro with-game-time
+  "While the body is running, set the game time to x."
+  [x & body]
+  `(with-redefs [jest.scheduler/calculate-game-time (constantly ~x)]
+     ~@body))
