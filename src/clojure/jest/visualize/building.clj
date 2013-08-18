@@ -7,7 +7,7 @@
   (:require [jest.visualize.resource :as resource]))
 
 (defn cell-building
-  "Which building tile-key fits this cell?"
+  "Return the drawable for the building in cell c using the sprites in tile-fn."
   [tile-fn c]
   (if-let [type (building/building-type c)]
     (let [resource-vis (comp resource/drawable-from-resource-rate
@@ -29,7 +29,7 @@
     (tile-fn nil)))
 
 (defn cell-spawn
-  "Which building tile-key fits this cell?"
+  "Return the drawable for a possible spawn in cell c using the sprites in tile-fn."
   [tile-fn c]
   (if-let [type (building/building-type c)]
     (let [resource-vis (comp resource/drawable-from-resource-rate
