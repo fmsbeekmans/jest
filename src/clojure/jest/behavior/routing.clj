@@ -1,4 +1,5 @@
 (ns jest.behavior.routing
+  "Implementation of the routing rules for guiding vehicles through levels."
   (:require [jest.world.path :refer [out-paths]]
             [jest.world.vehicle :refer [vehicle-cell cargo-color moving? vehicle->duration]]
             [jest.color :refer [<=delta?]]

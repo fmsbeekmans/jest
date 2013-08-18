@@ -1,4 +1,5 @@
 (ns jest.behavior.state
+  "Functions for retrieving and altering the vehicle state which relate to the dynamic state of the game, and therefore cannot be part of jest.world.vehicle."
   (:require [jest.world.vehicle :refer [vehicle->duration vehicle-state-change update-vehicle vehicle-clear-exit vehicle-cell vehicle spawning? vehicles]]
             [jest.world.building :refer [spawn?]]
             [jest.world.path :refer [vehicle->path path]]

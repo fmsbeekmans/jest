@@ -1,4 +1,5 @@
 (ns jest.behavior.spawn
+  "Functions relating to spawn points."
   (:require [jest.world :refer [coords cell]]
             [jest.world.building :refer [spawning-spawners spawn? vehicle-type]]
             [jest.world.vehicle :refer [vehicle-state-change load-vehicle
@@ -48,10 +49,14 @@
   (swap! active-spawners
          conj (coords s)))
 
-(defn active? [s]
+(defn active?
+  "Returns whether or not the given spawn point is active, meaning whether it's actively spawning vehicles right now."
+  [s]
   (@active-spawners (coords s)))
 
-(defn start-spawning []
+(defn start-spawning
+  "Start the spawning process. All spawn points that are set to spawn vehicles will start doing so."
+  []
   (doseq [{:keys [coord spawn-rate spawn-offset] :as s} (spawning-spawners)]
     (letfn [(spawn-and-reschedule [time]
               (let [s (cell coord)
@@ -63,5 +68,7 @@
       (let [time (offset (:spawn-offset s))]
         (schedule (partial spawn-and-reschedule time) time)))))
 
-(defn stop-spawning []
+(defn stop-spawning
+  "Stop the spawning process. All spawn points stop spawning."
+  []
   (reset! active-spawners #{}))
