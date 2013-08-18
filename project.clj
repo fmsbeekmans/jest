@@ -11,7 +11,7 @@
                  [slingshot "0.10.3"]
                  [org.clojure/core.incubator "0.1.2"]
                  [com.taoensso/timbre "2.1.2"]
-                 [jest/brick "0.1.1-SNAPSHOT"]
+                 [jest/brick "0.1.2"]
                  [me.raynes/fs "1.4.4"]
                  [quil/quil "1.6.0"]
                  [org.clojure/core.match "0.2.0-rc3"]
