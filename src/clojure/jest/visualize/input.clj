@@ -23,14 +23,17 @@
   []
   (call-handler :on-down))
 
-(defn on-up-handler []
+(defn on-up-handler
   "Call the on-up handler"
+  []
   (call-handler :on-up))
 
-(defn on-move-handler []
+(defn on-move-handler
   "Call the on-move handler"
+  []
   (call-handler :on-move))
 
-(defn on-key-typed-handler []
+(defn on-key-typed-handler
   "Call the on-key-typed handler"
+  []
   (call-handler :on-key-typed))
