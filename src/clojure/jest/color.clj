@@ -1,4 +1,5 @@
 (ns jest.color
+  "Color transformation functions."
   (:require [jest.util :as util]))
 
 (defn- hue->vector
@@ -41,6 +42,7 @@
                     (util/snapper circle-delta-wrap (circle-divider %))
                     circle-overflow)]
   (defn hue-snap
+    "Snaps a hue to its closest approximation. This approximation is a multiple of h/n. n defaults to 32."
     ([h n]
        ((hue-snapper n) h))
     ([h]
