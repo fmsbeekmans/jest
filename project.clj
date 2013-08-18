@@ -37,7 +37,7 @@
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths ["resources/"]
-  :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/dev"
+  :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/master"
           :src-linenum-anchor-prefix "L"
           :exclude [jest.core
                     jest.input.highlight
