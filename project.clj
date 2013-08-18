@@ -39,4 +39,7 @@
   :java-source-paths ["src/java"]
   :resource-paths ["resources/"]
   :codox {:src-dir-uri "https://github.com/fmsbeekmans/jest/blob/dev"
-          :src-linenum-anchor-prefix "L"})
+          :src-linenum-anchor-prefix "L"
+          :exclude [jest.core
+                    jest.input.highlight
+                    jest.interface]})
