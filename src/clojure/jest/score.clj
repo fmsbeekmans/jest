@@ -1,10 +1,13 @@
 (ns jest.score
+  "Functions for keeping score."
   (:require [jest.world :refer [coords]]
             [jest.world.vehicle :refer [cargo-count vehicle-cell]]))
 
 (defonce current-score (ref nil))
 
-(defn reset-score []
+(defn reset-score
+  "Resets the score to 0."
+  []
   (dosync
    (ref-set current-score 0)))
 
@@ -12,7 +15,9 @@
 (def score-agent (agent nil :error-mode :continue))
 
 
-(defn add-score [n]
+(defn add-score
+  "Adds n to the current score."
+  [n]
   (alter current-score + n))
 
 (def scoring
@@ -35,10 +40,13 @@
   "should be a 3-arity fn where the args are the score, tile and type"
   (atom (fn [_ _ _])))
 
-(defn set-visualize-score-fn! [f]
+(defn set-visualize-score-fn!
+  "Sets callback function to perform score visualisation task when a score event happens."
+  [f]
   (reset! visualize-score-fn f))
 
 (defn score
+  "Add or subtract an amount from the current score based on a particular event and a multiplier."
   ([tile event multiplier]
      (let [sc (calculate-score event multiplier)]
        (add-score sc)
@@ -47,5 +55,7 @@
   ([tile event]
      (score tile event 1)))
 
-(defn score-vehicle [event v]
+(defn score-vehicle
+  "Add or subtract an amount from the current score based on a particular event and a vehicle."
+  [event v]
   (score (coords (vehicle-cell v)) event (cargo-count v)))
