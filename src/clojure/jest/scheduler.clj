@@ -1,4 +1,5 @@
 (ns jest.scheduler
+  "A pausable event scheduler and game clock."
   (:import java.util.Date
            [java.util.concurrent Executors TimeUnit]))
 
