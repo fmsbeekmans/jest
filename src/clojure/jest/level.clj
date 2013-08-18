@@ -1,4 +1,5 @@
 (ns jest.level
+  "Level lifecycle functions."
   (:require [jest.world :as world :refer [cell all-cells reset-world world-width world-height]]
             [jest.world.cell :refer [initialize-world]]
             [jest.world.building :refer
@@ -15,12 +16,15 @@
 
 (defonce current-level (atom nil))
 
-(defn win-level []
+(defn win-level
+  "Function to be run once a level is over."
+  []
   (reset! win-screen-visible true)
   (stop-spawning)
   (pause!))
 
-(defn initialize-level []
+(defn initialize-level
+  []
   (stop-spawning)
   (reset-world {})
   (scheduler-reset!)
@@ -29,6 +33,8 @@
   (reset! win-screen-visible false))
 
 (defn start-level
+  "Starts a level, ensuring all state is properly initialized.
+   level-fn is a function responsible for loading the level."
   ([level-fn]
      (start-level level-fn false))
   ([level-fn edit-mode?]
@@ -42,7 +48,9 @@
      (start!)
      (start-spawning)))
 
-(defn reset-level []
+(defn reset-level
+  "Reset the current level."
+  []
   (start-level @current-level))
 
 ;; World saving
@@ -81,22 +89,30 @@
                             (all-depots)
                             (all-restricteds))))
 
-(defn print-level []
+(defn print-level
+  "Print the current level definition to standard output."
+  []
   (doseq [e (concat [(world-size-definition)]
              (extract-building-definitions)
              (extract-path-definitions))]
     (println e)))
 
-(defn save-world [file-name]
+(defn save-world
+  "Save the current level definition at the given path."
+  [file-name]
   (spit file-name (with-out-str (print-level))))
 
 ;; This is probably the most evil thing I have ever done. So happy my name is still not correctly tied to this commit ~J
 (let [this-ns *ns*]
-  (defn load-world [file-name]
+  (defn load-world
+    "Load a level from the given path."
+    [file-name]
     (binding [*ns* this-ns]
       (load-file file-name))))
 
-(defn level-helper [level]
+(defn level-helper
+  "Returns a function which will load the specified level from the levels/ directory. To be used with start-level."
+  [level]
   (partial load-world (str "levels/" level ".level")))
 
 
