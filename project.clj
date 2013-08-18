@@ -22,7 +22,6 @@
   :repl-options {;; Specify the string to print when prompting for input.
                  ;; defaults to something like (fn [ns] (str *ns* "=> "))
                  ;; What to print when the repl session starts.
-                 :welcome (println "Hallo Matthijs...")
                  ;; Customize the socket the repl task listens on and
                  ;; attaches to.
                  :port 3000 }
