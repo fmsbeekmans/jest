@@ -1,4 +1,5 @@
 (ns jest.input.wm-touch
+  "input hardware backend using the Windows Touch API."
   (:require [jest.input.core :refer [receive-down receive-up receive-move]]
             [jest.visualize.visualize :refer [world-sketch]]
             [jest.visualize.util :refer [get-frame-offset get-pane-offset]]
