@@ -1,4 +1,4 @@
-(defproject jest "0.0.0-SNAPSHOT"
+(defproject jest "0.2.0"
   :description "Multi touch game for the city of Delft"
   :url "http://www.github.com/fmsbeekmans/Jest.git"
   :license {:name "Eclipse Public License - v1.0"
