@@ -1,4 +1,5 @@
 (ns jest.tileset
+  "Tileset loading functionality."
   (:require [brick.image :as image]
             [jest.visualize.visualize :as visualize]
             [jest.util :as util]
@@ -23,7 +24,9 @@
          ))))
 
 
-(defn load-tileset [tileset-name]
+(defn load-tileset
+  "loads the tileset with the given name from the resource path."
+  [tileset-name]
   (if-let [level
         (-?> tileset-name
              clojure.java.io/resource
