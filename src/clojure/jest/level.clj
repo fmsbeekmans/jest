@@ -111,7 +111,6 @@
   [level]
   (partial load-world (str "levels/" level ".level")))
 
-
 (def level-cycle (atom nil))
 
 (defn start-next-level []
