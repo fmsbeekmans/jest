@@ -91,7 +91,8 @@
   [id p]
   (with-tile [t p]
     (let [prev (@pointers id)]
-      (when-not (= prev t)
+      (when-not (or (nil? prev)
+                    (= prev t))
         (loop [prev prev
                [t & tnext] (interpolate prev t)]
           (swap! pointers assoc id t)
@@ -99,3 +100,4 @@
           (on-move-handler id prev t)
           (if tnext
             (recur t tnext)))))))
+
