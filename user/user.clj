@@ -48,7 +48,7 @@
   (reset-score)
   (interaction-setup)
   (setup (load-tileset "tileset.json"))
-  (start-level-cycle ["tut1" "demo-restricted" "tut2" "demo-routes"  "tut3" "tut4" "demo-colab"]))
+  (start-level-cycle ["tut1" "demo-restricted" "tut2" "demo-routing"  "tut3" "tut4" "demo-colab"]))
 
 (defn user-setup []
   (setup-quil-mouse-input)
