@@ -48,7 +48,7 @@
   (reset-score)
   (interaction-setup)
   (setup (load-tileset "tileset.json"))
-  (start-level (level-helper "tut1")))
+  (start-level-cycle ["tut1" "tut2" "tut3"]))
 
 (defn user-setup []
   (setup-quil-mouse-input)

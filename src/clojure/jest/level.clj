@@ -16,12 +16,7 @@
 
 (defonce current-level (atom nil))
 
-(defn win-level
-  "Function to be run once a level is over."
-  []
-  (reset! win-screen-visible true)
-  (stop-spawning)
-  (pause!))
+(declare win-level)
 
 (defn initialize-level
   []
@@ -116,3 +111,25 @@
   (partial load-world (str "levels/" level ".level")))
 
 
+(def level-cycle (atom nil))
+
+(defn start-next-level []
+  (let [next-level (first @level-cycle)]
+    (swap! level-cycle next)
+    (start-level (level-helper next-level))))
+
+(defn start-level-cycle [level-coll]
+  (reset! level-cycle (cycle level-coll))
+  (start-next-level))
+
+(defn win-level
+  "Function to be run once a level is over."
+  []
+  (reset! win-screen-visible true)
+  (stop-spawning)
+  (pause!)
+  (jest.input.core/set-input-handler! :on-down
+                                      (fn [_ _]
+                                        (jest.input.core/set-input-handler! :on-down
+                                                                            jest.input.interaction/on-down)
+                                        (start-next-level))))
