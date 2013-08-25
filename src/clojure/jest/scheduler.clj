@@ -22,10 +22,11 @@
 (defn calculate-game-time
   "Calculates the current game time"
   []
-  {:pre [@timer-data]}
-  (let [[start-time paused] @timer-data]
-    (or paused
-        (- (time-millis) start-time))))
+  (if @timer-data
+    (let [[start-time paused] @timer-data]
+      (or paused
+          (- (time-millis) start-time)))
+    0))
 
 (defn- calculate-real-time
   "Maps a game time to real time."
