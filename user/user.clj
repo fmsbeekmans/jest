@@ -77,3 +77,8 @@
    (doseq [m (all-mixers)] (alter-cell m assoc :resource nil))
    (doseq [d (all-depots)] (alter-cell d assoc :amount 0))))
 
+(defn test-reloads
+  []
+  (dotimes [_ 600]
+    (start-level (level-helper "demo-restricted"))
+    (Thread/sleep 1000)))
