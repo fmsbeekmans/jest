@@ -18,11 +18,12 @@
 (defonce current-level (atom nil))
 
 (declare win-level)
+(declare level-helper)
 
 (defn initialize-level
   []
   (stop-spawning)
-  (reset-world {})
+  ((level-helper "build"))
   (scheduler-reset!)
   (reset-score)
   (reset-done-callback)
