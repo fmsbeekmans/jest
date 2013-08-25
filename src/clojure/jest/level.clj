@@ -12,7 +12,8 @@
             [jest.behavior.callback :refer [set-done-callback reset-done-callback]]
             [jest.score :refer [reset-score]]
             [clojure.core.incubator :refer [-?>]]
-            [jest.visualize.visualize :refer [win-screen-visible]]))
+            [jest.visualize.visualize :refer [win-screen-visible]]
+            [jest.input.interaction :refer [interaction-setup]]))
 
 (defonce current-level (atom nil))
 
@@ -130,6 +131,5 @@
   (pause!)
   (jest.input.core/set-input-handler! :on-down
                                       (fn [_ _]
-                                        (jest.input.core/set-input-handler! :on-down
-                                                                            jest.input.interaction/on-down)
+                                        (interaction-setup)
                                         (start-next-level))))
