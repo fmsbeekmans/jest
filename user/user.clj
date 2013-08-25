@@ -77,3 +77,37 @@
    (doseq [m (all-mixers)] (alter-cell m assoc :resource nil))
    (doseq [d (all-depots)] (alter-cell d assoc :amount 0))))
 
+(defn red
+  ([]
+     (edit supply :red))
+  ([n]
+     (edit depot :red n)))
+
+(defn green
+  ([]
+     (edit supply :green))
+  ([n]
+     (edit depot :green n)))
+
+
+(defn blue
+  ([]
+     (edit supply :blue))
+  ([n]
+     (edit depot :blue n)))
+
+(defn purple
+  ([]
+     (edit supply :purple))
+  ([n]
+     (edit depot :purple n)))
+
+(defn yellow
+  ([]
+     (edit supply :yellow))
+  ([n]
+     (edit depot :yellow n)))
+
+(defn truck
+  []
+  (edit spawn :truck))
