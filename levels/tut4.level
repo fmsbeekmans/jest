@@ -7,7 +7,7 @@
 (build-supply (jest.world/cell [8 7]) :red)
 (build-supply (jest.world/cell [8 9]) :green)
 (build-mixer (jest.world/cell [10 8]))
-(build-depot (jest.world/cell [11 13]) :yellow 4)
+(build-depot (jest.world/cell [11 13]) :yellow 2)
 (jest.world.path/build-path (jest.world/cell [4 3]) :north :road)
 (jest.world.path/build-path (jest.world/cell [6 5]) :west :road)
 (jest.world.path/build-path (jest.world/cell [8 7]) :south :road)
