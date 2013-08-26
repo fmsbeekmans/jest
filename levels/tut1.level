@@ -2,7 +2,7 @@
 (jest.world.building/enable-spawner (build-spawn (jest.world/cell [3 6]) :truck) 0 4000)
 (build-spawn (jest.world/cell [15 8]) :truck)
 (build-supply (jest.world/cell [7 8]) :red)
-(build-depot (jest.world/cell [11 8]) :red 7)
+(build-depot (jest.world/cell [11 8]) :red 6)
 (jest.world.path/build-path (jest.world/cell [7 8]) :east :road)
 (jest.world.path/build-path (jest.world/cell [4 6]) :south :road)
 (jest.world.path/build-path (jest.world/cell [6 8]) :east :road)

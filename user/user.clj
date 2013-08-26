@@ -81,4 +81,4 @@
   []
   (dotimes [_ 600]
     (start-level (level-helper "demo-restricted"))
-    (Thread/sleep 1000)))
+    (Thread/sleep 10)))

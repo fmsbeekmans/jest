@@ -6,7 +6,7 @@
 (build-supply (jest.world/cell [4 6]) :red)
 (build-supply (jest.world/cell [4 10]) :blue)
 (build-depot (jest.world/cell [13 6]) :blue 3)
-(build-depot (jest.world/cell [13 10]) :red 3)
+(build-depot (jest.world/cell [13 10]) :red 5)
 (jest.world.path/build-path (jest.world/cell [7 6]) :south :road)
 (jest.world.path/build-path (jest.world/cell [9 8]) :east :road)
 (jest.world.path/build-path (jest.world/cell [10 9]) :south :road)
