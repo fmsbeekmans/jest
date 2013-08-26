@@ -119,9 +119,13 @@
     (swap! level-cycle next)
     (start-level (level-helper next-level))))
 
-(defn start-level-cycle [level-coll]
-  (reset! level-cycle (cycle level-coll))
+(defn start-level-sequence [level-coll]
+  (reset! level-cycle level-coll)
   (start-next-level))
+
+(defn start-level-cycle [level-coll]
+  (start-level-sequence (cycle level-coll)))
+
 
 (defn win-level
   "Function to be run once a level is over."

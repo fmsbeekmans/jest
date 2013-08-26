@@ -41,6 +41,11 @@
     (let [queue (:command-queue world-bricklet)]
       (swap! queue conj (fn [_] (quil/exit)) ))))
 
+(defn start-levels-for-demo []
+  (start-level-sequence
+   (concat ["tut1" "demo-restricted" "tut2" "demo-routing"  "tut3" "tut4" "demo-colab"]
+           (cycle ["easy1" "easy2" "easy3"]))))
+
 (defn common-setup []
   (graceful-exit)
   (initialize-world 0 0)
@@ -48,7 +53,7 @@
   (reset-score)
   (interaction-setup)
   (setup (load-tileset "tileset.json"))
-  (start-level-cycle ["tut1" "demo-restricted" "tut2" "demo-routing"  "tut3" "tut4" "demo-colab"]))
+  (start-levels-for-demo))
 
 (defn user-setup []
   (setup-quil-mouse-input)
