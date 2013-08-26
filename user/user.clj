@@ -44,7 +44,7 @@
 (defn start-levels-for-demo []
   (start-level-sequence
    (concat ["tut1" "demo-restricted" "tut2" "demo-routing"  "tut3" "tut4" "demo-colab"]
-           (cycle ["easy1" "easy2" "easy3"]))))
+           (cycle ["easy1" "easy2" "easy3" "demo-switch"]))))
 
 (defn common-setup []
   (graceful-exit)
